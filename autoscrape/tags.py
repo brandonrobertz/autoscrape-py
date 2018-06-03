@@ -1,3 +1,5 @@
+import html5lib
+
 
 class Tagger(object):
     """
@@ -6,7 +8,7 @@ class Tagger(object):
     """
 
     def __init__(self, html):
-        pass
+        self.tree = html5lib.parse(html)
 
     def tags(self, type):
         return []
