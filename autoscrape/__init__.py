@@ -1,7 +1,11 @@
 # -*- coding: UTF-8 -*-
+import logging
 
 from .control import Controller
 from .web import Scraper
+
+
+logger = logging.getLogger('AUTOSCRAPE')
 
 
 """
@@ -53,25 +57,34 @@ class TestScraper(object):
         """
         Initialize our scraper and get the first page.
         """
+        logger.setLevel(logging.DEBUG)
+        console_handler = logging.StreamHandler()
+        logger.addHandler(console_handler)
+
         self.scraper = Scraper()
         self.scraper.fetch(baseurl)
         self.visited_urls = set()
 
     def run(self, depth=0, tags=None):
-        print("** DEPTH", depth)
+        """
+        This is the main recursive depth-first search of a site. It
+        doesn't do anything but crawl a site DFS and ensure the tagging
+        and web engine is working as it should.
+        """
+        logger.debug("** DEPTH %s" % depth)
         if not tags:
             tags = self.scraper.get_tags()
 
-        print("RUN tags", ("\n    ").join(tags))
+        logger.debug("All tags at this depth \n    %s" % ("\n    ").join(tags))
 
         for tag in tags:
-            print("RUN tag", tag)
+            logger.debug("Attempting click on tag \n    %s" % tag)
 
             if self.scraper.click(tag):
-                print("Clicked! Recursing ...")
+                logger.debug("Clicked! Recursing ...")
                 self.run(depth=depth + 1, tags=self.scraper.get_tags())
 
-        print("Going back...")
+        logger.debug("Going back...")
         self.scraper.back()
 
 

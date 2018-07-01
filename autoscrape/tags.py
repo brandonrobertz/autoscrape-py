@@ -1,5 +1,9 @@
 # -*- coding: UTF-8 -*-
+import logging
 from urllib.parse import urlparse
+
+
+logger = logging.getLogger('AUTOSCRAPE')
 
 
 class Tagger(object):
@@ -71,7 +75,7 @@ class Tagger(object):
 
             href = elem.get_attribute("href")
             if href == self.current_url:
-                # print("Skipping current url  href %s" % href)
+                # ("Skipping current url  href %s" % href)
                 continue
 
             # skip any weird protos ... we whitelist notrmal HTTP,
@@ -86,7 +90,7 @@ class Tagger(object):
             tag = self.csspath_from_element(elem)
             # No way to get back to here, so we can't use it
             if not tag:
-                print("No tag for element %s" % elem)
+                logger.warn("No tag for element %s" % elem)
                 continue
 
             # Don't leave base host ... configurable?
@@ -103,6 +107,5 @@ class Tagger(object):
         elem_tags = []
         clickable_tags = self.clickable_tags()
         elem_tags.extend(clickable_tags)
-        print("Element tags", elem_tags)
         return elem_tags
 

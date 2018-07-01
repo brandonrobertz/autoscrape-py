@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 import time
+import logging
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
@@ -7,6 +8,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from .tags import Tagger
+
+
+logger = logging.getLogger('AUTOSCRAPE')
 
 
 class Scraper(object):
@@ -22,12 +26,12 @@ class Scraper(object):
         Fetch a page from a given URL (entry point, typically). Most of the time
         we just want to click a link or submit a form using webdriver.
         """
-        print("Fetching", url)
+        logger.debug("Fetching %s" % url)
         self.driver.get(url)
         time.sleep(2)
 
     def back(self):
-        print("Going back...")
+        logger.debug("Going back...")
         self.driver.back()
         time.sleep(2)
 
@@ -47,10 +51,10 @@ class Scraper(object):
         Click an element by a given tag. Returns True if the link
         hasn't been visited and was actually clicked.
         """
-        print("Click tag", tag)
+        logger.debug("Click tag %s" % tag)
         elem = self.driver.find_element_by_css_selector(tag)
         href = elem.get_attribute("href")
-        print("  href", href)
+        logger.debug("  href %s" % href)
         onclick = elem.get_attribute("onclick")
         name = elem.tag_name
         hash = "%s|%s|%s" % (href, onclick, name)
@@ -58,7 +62,7 @@ class Scraper(object):
             return False
 
         self.visited.add(hash)
-        print("Clicked hash", hash)
+        logger.debug("Clicked hash %s" % hash)
         self.disable_target(elem)
         elem.click()
         time.sleep(2)
@@ -68,7 +72,7 @@ class Scraper(object):
         """
         Enter some input into an element by a given tag.
         """
-        print("Inputting", input, "into tag", tag)
+        logger.debug("Inputting %s into tag %s" % (input, tag))
         elem = self.driver.find_element_by_css_selector(tag)
         elem.send_keys(input)
 
@@ -76,7 +80,7 @@ class Scraper(object):
         """
         Submit a form from a given tag. Assumes all inputs are filled.
         """
-        print("Submitting", tag)
+        logger.debug("Submitting tag %s" % tag)
         elem = self.driver.find_element_by_css_selector(tag)
         elem.submit()
         time.sleep(2)
