@@ -64,6 +64,7 @@ class TestScraper(object):
         self.scraper = Scraper()
         self.scraper.fetch(baseurl)
         self.visited_urls = set()
+        self.maxdepth = 10
 
     def run(self, depth=0, tags=None):
         """
@@ -72,6 +73,12 @@ class TestScraper(object):
         and web engine is working as it should.
         """
         logger.debug("** DEPTH %s" % depth)
+
+        if depth > self.maxdepth:
+            logger.debug("Maximum depth %s reached, returning..." % depth)
+            self.scraper.back()
+            return
+
         if not tags:
             tags = self.scraper.get_tags()
 
