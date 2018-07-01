@@ -5,7 +5,9 @@ from .web import Scraper
 class Controller(object):
     """
     High-level control for scraping a web page. This allows us to control
-    all of the possible scraper commands in an automated way.
+    all of the possible scraper commands in an automated way, using a set
+    of indices instead of tags. This way we can present vectors of options
+    to a ML model.
     """
     def __init__(self):
         """
@@ -20,13 +22,6 @@ class Controller(object):
         """
         self.scraper.fetch(url)
         self.tags = self.scraper.get_tags()
-
-    def get_tags(self):
-        """
-        Return a list of tags for analysis. In the future we may
-        want to return word vectors, etc, for our tagged elements.
-        """
-        return self.tags
 
     def select_link(self, index):
         tag = self.tag[index]

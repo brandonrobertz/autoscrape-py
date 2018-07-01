@@ -53,7 +53,7 @@ SELECT_LINK (index)  └─── click the next button & load page
 
 class TestScraper(object):
 
-    def __init__(self, baseurl):
+    def __init__(self, baseurl, maxdepth=10):
         """
         Initialize our scraper and get the first page.
         """
@@ -64,7 +64,7 @@ class TestScraper(object):
         self.scraper = Scraper()
         self.scraper.fetch(baseurl)
         self.visited_urls = set()
-        self.maxdepth = 10
+        self.maxdepth = maxdepth
 
     def run(self, depth=0, tags=None):
         """
@@ -72,12 +72,12 @@ class TestScraper(object):
         doesn't do anything but crawl a site DFS and ensure the tagging
         and web engine is working as it should.
         """
-        logger.debug("** DEPTH %s" % depth)
-
         if depth > self.maxdepth:
             logger.debug("Maximum depth %s reached, returning..." % depth)
             self.scraper.back()
             return
+
+        logger.debug("** DEPTH %s" % depth)
 
         if not tags:
             tags = self.scraper.get_tags()
