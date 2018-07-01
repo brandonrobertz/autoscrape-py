@@ -12,37 +12,39 @@ class Tagger(object):
         self.driver = driver
         self.current_url = current_url
 
-    def xpath_from_element(self, element):
+    def csspath_from_element(self, element):
         """
-        Takes a WebDriver element and returns an XPath for finding it
+        Takes a WebDriver element and returns an CSSPath for finding it
         in the future. As far as I know, this is only really feasible
         using JavaScript (without resorting to a complicated tree walking
         algorithm ... which we may need to do if this ends up failing).
 
-        Taken from:
-        https://stackoverflow.com/questions/2631820/2631931#2631931
+        Taken from: https://stackoverflow.com/a/12222317
         """
         script = """
-            function getPathTo(el) {
-                if (el.id !== '')
-                    return 'id("' + el.id + '")';
-
-                if (el === document.body)
-                    return el.tagName;
-
-                var ix = 0;
-                var siblings = el.parentNode.childNodes;
-
-                for (var i = 0; i < siblings.length; i++) {
-                    var sibling = siblings[i];
-                    if (sibling === el) {
-                        // warning: recursion!
-                        var path = getPathTo(el.parentNode);
-                        return path + '/' + el.tagName + '[' + (ix+1) + ']';
+            var getPathTo = function(el) {
+                if (!(el instanceof Element))
+                    return;
+                var path = [];
+                while (el.nodeType === Node.ELEMENT_NODE) {
+                    var selector = el.nodeName.toLowerCase();
+                    if (el.id) {
+                        selector += '#' + el.id;
+                        path.unshift(selector);
+                        break;
+                    } else {
+                        var sib = el, nth = 1;
+                        while (sib = sib.previousElementSibling) {
+                            if (sib.nodeName.toLowerCase() == selector)
+                               nth++;
+                        }
+                        //if (nth != 1)
+                            selector += ":nth-of-type("+nth+")";
                     }
-                    if (sibling.nodeType === 1 && sibling.tagName === el.tagName)
-                        ix++;
+                    path.unshift(selector);
+                    el = el.parentNode;
                 }
+                return path.join(" > ");
             }
             return getPathTo(arguments[0]).toLowerCase();
         """
@@ -81,7 +83,7 @@ class Tagger(object):
                 # print("Skipping element w/ href %s" % href)
                 continue
 
-            tag = self.xpath_from_element(elem)
+            tag = self.csspath_from_element(elem)
             # No way to get back to here, so we can't use it
             if not tag:
                 print("No tag for element %s" % elem)

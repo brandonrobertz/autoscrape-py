@@ -48,7 +48,7 @@ class Scraper(object):
         hasn't been visited and was actually clicked.
         """
         print("Click tag", tag)
-        elem = self.driver.find_element_by_xpath(tag)
+        elem = self.driver.find_element_by_css_selector(tag)
         href = elem.get_attribute("href")
         print("  href", href)
         onclick = elem.get_attribute("onclick")
@@ -69,7 +69,7 @@ class Scraper(object):
         Enter some input into an element by a given tag.
         """
         print("Inputting", input, "into tag", tag)
-        elem = self.driver.find_element_by_xpath(tag)
+        elem = self.driver.find_element_by_css_selector(tag)
         elem.send_keys(input)
 
     def submit(self, tag):
@@ -77,7 +77,7 @@ class Scraper(object):
         Submit a form from a given tag. Assumes all inputs are filled.
         """
         print("Submitting", tag)
-        elem = self.driver.find_element_by_xpath(tag)
+        elem = self.driver.find_element_by_css_selector(tag)
         elem.submit()
         time.sleep(2)
 
