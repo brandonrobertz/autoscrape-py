@@ -21,19 +21,27 @@ class Scraper(object):
         self.driver = webdriver.Chrome()
         self.visited = set()
 
+    def wait_check(self, driver):
+        script = "return document.readyState"
+        result = driver.execute_script(script)
+        return result == "complete"
+
+    def loadwait(self, fn, *args, **kwargs):
+        fn(*args, **kwargs)
+        wait = WebDriverWait(self.driver, 30)
+        wait.until(self.wait_check)
+
     def fetch(self, url):
         """
         Fetch a page from a given URL (entry point, typically). Most of the time
         we just want to click a link or submit a form using webdriver.
         """
         logger.debug("Fetching %s" % url)
-        self.driver.get(url)
-        time.sleep(2)
+        self.loadwait(self.driver.get, url)
 
     def back(self):
         logger.debug("Going back...")
-        self.driver.back()
-        time.sleep(2)
+        self.loadwait(self.driver.back)
 
     def disable_target(self, elem):
         """
@@ -64,8 +72,7 @@ class Scraper(object):
         self.visited.add(hash)
         logger.debug("Clicked hash %s" % hash)
         self.disable_target(elem)
-        elem.click()
-        time.sleep(2)
+        self.loadwait(elem.click)
         return True
 
     def input(self, tag, input):
@@ -82,8 +89,7 @@ class Scraper(object):
         """
         logger.debug("Submitting tag %s" % tag)
         elem = self.driver.find_element_by_css_selector(tag)
-        elem.submit()
-        time.sleep(2)
+        self.loadwait(elem.submit)
 
     @property
     def page_html(self):
