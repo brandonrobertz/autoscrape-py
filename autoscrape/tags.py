@@ -1,4 +1,5 @@
-import html5lib
+# -*- coding: UTF-8 -*-
+from urllib.parse import urlparse
 
 
 class Tagger(object):
@@ -7,8 +8,9 @@ class Tagger(object):
     to refer to unique elements on a web page.
     """
 
-    def __init__(self, html):
-        self.tree = html5lib.parse(html)
+    def __init__(self, driver=None, current_url=None):
+        self.driver = driver
+        self.current_url = current_url
 
     def xpath_from_element(self, element):
         """
@@ -44,31 +46,61 @@ class Tagger(object):
             }
             return getPathTo(arguments[0]).toLowerCase();
         """
-        return driver.execute_script(script, element)
+        return self.driver.execute_script(script, element)
 
     def clickable_tags(self):
+        """
+        Get all clickable element tags on the current page.
+
+        TODO: In the future we may need to recurse the page to find
+        other clickable types like JS-enabled divs, etc.
+        """
         tags = []
-        # TODO: other clickable elements?
-        a_elems = driver.find_elements_by_xpath("//a")
+
+        x_path_types = "//a|//button"
+        a_elems = self.driver.find_elements_by_xpath(x_path_types)
+        base_host = urlparse(self.driver.current_url).netloc
 
         for elem in a_elems:
+            # avoid hidden or disabled links, these can be traps or lead
+            # to strange errors
             if not elem.is_displayed() or not elem.is_enabled():
                 continue
 
-            href = anchor.get_attribute("href")
-            if href.startswith("mailto:") or href.startswith("tel:"):
+            href = elem.get_attribute("href")
+            if href == self.current_url:
+                # print("Skipping current url  href %s" % href)
+                continue
+
+            # skip any weird protos ... we whitelist notrmal HTTP,
+            # anchor tags and blank tags (to support JavaScript & btns)
+            if not href.startswith("https:") and \
+               not href.startswith("http:") and \
+               not href.startswith("#") and \
+               not href:
+                # print("Skipping element w/ href %s" % href)
                 continue
 
             tag = self.xpath_from_element(elem)
+            # No way to get back to here, so we can't use it
             if not tag:
+                print("No tag for element %s" % elem)
+                continue
+
+            # Don't leave base host ... configurable?
+            elem_host = urlparse(href).netloc
+            if elem_host != base_host:
+                # print("Skipping external host link %s" % href)
                 continue
 
             tags.append(tag)
 
         return tags
 
-    def tags(self, type):
+    def get_tags(self, type=None):
         elem_tags = []
         clickable_tags = self.clickable_tags()
-
+        elem_tags.extend(clickable_tags)
+        print("Element tags", elem_tags)
+        return elem_tags
 

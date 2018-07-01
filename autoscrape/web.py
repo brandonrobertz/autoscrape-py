@@ -1,7 +1,12 @@
+# -*- coding: UTF-8 -*-
+import time
+
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+from .tags import Tagger
 
 
 class Scraper(object):
@@ -10,13 +15,21 @@ class Scraper(object):
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
         self.driver = webdriver.Chrome()
+        self.visited = set()
 
     def fetch(self, url):
         """
         Fetch a page from a given URL (entry point, typically). Most of the time
         we just want to click a link or submit a form using webdriver.
         """
+        print("Fetching", url)
         self.driver.get(url)
+        time.sleep(2)
+
+    def back(self):
+        print("Going back...")
+        self.driver.back()
+        time.sleep(2)
 
     def disable_target(self, elem):
         """
@@ -31,33 +44,55 @@ class Scraper(object):
 
     def click(self, tag):
         """
-        Click an element by a given tag.
+        Click an element by a given tag. Returns True if the link
+        hasn't been visited and was actually clicked.
         """
+        print("Click tag", tag)
         elem = self.driver.find_element_by_xpath(tag)
+        href = elem.get_attribute("href")
+        print("  href", href)
+        onclick = elem.get_attribute("onclick")
+        name = elem.tag_name
+        hash = "%s|%s|%s" % (href, onclick, name)
+        if hash in self.visited:
+            return False
+
+        self.visited.add(hash)
+        print("Clicked hash", hash)
         self.disable_target(elem)
         elem.click()
+        time.sleep(2)
+        return True
 
-    def index(self, tag, input):
+    def input(self, tag, input):
         """
         Enter some input into an element by a given tag.
         """
-        pass
+        print("Inputting", input, "into tag", tag)
+        elem = self.driver.find_element_by_xpath(tag)
+        elem.send_keys(input)
 
     def submit(self, tag):
         """
         Submit a form from a given tag. Assumes all inputs are filled.
         """
-        pass
+        print("Submitting", tag)
+        elem = self.driver.find_element_by_xpath(tag)
+        elem.submit()
+        time.sleep(2)
 
+    @property
     def page_html(self):
-        """
-        Get raw page HTML from the currently loaded page.
-        """
         return self.driver.page_source
 
-    def tags(self, type):
+    @property
+    def page_url(self):
+        return self.driver.current_url
+
+    def get_tags(self, type=None):
         """
         Get tags, by type (optional), for the currently loaded page.
         """
-        pass
+        tagger = Tagger(driver=self.driver, current_url=self.page_url)
+        return tagger.get_tags()
 
