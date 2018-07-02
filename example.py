@@ -3,6 +3,7 @@
 import argparse
 import autoscrape
 
+
 def parse_args():
     desc = 'Example of running various autoscrapers.'
     parser = argparse.ArgumentParser(description=desc)

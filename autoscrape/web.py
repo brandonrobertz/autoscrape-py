@@ -99,10 +99,10 @@ class Scraper(object):
     def page_url(self):
         return self.driver.current_url
 
-    def get_tags(self, type=None):
+    def get_clickable(self, type=None):
         """
         Get tags, by type (optional), for the currently loaded page.
         """
         tagger = Tagger(driver=self.driver, current_url=self.page_url)
-        return tagger.get_tags()
+        return tagger.get_clickable()
 

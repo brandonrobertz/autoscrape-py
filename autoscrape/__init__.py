@@ -16,14 +16,14 @@ INIT (url)               initialize & get entry point
                                      ↓
                                  load page    🠤───────────────────┐
                                      │                            │
-SELECT_LINK (index)                  │            click a link based on likelihood
-                                     │               of finding a search form
+GET_CLICKABLE                        │            click a link based on likelihood
+SELECT_LINK (index)                  │               of finding a search form
                                      ↓                            │
-GET_TAGS     ┌────🠦 look for search form (possibly classifier) ───┘
+GET_FORMS    ┌────🠦 look for search form (possibly classifier) ───┘
              │                       │
              │                       │ FOUND
              │                       ↓
-GET_TAGS?    │         identify forms on page that require input
+GET_INPUTS   │         identify forms on page that require input
              │     (begin with config then move to heuristic then ML)
              │                       │
              │                       ↓
@@ -43,7 +43,7 @@ SUBMIT (index)          submit form and load next page       │
                      ┌──────🠦 scrape the page                │
                      │               │                       │
                      │               ↓                       │
-GET_TAGS             │     look for a next button ───────────┘
+GET_LINKS            │     look for a next button ───────────┘
                      │         (classifier)        NOT FOUND
                      │               │
                      │               │ YES
@@ -80,7 +80,7 @@ class TestScraper(object):
         logger.debug("** DEPTH %s" % depth)
 
         if not tags:
-            tags = self.scraper.get_tags()
+            tags = self.scraper.get_clickable()
 
         logger.debug("All tags at this depth \n    %s" % ("\n    ").join(tags))
 
@@ -89,7 +89,7 @@ class TestScraper(object):
 
             if self.scraper.click(tag):
                 logger.debug("Clicked! Recursing ...")
-                self.run(depth=depth + 1, tags=self.scraper.get_tags())
+                self.run(depth=depth + 1, tags=self.scraper.get_clickable())
 
         logger.debug("Going back...")
         self.scraper.back()

@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
-
 from .web import Scraper
+
 
 class Controller(object):
     """
@@ -14,24 +14,47 @@ class Controller(object):
         Set up our WebDriver and misc utilities.
         """
         self.scraper = Scraper()
-        self.tags = []
+        self.clickabke = []
+        self.inputs = []
+        self.forms = []
 
     def initialize(self, url):
         """
-        Instantiate a web scraper, given a starting point URL.
+        Instantiate a web scraper, given a starting point URL. Also
+        gets the links for the current page and sets its tag array.
         """
         self.scraper.fetch(url)
-        self.tags = self.scraper.get_tags()
+        self.clickable = self.scraper.get_clickable()
+        # TODO: form-indexed inputs
+        # self.inputs = self.scraper.get_inputs()
+        # self.forms = self.scraper.get_forms()
 
     def select_link(self, index):
-        tag = self.tag[index]
+        tag = self.clickable[index]
         self.scraper.click(tag)
 
     def input(self, index, chars):
-        tag = self.tag[index]
+        tag = self.inputs[index]
         self.scraper.input(tag, chars)
 
     def submit(self, index):
-        tag = self.tag[index]
+        tag = self.forms[index]
         self.scraper.submit(tag)
+
+    def page_vector(self):
+        """
+        Get feature vector from currently loaded page. This should
+        be used to determine what type of page we're on and what action
+        we ought to take (continue crawl, enter input, scrape structured
+        data, etc).
+        """
+        pass
+
+    def link_vectors(self):
+        """
+        Get a matrix of link vectors. These describe the text of the link
+        in a way that a ML algorithm could decide how to prioritize the
+        search pattern.
+        """
+        pass
 

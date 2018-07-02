@@ -103,9 +103,6 @@ class Tagger(object):
 
         return tags
 
-    def get_tags(self, type=None):
-        elem_tags = []
-        clickable_tags = self.clickable_tags()
-        elem_tags.extend(clickable_tags)
-        return elem_tags
+    def get_clickable(self, type=None):
+        return self.clickable_tags()
 
