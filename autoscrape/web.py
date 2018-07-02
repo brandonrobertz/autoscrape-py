@@ -18,7 +18,12 @@ class Scraper(object):
     def __init__(self):
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
-        self.driver = webdriver.Chrome()
+        chromeOptions = webdriver.ChromeOptions()
+        prefs = {
+            "profile.managed_default_content_settings.images":2
+        }
+        chromeOptions.add_experimental_option("prefs",prefs)
+        self.driver = webdriver.Chrome(chrome_options=chromeOptions)
         self.visited = set()
 
     def wait_check(self, driver):

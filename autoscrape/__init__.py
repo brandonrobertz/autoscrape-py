@@ -53,11 +53,20 @@ SELECT_LINK (index)  └─── click the next button & load page
 
 class TestScraper(object):
 
-    def __init__(self, baseurl, maxdepth=10):
+    def __init__(self, baseurl, maxdepth=10, loglevel=None):
         """
         Initialize our scraper and get the first page.
         """
-        logger.setLevel(logging.DEBUG)
+        if not loglevel:
+            loglevel = logging.DEBUG
+        elif loglevel == "INFO":
+            loglevel = logging.INFO
+        elif loglevel == "WARN":
+            loglevel = logging.WARN
+        elif loglevel == "ERROR":
+            loglevel = logging.ERROR
+
+        logger.setLevel(loglevel)
         console_handler = logging.StreamHandler()
         logger.addHandler(console_handler)
 

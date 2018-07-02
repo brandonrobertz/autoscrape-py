@@ -16,13 +16,21 @@ def parse_args():
     parser.add_argument(
         '--maxdepth', type=int, default=10,
         help='Maximum depth to allow the scraper to traverse.')
+    parser.add_argument(
+        '--loglevel', type=str, default="INFO",
+        help='Log level. Default: INFO. Options: DEBUG, INFO, WARN, ERROR')
     args = parser.parse_args()
     return args
 
 if __name__ == "__main__":
     args = parse_args()
     if args.scraper == "test":
-        autoscrape.TestScraper(args.baseurl, maxdepth=args.maxdepth).run()
+        kwargs = {
+            "maxdepth": args.maxdepth,
+        }
+        if args.loglevel:
+            kwargs["loglevel"] = args.loglevel
+        autoscrape.TestScraper(args.baseurl, **kwargs).run()
     else:
         print("No scraper found for %s" % args.scraper)
 
