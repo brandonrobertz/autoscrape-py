@@ -63,8 +63,6 @@ class Scraper(object):
                     raise e
             except TypeError as e:
                 if "not callable" in str(e):
-                    def wrapped(*args, **kwargs):
-                        return fn
                     return self.driver_exec(lambda: fn)
                     # don't increment pipe_retries here because we just need to
                     # convert our property into a callable for the next
