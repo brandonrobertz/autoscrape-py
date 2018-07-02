@@ -51,6 +51,7 @@ GET_LINKS            │     look for a next button ─────────�
 SELECT_LINK (index)  └─── click the next button & load page
 """
 
+
 class BaseScraper(object):
     def setup_logging(self, loglevel=None):
         if not loglevel or loglevel == "DEBUG":

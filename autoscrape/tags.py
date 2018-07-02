@@ -70,20 +70,23 @@ class Tagger(object):
         for elem in a_elems:
             # avoid hidden or disabled links, these can be traps or lead
             # to strange errors
-            if not elem.is_displayed() or not elem.is_enabled():
+            # vis = elem.get_attribute("visibility")
+            if not elem.is_displayed() or not elem.is_enabled(): # or vis == "None":
                 continue
 
             href = elem.get_attribute("href")
-            if href == self.current_url:
+            if not href:
+                continue
+
+            if href.split("#")[0] == self.current_url:
                 # ("Skipping current url  href %s" % href)
                 continue
 
             # skip any weird protos ... we whitelist notrmal HTTP,
             # anchor tags and blank tags (to support JavaScript & btns)
-            if not href.startswith("https:") and \
-               not href.startswith("http:") and \
-               not href.startswith("#") and \
-               not href:
+            if href and \
+               not href.startswith("https:") and \
+               not href.startswith("http:"):
                 # print("Skipping element w/ href %s" % href)
                 continue
 

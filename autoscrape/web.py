@@ -15,15 +15,19 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 class Scraper(object):
 
-    def __init__(self):
+    def __init__(self, driver="Firefox"):
+        # Needs geckodriver: https://github.com/mozilla/geckodriver/releases
+        if driver == "Firefox":
+            self.driver = webdriver.Firefox()
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
-        chromeOptions = webdriver.ChromeOptions()
-        prefs = {
-            "profile.managed_default_content_settings.images":2
-        }
-        chromeOptions.add_experimental_option("prefs",prefs)
-        self.driver = webdriver.Chrome(chrome_options=chromeOptions)
+        elif driver == "Chrome":
+            chromeOptions = webdriver.ChromeOptions()
+            prefs = {
+                "profile.managed_default_content_settings.images":2
+            }
+            chromeOptions.add_experimental_option("prefs",prefs)
+            self.driver = webdriver.Chrome(chrome_options=chromeOptions)
         self.visited = set()
 
     def wait_check(self, driver):
@@ -35,6 +39,10 @@ class Scraper(object):
         fn(*args, **kwargs)
         wait = WebDriverWait(self.driver, 30)
         wait.until(self.wait_check)
+
+    def scrolltoview(self, elem):
+        script = "arguments[0].scrollIntoView()"
+        result = self.driver.execute_script(script, elem)
 
     def fetch(self, url):
         """
@@ -66,10 +74,22 @@ class Scraper(object):
         """
         logger.debug("Click tag %s" % tag)
         elem = self.driver.find_element_by_css_selector(tag)
-        href = elem.get_attribute("href")
-        logger.debug("  href %s" % href)
-        onclick = elem.get_attribute("onclick")
         name = elem.tag_name
+        position = elem.location
+        css_vis = elem.value_of_css_property("visibility")
+        css_dis = elem.value_of_css_property("display")
+        href = elem.get_attribute("href")
+        onclick = elem.get_attribute("onclick")
+        logger.debug("  name %s" % name)
+        logger.debug("  element position %s" % position)
+        logger.debug("  displayed: %s" % elem.is_displayed())
+        logger.debug("  enabled: %s" % elem.is_enabled())
+        logger.debug("  size: %s" % elem.is_enabled())
+        logger.debug("  css visibility: %s" % css_vis)
+        logger.debug("  css display: %s" % css_dis)
+        logger.debug("  href %s" % href)
+        logger.debug("  onclick %s" % onclick)
+
         hash = "%s|%s|%s" % (href, onclick, name)
         if hash in self.visited:
             return False
@@ -77,7 +97,13 @@ class Scraper(object):
         self.visited.add(hash)
         logger.debug("Clicked hash %s" % hash)
         self.disable_target(elem)
-        self.loadwait(elem.click)
+        self.scrolltoview(elem)
+        try:
+            self.loadwait(elem.click)
+        except Exception as e:
+            logger.error("Error clicking %s: %s" % (href, e))
+            return False
+
         return True
 
     def input(self, tag, input):

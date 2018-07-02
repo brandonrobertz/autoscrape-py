@@ -3,3 +3,4 @@
 *.swo
 training_data
 deps/
+*.log
