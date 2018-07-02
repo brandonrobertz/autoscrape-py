@@ -30,6 +30,9 @@ class Scraper(object):
             self.driver = webdriver.Chrome(chrome_options=chromeOptions)
         self.visited = set()
 
+    def __del__(self):
+        self.driver.close()
+
     def wait_check(self, driver):
         script = "return document.readyState"
         result = driver.execute_script(script)
@@ -73,7 +76,13 @@ class Scraper(object):
         hasn't been visited and was actually clicked.
         """
         logger.debug("Click tag %s" % tag)
-        elem = self.driver.find_element_by_css_selector(tag)
+        try:
+            elem = self.driver.find_element_by_css_selector(tag)
+        except Exception as e:
+            msg = "Error finding css element for tag %s. Error: %s" % (tag, e)
+            logger.error(msg)
+            return False
+
         name = elem.tag_name
         position = elem.location
         css_vis = elem.value_of_css_property("visibility")
