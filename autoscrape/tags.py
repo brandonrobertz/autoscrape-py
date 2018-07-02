@@ -54,7 +54,7 @@ class Tagger(object):
         """
         return self.driver.execute_script(script, element)
 
-    def clickable_tags(self):
+    def get_clickable(self):
         """
         Get all clickable element tags on the current page.
 
@@ -106,6 +106,18 @@ class Tagger(object):
 
         return tags
 
-    def get_clickable(self, type=None):
-        return self.clickable_tags()
+    def get_forms(self):
+        x_path = "//form"
+        forms = self.driver.find_elements_by_xpath(x_path)
+
+        tags = []
+        for elem in a_elems:
+            tag = self.csspath_from_element(elem)
+            if not tag:
+                logger.warn("No tag for element %s" % elem)
+                continue
+
+            tags.append(tag)
+
+        return tags
 
