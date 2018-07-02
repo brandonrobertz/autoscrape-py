@@ -51,13 +51,9 @@ GET_LINKS            │     look for a next button ─────────�
 SELECT_LINK (index)  └─── click the next button & load page
 """
 
-class TestScraper(object):
-
-    def __init__(self, baseurl, maxdepth=10, loglevel=None):
-        """
-        Initialize our scraper and get the first page.
-        """
-        if not loglevel:
+class BaseScraper(object):
+    def setup_logging(self, loglevel=None):
+        if not loglevel or loglevel == "DEBUG":
             loglevel = logging.DEBUG
         elif loglevel == "INFO":
             loglevel = logging.INFO
@@ -70,6 +66,14 @@ class TestScraper(object):
         console_handler = logging.StreamHandler()
         logger.addHandler(console_handler)
 
+
+class TestScraper(BaseScraper):
+
+    def __init__(self, baseurl, maxdepth=10, loglevel=None):
+        """
+        Initialize our scraper and get the first page.
+        """
+        super(TestScraper, self).setup_logging(loglevel=loglevel)
         self.scraper = Scraper()
         self.scraper.fetch(baseurl)
         self.visited_urls = set()
