@@ -10,13 +10,13 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 """
 COMMAND        Logical Control Flow Step
---------       -------------------------------------------------------------------
+--------       -----------------------------------------------------------------
 INIT (url)               initialize & get entry point
                                      │
                                      ↓
                                  load page    🠤───────────────────┐
                                      │                            │
-GET_CLICKABLE                        │            click a link based on likelihood
+GET_CLICKABLE                        │          click a link based on likelihood
 SELECT_LINK (index)                  │               of finding a search form
                                      ↓                            │
 GET_FORMS    ┌────🠦 look for search form (possibly classifier) ───┘
@@ -69,7 +69,6 @@ class BaseScraper(object):
 
 
 class TestScraper(BaseScraper):
-
     def __init__(self, baseurl, maxdepth=10, loglevel=None):
         """
         Initialize our scraper and get the first page.
@@ -77,7 +76,6 @@ class TestScraper(BaseScraper):
         super(TestScraper, self).setup_logging(loglevel=loglevel)
         self.scraper = Scraper()
         self.scraper.fetch(baseurl)
-        self.visited_urls = set()
         self.maxdepth = maxdepth
 
     def run(self, depth=0, tags=None):
@@ -96,17 +94,52 @@ class TestScraper(BaseScraper):
         if not tags:
             tags = self.scraper.get_clickable()
 
-        logger.debug("All tags at this depth \n    %s" % ("\n    ").join(tags))
+        logger.debug(
+            "All tags at this depth \n    %s" % ("\n    ").join(tags))
 
         for tag in tags:
             logger.debug("Attempting click on tag \n    %s" % tag)
 
             if self.scraper.click(tag):
                 logger.debug("Clicked! Recursing ...")
-                self.run(depth=depth + 1, tags=self.scraper.get_clickable())
+                self.run(
+                    depth=depth + 1, tags=self.scraper.get_clickable())
 
         logger.debug("Going back...")
         self.scraper.back()
+
+
+class TestManualControlScraper(TestScraper):
+    """
+    A Depth-First Search scraper that looks for forms, inputs, and next
+    buttons by some manual criteria and iterates accordingly.
+    """
+
+    def __init__(self, baseurl, maxdepth=10, loglevel=None):
+        super(TestScraper, self).setup_logging(loglevel=loglevel)
+        self.control = Controller()
+        self.control.initialize(baseurl)
+        self.maxdepth = maxdepth
+
+    def run(self, depth=0):
+        if depth > self.maxdepth:
+            logger.debug("Maximum depth %s reached, returning..." % depth)
+            self.control.back()
+            return
+
+        logger.debug("** DEPTH %s" % depth)
+
+        links = self.control.clickable
+        logger.debug("All tags at this depth %s" % links)
+
+        for ix in range(len(links)):
+            logger.debug("Attempting click on link %s" % ix)
+            if self.control.select_link(ix):
+                logger.debug("Clicked! Recursing ...")
+                self.run(depth=depth + 1)
+
+        logger.debug("Going back...")
+        self.control.back()
 
 
 class BruteForceScraper(object):

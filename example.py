@@ -22,15 +22,20 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
 if __name__ == "__main__":
     args = parse_args()
+    kwargs = {
+        "maxdepth": args.maxdepth,
+        "loglevel": args.loglevel,
+    }
+
     if args.scraper == "test":
-        kwargs = {
-            "maxdepth": args.maxdepth,
-        }
-        if args.loglevel:
-            kwargs["loglevel"] = args.loglevel
         autoscrape.TestScraper(args.baseurl, **kwargs).run()
+
+    elif args.scraper == "test-manual-control":
+        autoscrape.TestManualControlScraper(args.baseurl, **kwargs).run()
+
     else:
         print("No scraper found for %s" % args.scraper)
 

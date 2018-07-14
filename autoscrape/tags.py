@@ -79,7 +79,9 @@ class Tagger(object):
                 continue
 
             if href.split("#")[0] == self.current_url:
-                # ("Skipping current url  href %s" % href)
+                print("Skipping current url (%s) href %s" % (
+                    self.current_url, href
+                ))
                 continue
 
             # skip any weird protos ... we whitelist notrmal HTTP,
@@ -111,7 +113,7 @@ class Tagger(object):
         forms = self.driver.find_elements_by_xpath(x_path)
 
         tags = []
-        for elem in a_elems:
+        for elem in forms:
             tag = self.csspath_from_element(elem)
             if not tag:
                 logger.warn("No tag for element %s" % elem)
