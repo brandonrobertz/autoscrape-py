@@ -108,12 +108,64 @@ class Tagger(object):
 
         return tags
 
+    def get_inputs(self, form=None):
+        """
+        Get inputs, either for full page or by a form WebElement.
+        Returns a list of tags.
+        """
+        x_path = "//input[@type='text']"
+        elem = self.driver
+        tags = []
+        if form:
+            elem = form
+            x_path = ".%s" % x_path
+
+        elems = elem.find_elements_by_xpath(x_path)
+        for input in elems:
+            input_tag = self.csspath_from_element(input)
+            if not input_tag:
+                logger.warn("No tag for input %s" % input)
+                continue
+
+            tags.append(input_tag)
+
+        return tags
+
     def get_forms(self):
+        """
+        Get all tags to forms on a page and their respective
+        text inputs. Tags are returned in a dict, with the
+        form CSSPath as the key and a list of input CSSPaths
+        under the form.
+        """
         x_path = "//form"
         forms = self.driver.find_elements_by_xpath(x_path)
 
-        tags = []
+        tags = {}
         for elem in forms:
+            if not elem.is_displayed() or not elem.is_enabled():
+                continue
+
+            tag = self.csspath_from_element(elem)
+            if not tag:
+                logger.warn("No tag for element %s" % elem)
+                continue
+
+            tags[tag] = self.get_inputs(form=elem)
+
+        return tags
+
+    def get_buttons(self):
+        x_path = "//button|//input[@type='button']"
+        btns = self.driver.find_elements_by_xpath(x_path)
+        print("*** btns", btns)
+        # import IPython; IPython.embed()
+
+        tags = []
+        for elem in btns:
+            if not elem.is_displayed() or not elem.is_enabled():
+                continue
+
             tag = self.csspath_from_element(elem)
             if not tag:
                 logger.warn("No tag for element %s" % elem)

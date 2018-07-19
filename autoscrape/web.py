@@ -2,11 +2,13 @@
 import time
 import logging
 
+import selenium
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import (
+    TimeoutException, UnexpectedAlertPresentException,
+)
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
 from .tags import Tagger
 
 
@@ -16,14 +18,22 @@ logger = logging.getLogger('AUTOSCRAPE')
 class Scraper(object):
 
     def __init__(self, driver="Firefox"):
-        # Needs geckodriver: https://github.com/mozilla/geckodriver/releases
+        # Needs geckodriver:
+        # https://github.com/mozilla/geckodriver/releases
+        # Version 0.20.1 is recommended as of 14/07/2018
         if driver == "Firefox":
             firefox_profile = webdriver.FirefoxProfile()
-            firefox_profile.set_preference('permissions.default.image', 2)
+            # disable images
+            firefox_profile.set_preference(
+                'permissions.default.image', 2
+            )
+            # disable flash
             firefox_profile.set_preference(
                 'dom.ipc.plugins.enabled.libflashplayer.so', 'false'
             )
-            self.driver = webdriver.Firefox(firefox_profile=firefox_profile)
+            self.driver = webdriver.Firefox(
+                firefox_profile=firefox_profile
+            )
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
         elif driver == "Chrome":
@@ -47,7 +57,7 @@ class Scraper(object):
         Wrap all driver function calls with broken pipe handling. This
         is a workaround for geckodriver's problem of killing connections
         or lack of persistent connection. Geckodriver 0.20.1 doesn't seem
-        to have the issue ... as it appears to be related to an excessively
+        to have the issue ... as it appears to be related to a very
         short keep-alive in 0.21.0.
         """
         pipe_retries = 0
@@ -58,13 +68,13 @@ class Scraper(object):
                 if pipe_retries > self.broken_pipe_retries:
                     msg = "Exceeded max broken pipe retries: %s"
                     logger.info(msg % self.broken_pipe_retries)
-                    msg = "Broken pipe error on fn: %s, args: %s, kwargs: %s"
+                    msg = "Broken pipe err. fn: %s, args: %s, kwargs: %s"
                     logger.error(msg % (fn, args, kwargs))
                     raise e
             except TypeError as e:
                 if "not callable" in str(e):
                     return self.driver_exec(lambda: fn)
-                    # don't increment pipe_retries here because we just need to
+                    # don't increment pipe_retries here. we just need to
                     # convert our property into a callable for the next
                     # iteration
                     continue
@@ -131,6 +141,20 @@ class Scraper(object):
             msg = "Error finding element for tag %s. Error: %s"
             logger.error(msg % (tag, e))
 
+    def elem_stats(self, elem):
+        position  = self.driver_exec(elem.location)
+        css_vis   = self.driver_exec(elem.value_of_css_property, "visibility")
+        css_dis   = self.driver_exec(elem.value_of_css_property, "display")
+        displayed = self.driver_exec(elem.is_displayed)
+        enabled   = self.driver_exec(elem.is_enabled)
+        size      = self.driver_exec(elem.size)
+        logger.debug("  element position %s" % position)
+        logger.debug("  displayed: %s" % displayed)
+        logger.debug("  enabled: %s" % enabled)
+        logger.debug("  size: %s" % size)
+        logger.debug("  css visibility: %s" % css_vis)
+        logger.debug("  css display: %s" % css_dis)
+
     def click(self, tag):
         """
         Click an element by a given tag. Returns True if the link
@@ -141,29 +165,14 @@ class Scraper(object):
         if not elem:
             return False
 
-        name      = self.driver_exec(elem.tag_name)
-        position  = self.driver_exec(elem.location)
-        css_vis   = self.driver_exec(elem.value_of_css_property, "visibility")
-        css_dis   = self.driver_exec(elem.value_of_css_property, "display")
-        href      = self.driver_exec(elem.get_attribute, "href")
-        onclick   = self.driver_exec(elem.get_attribute, "onclick")
-        displayed = self.driver_exec(elem.is_displayed)
-        enabled   = self.driver_exec(elem.is_enabled)
-        size      = self.driver_exec(elem.size)
-        logger.debug("  name %s" % name)
-        logger.debug("  element position %s" % position)
-        logger.debug("  displayed: %s" % displayed)
-        logger.debug("  enabled: %s" % enabled)
-        logger.debug("  size: %s" % size)
-        logger.debug("  css visibility: %s" % css_vis)
-        logger.debug("  css display: %s" % css_dis)
-        logger.debug("  href %s" % href)
-        logger.debug("  onclick %s" % onclick)
-
+        name = self.driver_exec(elem.tag_name)
+        onclick = self.driver_exec(elem.get_attribute, "onclick")
+        href = self.driver_exec(elem.get_attribute, "href")
         hash = "%s|%s|%s" % (href, onclick, name)
         if hash in self.visited:
             return False
 
+        self.elem_stats(elem)
         self.visited.add(hash)
         logger.debug("Clicked hash %s" % hash)
         self.disable_target(elem)
@@ -181,7 +190,10 @@ class Scraper(object):
         Enter some input into an element by a given tag.
         """
         logger.debug("Inputting %s into tag %s" % (input, tag))
-        elem = self.driver_exec(self.driver.find_element_by_css_selector, tag)
+        elem = self.lookup_by_tag(tag)
+        self.driver_exec(self.scrolltoview, elem)
+        self.elem_stats(elem)
+        self.driver_exec(elem.clear)
         self.driver_exec(elem.send_keys, input)
 
     def submit(self, tag):
@@ -189,8 +201,14 @@ class Scraper(object):
         Submit a form from a given tag. Assumes all inputs are filled.
         """
         logger.debug("Submitting tag %s" % tag)
-        elem = self.driver_exec(self.driver.find_element_by_css_selector, tag)
+        elem = self.lookup_by_tag(tag)
+        self.driver_exec(self.scrolltoview, elem)
+        self.elem_stats(elem)
         self.loadwait(elem.submit)
+        alert = self.driver.switch_to_alert()
+        logger.warn("Accepting alert: %s" % alert.text)
+        self.loadwait(alert.accept)
+        time.sleep(3)
 
     @property
     def page_html(self):
@@ -211,5 +229,11 @@ class Scraper(object):
     def get_forms(self):
         current_url = self.driver_exec(self.page_url)
         tagger = Tagger(driver=self.driver, current_url=current_url)
-        return tagger.get_forms()
+        forms_dict = tagger.get_forms()
+        return forms_dict
+
+    def get_buttons(self):
+        current_url = self.driver_exec(self.page_url)
+        tagger = Tagger(driver=self.driver, current_url=current_url)
+        return tagger.get_buttons()
 

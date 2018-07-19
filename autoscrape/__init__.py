@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
 import logging
+import string
+from itertools import product
 
 from .control import Controller
 from .web import Scraper
@@ -10,13 +12,13 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 """
 COMMAND        Logical Control Flow Step
---------       -----------------------------------------------------------------
+--------       ---------------------------------------------------------------
 INIT (url)               initialize & get entry point
                                      │
                                      ↓
                                  load page    🠤───────────────────┐
                                      │                            │
-GET_CLICKABLE                        │          click a link based on likelihood
+GET_CLICKABLE                        │        click a link based on likelihood
 SELECT_LINK (index)                  │               of finding a search form
                                      ↓                            │
 GET_FORMS    ┌────🠦 look for search form (possibly classifier) ───┘
@@ -121,6 +123,25 @@ class TestManualControlScraper(TestScraper):
         self.control.initialize(baseurl)
         self.maxdepth = maxdepth
 
+    def input_generator(self, length=1):
+        chars = string.ascii_lowercase
+        for input in product(chars, repeat=length):
+            yield "".join(input)
+
+    def keep_clicking_next_btns(self):
+        button_data = self.control.button_vectors()
+        logger.debug("Button vectors %s" % button_data)
+        depth = 0
+        for ix in range(len(button_data)):
+            button = button_data[ix]
+            logger.debug("Checking button %s" % button)
+            if "next" in button.lower():
+                logger.debug("Clicking button %s..." % ix)
+                depth += 1
+                self.control.select_button(ix)
+        for _ in range(depth):
+            self.control.back()
+
     def run(self, depth=0):
         if depth > self.maxdepth:
             logger.debug("Maximum depth %s reached, returning..." % depth)
@@ -128,6 +149,28 @@ class TestManualControlScraper(TestScraper):
             return
 
         logger.debug("** DEPTH %s" % depth)
+
+        form_vectors = self.control.form_vectors(type="text")
+        for ix in range(len(form_vectors)):
+            form_data = form_vectors[ix]
+            # inputs are keyed by form index
+            inputs = self.control.inputs[ix]
+
+            logger.debug("Form: %s Text: %s" % (ix, form_data))
+            logger.debug("Inputs: %s" % inputs)
+
+            # TODO: this is where a ML algorithm will go.
+            # Classifier for determining if there's a good form
+            # on a page.
+            if "Verify Degrees" not in form_data or len(inputs) != 1:
+                continue
+
+            for input in self.input_generator(length=2):
+                logger.debug("Inputting %s to input %s" % (input, 0))
+                self.control.input(ix, 0, input)
+                self.control.submit(ix)
+                logger.debug("Beginning iteration of data pages")
+                self.keep_clicking_next_btns()
 
         links = self.control.clickable
         logger.debug("All tags at this depth %s" % links)

@@ -10,18 +10,23 @@ class Controller(object):
     to a ML model. This abstraction also returns feature matrices for pages
     and elements on the webpage.
     """
+
     def __init__(self):
         """
         Set up our WebDriver and misc utilities.
         """
         self.scraper = Scraper()
         self.clickabke = []
-        self.inputs = []
         self.forms = []
+        self.inputs = []
 
     def load_indices(self):
         self.clickable = self.scraper.get_clickable()
-        self.forms = self.scraper.get_forms()
+        forms_dict = self.scraper.get_forms()
+        self.forms = list(forms_dict.keys())
+        print("Forms dict", forms_dict)
+        self.inputs = [ tags for tags in forms_dict.values() ]
+        self.buttons = self.scraper.get_buttons()
 
     def initialize(self, url):
         """
@@ -30,9 +35,6 @@ class Controller(object):
         """
         self.scraper.fetch(url)
         self.load_indices()
-        # TODO: form-indexed inputs
-        # self.inputs = self.scraper.get_inputs()
-        # self.forms = self.scraper.get_forms()
 
     def select_link(self, index):
         tag = self.clickable[index]
@@ -41,8 +43,16 @@ class Controller(object):
             self.load_indices()
         return clicked
 
-    def input(self, index, chars):
-        tag = self.inputs[index]
+    def select_button(self, index):
+        tag = self.buttons[index]
+        clicked = self.scraper.click(tag)
+        if clicked:
+            self.load_indices()
+        return clicked
+
+    def input(self, form_ix, index, chars):
+        print("Inputs", self.inputs)
+        tag = self.inputs[form_ix][index]
         self.scraper.input(tag, chars)
 
     def submit(self, index):
@@ -63,13 +73,35 @@ class Controller(object):
         """
         pass
 
-    def form_vectors(self):
+    def form_vectors(self, type="text"):
         """
         Get a feature vector representing the forms on a page. This ought
         to be used in cases where the model indicates the page may be a
-        search page, but where there are multiple forms.
+        search page, but where there are multiple forms. Or where you
+        just want to determine if a form is interactive data search.
+        Another alternative strategy would be to try the search and then
+        look at the next page.
         """
-        pass
+        form_data = []
+        if type == "text":
+            for tag in self.forms:
+                form = self.scraper.lookup_by_tag(tag)
+                elems = form.find_elements_by_xpath(".//*")
+                text = " ".join([ e.text for e in elems ])
+                form_data.append(text)
+
+        return form_data
+
+    def button_vectors(self, type="text"):
+        buttons_data = []
+        print("Buttons", self.buttons)
+        if type == "text":
+            for tag in self.buttons:
+                btn = self.scraper.lookup_by_tag(tag)
+                value = btn.get_attribute("value")
+                text = "%s %s" % (btn.text, value)
+                buttons_data.append(text)
+        return buttons_data
 
     def link_vectors(self):
         """

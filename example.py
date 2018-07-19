@@ -12,7 +12,8 @@ def parse_args():
         help='The base URL to begin scraping.')
     parser.add_argument(
         '--scraper', type=str, default="test",
-        help='Which scraper to use. Default is the test DFS scraper.')
+        help=('Which scraper to use. Default is the test DFS '
+              'scraper "test". Options: test, test-manual-control'))
     parser.add_argument(
         '--maxdepth', type=int, default=10,
         help='Maximum depth to allow the scraper to traverse.')
