@@ -96,6 +96,7 @@ class Scraper(object):
         Run a driver interaction function, wait for the page to
         become ready, and handle any broken pipe errors
         """
+        logger.debug("Waiting for loading to complete...")
         self.driver_exec(fn, *args, **kwargs)
         # wait for the page to become ready, up to 30s, checks every 0.5s
         wait = WebDriverWait(self.driver, 30)
@@ -155,7 +156,7 @@ class Scraper(object):
         logger.debug("  css visibility: %s" % css_vis)
         logger.debug("  css display: %s" % css_dis)
 
-    def click(self, tag):
+    def click(self, tag, iterating_form=False):
         """
         Click an element by a given tag. Returns True if the link
         hasn't been visited and was actually clicked.
@@ -163,13 +164,15 @@ class Scraper(object):
         logger.debug("Click tag %s" % tag)
         elem = self.lookup_by_tag(tag)
         if not elem:
+            logger.warn("Element by tag not found. Tag: %s" % tag)
             return False
 
         name = self.driver_exec(elem.tag_name)
         onclick = self.driver_exec(elem.get_attribute, "onclick")
         href = self.driver_exec(elem.get_attribute, "href")
         hash = "%s|%s|%s" % (href, onclick, name)
-        if hash in self.visited:
+        if hash in self.visited and not iterating_form:
+            logger.warn("Hash visited: %s" % hash)
             return False
 
         self.elem_stats(elem)

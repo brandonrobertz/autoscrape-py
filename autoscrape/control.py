@@ -1,5 +1,11 @@
 # -*- coding: UTF-8 -*-
+import time
+import logging
+
 from .web import Scraper
+
+
+logger = logging.getLogger('AUTOSCRAPE')
 
 
 class Controller(object):
@@ -24,7 +30,6 @@ class Controller(object):
         self.clickable = self.scraper.get_clickable()
         forms_dict = self.scraper.get_forms()
         self.forms = list(forms_dict.keys())
-        print("Forms dict", forms_dict)
         self.inputs = [ tags for tags in forms_dict.values() ]
         self.buttons = self.scraper.get_buttons()
 
@@ -43,15 +48,17 @@ class Controller(object):
             self.load_indices()
         return clicked
 
-    def select_button(self, index):
+    def select_button(self, index, iterating_form=False):
         tag = self.buttons[index]
-        clicked = self.scraper.click(tag)
+        logger.debug("Clicking button ix: %s, tag: %s" % (
+            index, tag))
+        clicked = self.scraper.click(tag, iterating_form=iterating_form)
+        time.sleep(1)
         if clicked:
             self.load_indices()
         return clicked
 
     def input(self, form_ix, index, chars):
-        print("Inputs", self.inputs)
         tag = self.inputs[form_ix][index]
         self.scraper.input(tag, chars)
 

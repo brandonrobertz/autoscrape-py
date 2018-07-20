@@ -132,13 +132,22 @@ class TestManualControlScraper(TestScraper):
         button_data = self.control.button_vectors()
         logger.debug("Button vectors %s" % button_data)
         depth = 0
-        for ix in range(len(button_data)):
-            button = button_data[ix]
-            logger.debug("Checking button %s" % button)
-            if "next" in button.lower():
-                logger.debug("Clicking button %s..." % ix)
-                depth += 1
-                self.control.select_button(ix)
+        while True:
+            found_next = False
+            for ix in range(len(button_data)):
+                logger.debug("Depth %s" % depth)
+                button = button_data[ix]
+                logger.debug("Checking button %s" % button)
+                if "next page" in button.lower():
+                    logger.debug("Clicking button %s..." % ix)
+                    depth += 1
+                    self.control.select_button(ix, iterating_form=True)
+                    found_next = True
+                    # don't click any other next buttons
+                    break
+            if not found_next:
+                logger.debug("Next button not found!")
+                break
         for _ in range(depth):
             self.control.back()
 
@@ -165,7 +174,7 @@ class TestManualControlScraper(TestScraper):
             if "Verify Degrees" not in form_data or len(inputs) != 1:
                 continue
 
-            for input in self.input_generator(length=2):
+            for input in self.input_generator(length=1):
                 logger.debug("Inputting %s to input %s" % (input, 0))
                 self.control.input(ix, 0, input)
                 self.control.submit(ix)
