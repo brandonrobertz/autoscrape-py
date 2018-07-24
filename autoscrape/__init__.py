@@ -128,12 +128,16 @@ class TestManualControlScraper(TestScraper):
         for input in product(chars, repeat=length):
             yield "".join(input)
 
-    def keep_clicking_next_btns(self):
+    def keep_clicking_next_btns(self, maxdepth=0):
         button_data = self.control.button_vectors()
         logger.debug("Button vectors %s" % button_data)
         depth = 0
         while True:
             found_next = False
+            if maxdepth and depth > maxdepth:
+                logger.debug("Max 'next' depth reached %s" % depth)
+                break
+
             for ix in range(len(button_data)):
                 logger.debug("Depth %s" % depth)
                 button = button_data[ix]
@@ -145,10 +149,13 @@ class TestManualControlScraper(TestScraper):
                     found_next = True
                     # don't click any other next buttons
                     break
+
             if not found_next:
                 logger.debug("Next button not found!")
                 break
+
         for _ in range(depth):
+            logger.debug("Going back from 'next'...")
             self.control.back()
 
     def run(self, depth=0):
@@ -179,7 +186,9 @@ class TestManualControlScraper(TestScraper):
                 self.control.input(ix, 0, input)
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")
-                self.keep_clicking_next_btns()
+                self.keep_clicking_next_btns(maxdepth=3)
+
+            logger.debug("Completed iteration!")
 
         links = self.control.clickable
         logger.debug("All tags at this depth %s" % links)

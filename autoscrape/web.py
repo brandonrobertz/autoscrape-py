@@ -209,9 +209,10 @@ class Scraper(object):
         self.elem_stats(elem)
         self.loadwait(elem.submit)
         alert = self.driver.switch_to_alert()
-        logger.warn("Accepting alert: %s" % alert.text)
-        self.loadwait(alert.accept)
-        time.sleep(3)
+        if alert:
+            logger.warn("Accepting alert: %s" % alert.text)
+            self.loadwait(alert.accept)
+            time.sleep(5)
 
     @property
     def page_html(self):
