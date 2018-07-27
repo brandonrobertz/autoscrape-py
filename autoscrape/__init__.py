@@ -187,6 +187,7 @@ class TestManualControlScraper(TestScraper):
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")
                 self.keep_clicking_next_btns(maxdepth=3)
+                self.control.back()
 
             logger.debug("Completed iteration!")
 

@@ -6,6 +6,7 @@ import selenium
 from selenium import webdriver
 from selenium.common.exceptions import (
     TimeoutException, UnexpectedAlertPresentException,
+    StaleElementReferenceException, TimeoutException,
 )
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -96,8 +97,19 @@ class Scraper(object):
         Run a driver interaction function, wait for the page to
         become ready, and handle any broken pipe errors
         """
-        logger.debug("Waiting for loading to complete...")
         self.driver_exec(fn, *args, **kwargs)
+
+        try:
+            WebDriverWait(self.driver, 0.25).until(
+                EC.alert_is_present(),
+                'Waiting for alert timed out'
+            )
+            alert = self.driver.switch_to_alert()
+            alert.accept()
+            logger.debug("Alert accepted!")
+        except TimeoutException:
+            print("No alert")
+
         # wait for the page to become ready, up to 30s, checks every 0.5s
         wait = WebDriverWait(self.driver, 30)
         wait.until(self.wait_check)
@@ -208,11 +220,8 @@ class Scraper(object):
         self.driver_exec(self.scrolltoview, elem)
         self.elem_stats(elem)
         self.loadwait(elem.submit)
-        alert = self.driver.switch_to_alert()
-        if alert:
-            logger.warn("Accepting alert: %s" % alert.text)
-            self.loadwait(alert.accept)
-            time.sleep(5)
+        # TODO: better way to wait for this, post-alert clicked
+        time.sleep(5)
 
     @property
     def page_html(self):
