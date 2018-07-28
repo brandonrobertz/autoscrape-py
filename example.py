@@ -18,6 +18,13 @@ def parse_args():
         '--maxdepth', type=int, default=10,
         help='Maximum depth to allow the scraper to traverse.')
     parser.add_argument(
+        '--formdepth', type=int, default=0,
+        help=('Maximum depth to allow the scraper iterate through forms '
+              'using "next" buttons. Default: 0, meaning no limit (will .'
+              'continue clicking "next" until no more are found). This '
+              'only has an effect on form interacting scrapers (test-manual-'
+              'control).'))
+    parser.add_argument(
         '--loglevel', type=str, default="INFO",
         help='Log level. Default: INFO. Options: DEBUG, INFO, WARN, ERROR')
     args = parser.parse_args()
@@ -29,6 +36,7 @@ if __name__ == "__main__":
     kwargs = {
         "maxdepth": args.maxdepth,
         "loglevel": args.loglevel,
+        "formdepth": args.formdepth,
     }
 
     if args.scraper == "test":

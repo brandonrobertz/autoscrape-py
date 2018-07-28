@@ -117,11 +117,12 @@ class TestManualControlScraper(TestScraper):
     buttons by some manual criteria and iterates accordingly.
     """
 
-    def __init__(self, baseurl, maxdepth=10, loglevel=None):
+    def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0):
         super(TestScraper, self).setup_logging(loglevel=loglevel)
         self.control = Controller()
         self.control.initialize(baseurl)
         self.maxdepth = maxdepth
+        self.formdepth = formdepth
 
     def input_generator(self, length=1):
         chars = string.ascii_lowercase
@@ -134,8 +135,8 @@ class TestManualControlScraper(TestScraper):
         depth = 0
         while True:
             found_next = False
-            if maxdepth and depth > maxdepth:
-                logger.debug("Max 'next' depth reached %s" % depth)
+            if self.formdepth and depth > self.formdepth:
+                logger.debug("Max 'next' formdepth reached %s" % depth)
                 break
 
             for ix in range(len(button_data)):
