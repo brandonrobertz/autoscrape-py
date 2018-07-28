@@ -130,19 +130,21 @@ class TestManualControlScraper(TestScraper):
             yield "".join(input)
 
     def keep_clicking_next_btns(self, maxdepth=0):
-        button_data = self.control.button_vectors()
-        logger.debug("Button vectors %s" % button_data)
         depth = 0
         while True:
-            found_next = False
             if self.formdepth and depth > self.formdepth:
                 logger.debug("Max 'next' formdepth reached %s" % depth)
                 break
+
+            found_next = False
+            button_data = self.control.button_vectors()
+            logger.debug("Button vectors %s" % button_data)
 
             for ix in range(len(button_data)):
                 logger.debug("Depth %s" % depth)
                 button = button_data[ix]
                 logger.debug("Checking button %s" % button)
+                # TODO: replace with a model?
                 if "next page" in button.lower():
                     logger.debug("Clicking button %s..." % ix)
                     depth += 1
