@@ -100,7 +100,7 @@ class Scraper(object):
         self.driver_exec(fn, *args, **kwargs)
 
         try:
-            WebDriverWait(self.driver, 0.25).until(
+            WebDriverWait(self.driver, 1).until(
                 EC.alert_is_present(),
                 'Waiting for alert timed out'
             )
