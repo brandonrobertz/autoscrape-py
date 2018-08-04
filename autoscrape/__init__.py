@@ -118,11 +118,17 @@ class TestManualControlScraper(TestScraper):
     """
 
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0):
+        # setup logging, etc
         super(TestScraper, self).setup_logging(loglevel=loglevel)
+        # set up web scraper controller
         self.control = Controller()
         self.control.initialize(baseurl)
+        # depth of DFS in search of form
         self.maxdepth = maxdepth
+        # current depth of iterating through 'next' form buttons
         self.formdepth = formdepth
+        # the current path to wherever we are at
+        self.path = []
 
     def input_generator(self, length=1):
         chars = string.ascii_lowercase
