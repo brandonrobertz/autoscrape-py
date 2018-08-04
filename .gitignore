@@ -1,7 +1,17 @@
+__pycache__
 *.pyc
 *.swp
 *.swo
 !training_data/embeddings
 training_data/embeddings/data
+training_data/embeddings/models
+training_data/embeddings/raw_data
+training_data/cleaned/*
+training_data/html/*
+training_data/raw/*
+training_data/target/*
+training_data/data_notes.txt
+training_data/features.txt
+*.7z
 deps/
 *.log
