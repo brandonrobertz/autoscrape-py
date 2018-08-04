@@ -1,6 +1,7 @@
 *.pyc
 *.swp
 *.swo
-training_data
+!training_data/embeddings
+training_data/embeddings/data
 deps/
 *.log
