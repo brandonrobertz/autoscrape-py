@@ -15,3 +15,6 @@ training_data/features.txt
 *.7z
 deps/
 *.log
+*.300d.*
+*.100d.*
+webcode.txt
