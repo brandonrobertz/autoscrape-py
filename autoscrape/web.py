@@ -97,18 +97,24 @@ class Scraper(object):
         Run a driver interaction function, wait for the page to
         become ready, and handle any broken pipe errors
         """
+        check_alerts = False
+        if "check_alerts" in kwargs:
+            check_alerts = kwargs["check_alerts"]
+            del kwargs["check_alerts"]
+
         self.driver_exec(fn, *args, **kwargs)
 
-        try:
-            WebDriverWait(self.driver, 1).until(
-                EC.alert_is_present(),
-                'Waiting for alert timed out'
-            )
-            alert = self.driver.switch_to_alert()
-            alert.accept()
-            logger.debug("Alert accepted!")
-        except TimeoutException:
-            print("No alert")
+        if check_alerts:
+            try:
+                WebDriverWait(self.driver, 1).until(
+                    EC.alert_is_present(),
+                    'Waiting for alert timed out'
+                )
+                alert = self.driver.switch_to_alert()
+                alert.accept()
+                logger.debug("Alert accepted!")
+            except TimeoutException:
+                pass
 
         # wait for the page to become ready, up to 30s, checks every 0.5s
         wait = WebDriverWait(self.driver, 30)
@@ -219,7 +225,7 @@ class Scraper(object):
         elem = self.lookup_by_tag(tag)
         self.driver_exec(self.scrolltoview, elem)
         self.elem_stats(elem)
-        self.loadwait(elem.submit)
+        self.loadwait(elem.submit, check_alerts=True)
         # TODO: better way to wait for this, post-alert clicked
         time.sleep(5)
 
