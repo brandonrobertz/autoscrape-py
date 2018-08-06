@@ -17,11 +17,11 @@ class Vectorizer(object):
         ))
         self.html_embeddings = None
         if html_embeddings_file:
-            self.html_embeddings = self.load_embedding(html_embeddings_file)
+            self.html = self.load_embedding(html_embeddings_file)
 
         self.word_embeddings = None
         if word_embeddings_file:
-            self.word_embeddings = self.load_embedding(word_embeddings_file)
+            self.word = self.load_embedding(word_embeddings_file)
 
     def embeddings_length(self, path):
         N = 0
@@ -41,6 +41,11 @@ class Vectorizer(object):
             N, dim
         ))
         logger.debug("Allocating embedding matrix...")
+        # token to ID (embedding row)
+        t2id = dict()
+        # ID to token
+        id2t = dict()
+        # embedding matrix
         embedding = np.zeros(shape=(N, dim))
         logger.debug("Reading embeddings into memory...")
         outputs = [ (N // 10) * i for i in range(10) ]
@@ -52,7 +57,13 @@ class Vectorizer(object):
                 key, data = line.split(' ', 1)
                 vec = [ float(d) for d in data.split() ]
                 embedding[I, :] = vec
+                t2id[key] = I
+                id2t[I] = key
                 I += 1
         logger.debug("Embeddings matrix: %s x %s" % embedding.shape)
-        return embedding
+        return {
+            "embedding": embedding,
+            "t2id": t2id,
+            "id2t": id2t,
+        }
 
