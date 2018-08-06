@@ -23,3 +23,11 @@ You can run the example script like so:
     ./example.py --loglevel DEBUG --maxdepth 10 SITE_HERE
 
 That will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data.
+
+More advanced models are under development. Currently, the prototype iterating model can be ran like so:
+
+    ./example.py --loglevel DEBUG --maxdepth 10  \
+        --scraper test-manual-control \
+        --html_embeddings ./training_data/embeddings/webcode2.300d.embeddings \
+        --word_embeddings ./training_data/embeddings/glove.840B.300d.txt  \
+        [SITE HERE]

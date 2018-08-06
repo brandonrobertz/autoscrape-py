@@ -3,6 +3,7 @@ import time
 import logging
 
 from .web import Scraper
+from .vectorization import Vectorizer
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -17,10 +18,14 @@ class Controller(object):
     and elements on the webpage.
     """
 
-    def __init__(self):
+    def __init__(self, html_embeddings_file=None, word_embeddings_file=None):
         """
         Set up our WebDriver and misc utilities.
         """
+        self.vectorizer = Vectorizer(
+            html_embeddings_file=html_embeddings_file,
+            word_embeddings_file=word_embeddings_file,
+        )
         self.scraper = Scraper()
         self.clickabke = []
         self.forms = []
@@ -71,14 +76,14 @@ class Controller(object):
         self.scraper.back()
         self.load_indices()
 
-    def page_vector(self):
+    def page_vector(self, type="text"):
         """
         Get feature vector from currently loaded page. This should
         be used to determine what type of page we're on and what action
         we ought to take (continue crawl, enter input, scrape structured
         data, etc).
         """
-        pass
+        html = self.scraper.page_html
 
     def form_vectors(self, type="text"):
         """

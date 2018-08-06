@@ -117,11 +117,15 @@ class TestManualControlScraper(TestScraper):
     buttons by some manual criteria and iterates accordingly.
     """
 
-    def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0):
+    def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
+                 html_embeddings=None, word_embeddings=None):
         # setup logging, etc
         super(TestScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
-        self.control = Controller()
+        self.control = Controller(
+            html_embeddings_file=html_embeddings,
+            word_embeddings_file=word_embeddings,
+        )
         self.control.initialize(baseurl)
         # depth of DFS in search of form
         self.maxdepth = maxdepth
