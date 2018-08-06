@@ -6,6 +6,13 @@ import numpy as np
 logger = logging.getLogger('AUTOSCRAPE')
 
 
+class Embedding(object):
+    def __init__(embeddings=None, t2id=None, id2t=None):
+        self.embeddings = embeddings
+        self.t2id = t2id
+        self.id2t = id2t
+
+
 class Vectorizer(object):
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None):
         """
@@ -15,11 +22,11 @@ class Vectorizer(object):
         print("html_embeddings_file=%s, word_embeddings_file=%s" % (
             html_embeddings_file, word_embeddings_file
         ))
-        self.html_embeddings = None
+        self.html = None
         if html_embeddings_file:
             self.html = self.load_embedding(html_embeddings_file)
 
-        self.word_embeddings = None
+        self.word = None
         if word_embeddings_file:
             self.word = self.load_embedding(word_embeddings_file)
 
@@ -46,7 +53,7 @@ class Vectorizer(object):
         # ID to token
         id2t = dict()
         # embedding matrix
-        embedding = np.zeros(shape=(N, dim))
+        embeddings = np.zeros(shape=(N, dim))
         logger.debug("Reading embeddings into memory...")
         outputs = [ (N // 10) * i for i in range(10) ]
         with open(path, "r") as f:
@@ -56,14 +63,15 @@ class Vectorizer(object):
                     logger.info("%0.4f%% complete" % ((I / float(N)) * 100))
                 key, data = line.split(' ', 1)
                 vec = [ float(d) for d in data.split() ]
-                embedding[I, :] = vec
+                embeddings[I, :] = vec
                 t2id[key] = I
                 id2t[I] = key
                 I += 1
-        logger.debug("Embeddings matrix: %s x %s" % embedding.shape)
-        return {
-            "embedding": embedding,
-            "t2id": t2id,
-            "id2t": id2t,
-        }
+        logger.debug("Embeddings matrix: %s x %s" % embeddings.shape)
+
+        return Embedding(
+            embeddings = embeddings,
+            t2id = t2id,
+            id2t = id2t,
+        )
 
