@@ -76,14 +76,19 @@ class Controller(object):
         self.scraper.back()
         self.load_indices()
 
-    def page_vector(self, type="text"):
+    def page_vector(self, type="embeddings"):
         """
         Get feature vector from currently loaded page. This should
         be used to determine what type of page we're on and what action
         we ought to take (continue crawl, enter input, scrape structured
         data, etc).
         """
-        html = self.scraper.page_html
+        if type == "embeddings":
+            html = self.scraper.page_html
+            text = self.scraper.element_text()
+            # this means use the root of the page
+            element = None
+            return  self.vectorizer.vectorize(html, text, element)
 
     def form_vectors(self, type="text"):
         """
@@ -101,7 +106,6 @@ class Controller(object):
                 elems = form.find_elements_by_xpath(".//*")
                 text = " ".join([ e.text for e in elems ])
                 form_data.append(text)
-
         return form_data
 
     def button_vectors(self, type="text"):

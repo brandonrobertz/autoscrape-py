@@ -237,6 +237,17 @@ class Scraper(object):
     def page_url(self):
         return self.driver_exec(self.driver.current_url)
 
+    def element_text(self, element=None):
+        """
+        Get the text for all elements either under a given element
+        or for a whole page (if element == None)
+        """
+        if element is None:
+            element = self.driver
+        elems = element.find_elements_by_xpath(".//*")
+        text = " ".join([ e.text for e in elems ])
+        return text
+
     def get_clickable(self, type=None):
         """
         Get tags, by type (optional), for the currently loaded page.

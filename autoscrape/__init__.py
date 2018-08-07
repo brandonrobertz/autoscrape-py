@@ -178,6 +178,7 @@ class TestManualControlScraper(TestScraper):
             return
 
         logger.debug("** DEPTH %s" % depth)
+        self.control.page_vector()
 
         form_vectors = self.control.form_vectors(type="text")
         for ix in range(len(form_vectors)):

@@ -1,4 +1,5 @@
 import logging
+import re
 
 import numpy as np
 
@@ -7,10 +8,11 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 
 class Embedding(object):
-    def __init__(embeddings=None, t2id=None, id2t=None):
+    def __init__(self, embeddings=None, t2id=None, id2t=None):
         self.embeddings = embeddings
         self.t2id = t2id
         self.id2t = id2t
+        self.N, self.dim = embeddings.shape
 
 
 class Vectorizer(object):
@@ -34,6 +36,9 @@ class Vectorizer(object):
         N = 0
         with open(path, "r") as f:
             for line in f:
+                if N == 0 and re.match("^[0-9]+\s[0-9]+$", line):
+                    logger.debug("Skipping embedding meta first line")
+                    continue
                 N += 1
             key, data = line.split(' ', 1)
             logger.debug("key=%s data=%s" % ( key, data))
@@ -59,6 +64,9 @@ class Vectorizer(object):
         with open(path, "r") as f:
             I = 0
             for line in f:
+                if I == 0 and re.match("^[0-9]+\s[0-9]+$", line):
+                    logger.debug("Skipping embedding meta first line")
+                    continue
                 if I in outputs:
                     logger.info("%0.4f%% complete" % ((I / float(N)) * 100))
                 key, data = line.split(' ', 1)
@@ -67,11 +75,55 @@ class Vectorizer(object):
                 t2id[key] = I
                 id2t[I] = key
                 I += 1
-        logger.debug("Embeddings matrix: %s x %s" % embeddings.shape)
 
+        logger.debug("Embeddings matrix: %s x %s" % embeddings.shape)
         return Embedding(
             embeddings = embeddings,
             t2id = t2id,
             id2t = id2t,
         )
+
+    def html_to_vector(self, html):
+        x = np.zeros(self.html.dim)
+        N = 0.0
+        for t in html:
+            N += 1
+            if re.match("\s", t):
+                t = "</s>"
+            id = self.html.t2id[t]
+            x += self.html.embeddings[id]
+        return x / N
+
+    def text_to_vector(self, text):
+        x = np.zeros(self.word.dim)
+        N = 0.0
+        for t in re.split("[^A-Za-z]", text):
+            t = t.strip()
+            if not t:
+                continue
+            logger.debug("Token=%s" % t)
+            N += 1
+            if re.match("\s", t):
+                t = "</s>"
+            try:
+                id = self.word.t2id[t]
+            except Exception as e:
+                logger.warn("Skipping word=%s,  Error=%s" % (
+                    t, e))
+            x += self.word.embeddings[id]
+        return x / N
+
+    def element_to_position_vector(self, element):
+        return np.array([0.0])
+
+    def vectorize(self, html, text, element):
+        x_html = self.html_to_vector(html)
+        x_text = self.text_to_vector(text)
+        x_pos  = self.element_to_position_vector(element)
+        logger.debug("x_html=%s, x_text=%s, x_pos=%s" % (
+            x_html, x_text, x_pos))
+        # import IPython; IPython.embed()
+        x = np.concatenate([x_html, x_text, x_pos])
+        logger.debug("Page vector x=%s" % x)
+        return x
 
