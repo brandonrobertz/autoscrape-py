@@ -120,10 +120,7 @@ class Vectorizer(object):
         x_html = self.html_to_vector(html)
         x_text = self.text_to_vector(text)
         x_pos  = self.element_to_position_vector(element)
-        logger.debug("x_html=%s, x_text=%s, x_pos=%s" % (
-            x_html, x_text, x_pos))
         # import IPython; IPython.embed()
         x = np.concatenate([x_html, x_text, x_pos])
-        logger.debug("Page vector x=%s" % x)
         return x
 

@@ -26,11 +26,19 @@ You can run the example script like so:
 
 That will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data.
 
-More advanced models are under development. Currently, the prototype iterating model can be ran like so:
+More advanced models are under development. Currently, the config-based iterating model can be ran like this:
 
-    ./example.py --loglevel DEBUG --maxdepth 10  \
-        --scraper test-manual-control \
-        --html_embeddings ./training_data/embeddings/webcode2.300d.embeddings \
-        --word_embeddings ./training_data/embeddings/glove.840B.300d.txt  \
+    ./example.py --scraper manual-control \
+        --loglevel DEBUG --maxdepth 10 \
+        [SITE_URL]
+
+And the experimental ML-based autoscraper can be ran with:
+
+    ./example.py --scraper autoscrape-ml \
+        --loglevel DEBUG --maxdepth 10 \
+        --html_embeddings ./training_data/embeddings/webcode.300d.embeddings \
+        --word_embeddings ./training_data/embeddings/glove.840B.300d.txt \
         [SITE HERE]
+
+This model requires pre-trained HTML/JS character embeddings and word embeddings. We're using a custom character embedding for the web code model and the [300D, 840B token Common Crawl embeddings](https://github.com/stanfordnlp/GloVe#download-pre-trained-word-vectors) for the language model. You also need the classifier to be trained on a labeled web page dataset.
 

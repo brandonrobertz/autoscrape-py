@@ -88,7 +88,7 @@ class Controller(object):
             text = self.scraper.element_text()
             # this means use the root of the page
             element = None
-            return  self.vectorizer.vectorize(html, text, element)
+            return self.vectorizer.vectorize(html, text, element)
 
     def form_vectors(self, type="text"):
         """
