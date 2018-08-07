@@ -4,6 +4,8 @@ This is an automated scraper of structured data from interactive web pages. The 
 
 The initial prototype version will use brute force, then machine learning and, finally, reinforcement learning. Note that while we could use other (Scala, Clojure, Go) languages for this, Python was selected because of the large ML and RL ecosystem.
 
+![Web code embeddings](https://github.com/brandonrobertz/autoscrape-py/blob/master/training_data/images/code_embeddings.png)
+
 ## Setup & Running
 
 You need to have geckodriver installed. You can do that here:
@@ -31,3 +33,4 @@ More advanced models are under development. Currently, the prototype iterating m
         --html_embeddings ./training_data/embeddings/webcode2.300d.embeddings \
         --word_embeddings ./training_data/embeddings/glove.840B.300d.txt  \
         [SITE HERE]
+
