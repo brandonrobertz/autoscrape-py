@@ -1,10 +1,13 @@
 # Autoscrape
 
+![Artificial Informer Labs](https://github.com/brandonrobertz/autoscrape-py/blob/master/images/ai.png)
+
+A project of [Artificial Informer Labs](https://artificialinformer.com).
+
 This is an automated scraper of structured data from interactive web pages. The goal is to be able to point this scraper at any site with interactive search forms, pages, etc., and both crawl the site and extract any structured data.
 
 The initial prototype version will use brute force, then machine learning and, finally, reinforcement learning. Note that while we could use other (Scala, Clojure, Go) languages for this, Python was selected because of the large ML and RL ecosystem.
 
-![Web code embeddings](https://github.com/brandonrobertz/autoscrape-py/blob/master/training_data/images/code_embeddings.png)
 
 ## Setup & Running
 
@@ -32,7 +35,7 @@ line options to control crawling for search forms and interacting with them. Cur
     ./scrape.py \
         --loglevel DEBUG
         --maxdepth 10 \
-        manual-control [SITE_URL] 
+        manual-control [SITE_URL]
 
 More advanced scrapers are currently under active development.
 
