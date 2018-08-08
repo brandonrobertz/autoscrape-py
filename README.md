@@ -4,10 +4,9 @@
 
 A project of [Artificial Informer Labs](https://artificialinformer.com).
 
-This is an automated scraper of structured data from interactive web pages. The goal is to be able to point this scraper at any site with interactive search forms, pages, etc., and both crawl the site and extract any structured data.
+This is an automated scraper of structured data from interactive web pages. You point this scraper at a site and it will be crawled, searched for forms and structured data will be extracted. No brittle, site-specific programming necessary.
 
-The initial prototype version will use brute force, then machine learning and, finally, reinforcement learning. Note that while we could use other (Scala, Clojure, Go) languages for this, Python was selected because of the large ML and RL ecosystem.
-
+*This is a work in progress.* The initial prototype version uses brute force with a set of configuration options. Machine learning and, finally, reinforcement learning models are being developed.
 
 ## Setup & Running
 
@@ -25,7 +24,7 @@ Then set up your python virtual environment (Python 3.6 required) and install th
 
 You can run a test to ensure your webdriver is set up correctly by running the `test` crawler:
 
-    ./scrape.py --loglevel DEBUG --maxdepth 10 test [SITE_HERE]
+    ./scrape.py --loglevel DEBUG --maxdepth 10 test [SITE_URL]
 
 The `test` crawler will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data.
 
@@ -46,7 +45,7 @@ The experimental ML-based `autoscraper-ml` crawler-scraper can be ran with this 
         --maxdepth 10 \
         --html_embeddings ./training_data/embeddings/webcode.300d.txt \
         --word_embeddings ./training_data/embeddings/glove.840B.300d.txt \
-        [SITE HERE]
+        [SITE_URL]
 
 `autoscrape-ml` requires pre-trained HTML/JS character embeddings and word embeddings. See `training_data/embeddings/` for more information about that. We will make the embeddings public in the near future.
 
