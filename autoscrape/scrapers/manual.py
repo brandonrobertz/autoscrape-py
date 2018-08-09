@@ -16,6 +16,16 @@ class ManualControlScraper(BaseScraper):
     buttons by some manual criteria and iterates accordingly.
     """
 
+    # TODO: save the path to the matched search form to a file. then
+    # upon subsequent loads, we can try that path first and then go
+    # from there. this way the manual control scraper can learn from
+    # self-exploration based on manual params
+    #
+    # Another related idea: it would be nice if we had an API that
+    # saved data about successful runs and loading/replaying them
+    # so users can get familiar with the concepts of self-exploration
+    # and self-learning but without having to get the ML concepts.
+
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)

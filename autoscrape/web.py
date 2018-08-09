@@ -45,7 +45,11 @@ class Scraper(object):
             chromeOptions.add_experimental_option("prefs",prefs)
             self.driver = webdriver.Chrome(chrome_options=chromeOptions)
 
+        # set of clicked elements
         self.visited = set()
+        # queue of the path that led us to the current page
+        # this is in the form of (command, *args, **kwargs)
+        self.path = []
         # sometimes the firefox driver loses its pipe to the browser. in
         # these cases, we can retry this number of times
         self.broken_pipe_retries = 3
@@ -134,10 +138,12 @@ class Scraper(object):
         """
         logger.debug("Fetching %s" % url)
         self.loadwait(self.driver.get, url)
+        self.path.append(("fetch", (url,), {}))
 
     def back(self):
         logger.debug("Going back...")
         self.loadwait(self.driver.back)
+        self.path.pop()
 
     def disable_target(self, elem):
         """
@@ -204,6 +210,9 @@ class Scraper(object):
             logger.error("Error clicking %s: %s" % (href, e))
             return False
 
+        self.path.append((
+            "click", (tag,), {"iterating_form": iterating_form}
+        ))
         return True
 
     def input(self, tag, input):
@@ -216,6 +225,7 @@ class Scraper(object):
         self.elem_stats(elem)
         self.driver_exec(elem.clear)
         self.driver_exec(elem.send_keys, input)
+        self.path.append(("input", (tag,input,), {}))
 
     def submit(self, tag):
         """
@@ -228,6 +238,7 @@ class Scraper(object):
         self.loadwait(elem.submit, check_alerts=True)
         # TODO: better way to wait for this, post-alert clicked
         time.sleep(5)
+        self.path.append(("submit", (tag,), {}))
 
     @property
     def page_html(self):
