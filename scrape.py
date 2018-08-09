@@ -63,6 +63,20 @@ philosophy/mechanism behind their operation:
         '--formdepth', type=int, default=0,
         help=formdepth_help,
     )
+    manual_p.add_argument(
+        '--next_match', type=str, default="next page",
+        help=(
+            "A string which will be used to identify 'next' buttons in "
+            "paginated form results."
+        )
+    )
+    manual_p.add_argument(
+        '--form_match', type=str, default="first name",
+        help=(
+            "A string which will be used to identify forms we want to "
+            "scrape. The form text will be used as the haystack."
+        )
+    )
 
     # ML AutoScraper
     autoscrape_ml_p = subparsers.add_parser(
@@ -146,6 +160,8 @@ if __name__ == "__main__":
         autoscrape.TestScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "manual-control":
+        kwargs["next_match"] = args.next_match
+        kwargs["form_match"] = args.form_match
         autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "autoscrape-ml":

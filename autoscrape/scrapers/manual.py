@@ -27,7 +27,7 @@ class ManualControlScraper(BaseScraper):
     # and self-learning but without having to get the ML concepts.
 
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
-                 next_match="next page", form_match="Verify Degrees"):
+                 next_match="next page", form_match="first name"):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
