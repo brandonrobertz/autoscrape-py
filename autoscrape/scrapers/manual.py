@@ -26,7 +26,8 @@ class ManualControlScraper(BaseScraper):
     # so users can get familiar with the concepts of self-exploration
     # and self-learning but without having to get the ML concepts.
 
-    def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0):
+    def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
+                 next_match="next page", form_match="Verify Degrees"):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
@@ -36,8 +37,10 @@ class ManualControlScraper(BaseScraper):
         self.maxdepth = maxdepth
         # current depth of iterating through 'next' form buttons
         self.formdepth = formdepth
-        # the current path to wherever we are at
-        self.path = []
+        # match for link to identify a "next" button
+        self.next_match = next_match
+        # string to match a form (by element text) we want to scrape
+        self.form_match = form_match
 
     def input_generator(self, length=1):
         chars = string.ascii_lowercase
@@ -59,8 +62,7 @@ class ManualControlScraper(BaseScraper):
                 logger.debug("Depth %s" % depth)
                 button = button_data[ix]
                 logger.debug("Checking button %s" % button)
-                # TODO: replace with a configuration option?
-                if "next page" in button.lower():
+                if self.next_match in button.lower():
                     logger.debug("Clicking button %s..." % ix)
                     depth += 1
                     self.control.select_button(ix, iterating_form=True)
@@ -93,8 +95,7 @@ class ManualControlScraper(BaseScraper):
             logger.debug("Form: %s Text: %s" % (ix, form_data))
             logger.debug("Inputs: %s" % inputs)
 
-            # TODO: replace with a configuration option
-            if "Verify Degrees" not in form_data or len(inputs) != 1:
+            if self.form_match not in form_data:
                 continue
 
             for input in self.input_generator(length=1):
@@ -118,5 +119,4 @@ class ManualControlScraper(BaseScraper):
 
         logger.debug("Going back...")
         self.control.back()
-
 
