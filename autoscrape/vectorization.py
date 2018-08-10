@@ -96,7 +96,7 @@ class Vectorizer(object):
         x = np.zeros(self.word.dim)
         N = 0.0
         for t in re.split("[^A-Za-z]", text):
-            t = t.strip()
+            t = t.strip().lower()
             if not t:
                 continue
             logger.debug("Token=%s" % t)
@@ -108,6 +108,7 @@ class Vectorizer(object):
             except Exception as e:
                 logger.warn("Skipping word=%s,  Error=%s" % (
                     t, e))
+                continue
             x += self.word.embeddings[id]
         return x / N
 

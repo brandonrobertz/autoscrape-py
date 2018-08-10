@@ -92,6 +92,7 @@ class Scraper(object):
         This is the check that gets ran to determine whether
         the page is loaded or not.
         """
+        logger.debug("Waiting for page to load...")
         script = "return document.readyState;"
         result = self.driver_exec(driver.execute_script, script)
         return result == "complete"
@@ -101,6 +102,7 @@ class Scraper(object):
         Run a driver interaction function, wait for the page to
         become ready, and handle any broken pipe errors
         """
+        start = time.time()
         check_alerts = False
         if "check_alerts" in kwargs:
             check_alerts = kwargs["check_alerts"]
@@ -109,6 +111,7 @@ class Scraper(object):
         self.driver_exec(fn, *args, **kwargs)
 
         if check_alerts:
+            logger.debug("Checking for popup alerts...")
             try:
                 WebDriverWait(self.driver, 1).until(
                     EC.alert_is_present(),
@@ -123,6 +126,8 @@ class Scraper(object):
         # wait for the page to become ready, up to 30s, checks every 0.5s
         wait = WebDriverWait(self.driver, 30)
         wait.until(self.wait_check)
+        t = time.time() - start
+        logger.debug("Page wait for load check succeeded in %s" % t)
 
     def scrolltoview(self, elem):
         """
@@ -256,8 +261,16 @@ class Scraper(object):
         if element is None:
             element = self.driver
         elems = element.find_elements_by_xpath(".//*")
-        text = " ".join([ e.text for e in elems ])
-        return text
+        text = []
+        for el in elems:
+            try:
+                text.append(el.text)
+            except Exception as e:
+                logger.error("Error getting text element: %s, Err: %s" % (
+                    el, e))
+                continue
+        logger.debug("Element texts: %s" % text)
+        return " ".join(text)
 
     def get_clickable(self, type=None):
         """

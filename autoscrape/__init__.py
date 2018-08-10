@@ -4,6 +4,7 @@ import logging
 from .scrapers.manual import ManualControlScraper
 from .scrapers.test import TestScraper
 from .scrapers.ml import MLAutoScraper
+from .scrapers.null import NullScraper
 
 
 """

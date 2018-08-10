@@ -5,9 +5,10 @@ import logging
 import numpy as np
 import os
 import pickle
+import time
 
 from autoscrape.vectorization import Vectorizer
-from autoscrape.web import Scraper
+from autoscrape import NullScraper
 
 
 class Data:
@@ -16,30 +17,14 @@ class Data:
         self.y = y
 
     def dump(self, filepath):
-        with open(filepath, "w") as f:
+        with open(filepath, "wb") as f:
             pickle.dump(self, f)
 
     def load(self, filepath):
-        with open(filepath, "r") as f:
-            tmpd = pickle.load(self, f)
+        with open(filepath, "rb") as f:
+            tmpd = pickle.load(f)
             self.X = tmp_d.X
             self.y = tmp_d.y
-
-
-def setup_logging(loglevel):
-    if not loglevel or loglevel == "DEBUG":
-        loglevel = logging.DEBUG
-    elif loglevel == "INFO":
-        loglevel = logging.INFO
-    elif loglevel == "WARN":
-        loglevel = logging.WARN
-    elif loglevel == "ERROR":
-        loglevel = logging.ERROR
-
-    logger = logging.getLogger('AUTOSCRAPE')
-    logger.setLevel(loglevel)
-    console_handler = logging.StreamHandler()
-    logger.addHandler(console_handler)
 
 
 def parse_args():
@@ -84,8 +69,6 @@ def load_file(filename):
 if __name__ == "__main__":
     args = parse_args()
 
-    setup_logging(args.loglevel)
-
     cls_data = {}
     total_records = 0
     for root, dirs, files in os.walk(args.dir):
@@ -115,21 +98,29 @@ if __name__ == "__main__":
     X = np.zeros(shape=(total_records, dim))
     y = np.zeros(shape=(total_records, 1))
 
-
     base_dir = os.path.abspath(os.curdir)
-    scraper = Scraper()
+    ns = NullScraper(
+        loglevel=args.loglevel,
+    )
 
     keys = list(cls_data.keys())
     I = 0
     for ix in range(len(keys)):
         cls = keys[ix]
         for file in cls_data[cls]:
+            print("I=%s" % I, end="\r")
             abs_path = os.path.join(base_dir, file)
             print("File=%s, Absolute Path=%s" % (file, abs_path))
+            url = "file://%s" % abs_path.replace("#", "%23").replace("%25",
+                                                                     "%2525")
             html = load_file(abs_path)
-            scraper.fetch("file://%s" % abs_path)
-            text = scraper.element_text()
-            X[I, :] = vectorizer.vectorize(html, text)
+            ns.scraper.fetch(url)
+            time.sleep(2)
+            text = ns.scraper.element_text()
+            x = vectorizer.vectorize(html, text)
+            X[I, :] = x
+            y[I, :] = [keys.index(cls)]
+            print("x=%s" % x)
             I += 1
 
     print("X: %s" % X)
