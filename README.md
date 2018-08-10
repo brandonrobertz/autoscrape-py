@@ -77,3 +77,14 @@ information will be made available soon.
 Visualization of our trained HTML & JavaScript code character-level language
 model from 61G of StackOverflow data.
 
+Once we have all our embeddings and training page data downloaded, we can
+vectorize it using this convenience script:
+
+    ./vectorize_data.py --loglevel DEBUG \
+        --html_embeddings training_data/embeddings/webcode.300d.txt \
+        --word_embeddings  training_data/embeddings/glove.840B.300d.txt \
+        --output_file training_data/page_data.pickle \
+        training_data/pages/html/
+
+The resulting `page_data.pickle` will be a class with `X` and `y` attributes.
+
