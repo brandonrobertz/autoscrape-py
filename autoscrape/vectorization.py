@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import logging
 import re
 
@@ -21,9 +22,6 @@ class Vectorizer(object):
         Initialize our vectorizer with paths to the relevant word
         embedding files for our vectorization routines.
         """
-        print("html_embeddings_file=%s, word_embeddings_file=%s" % (
-            html_embeddings_file, word_embeddings_file
-        ))
         self.html = None
         if html_embeddings_file:
             self.html = self.load_embedding(html_embeddings_file)
@@ -116,11 +114,14 @@ class Vectorizer(object):
     def element_to_position_vector(self, element):
         return np.array([0.0])
 
-    def vectorize(self, html, text, element):
+    def vectorize(self, html, text, element=None):
         x_html = self.html_to_vector(html)
         x_text = self.text_to_vector(text)
-        x_pos  = self.element_to_position_vector(element)
+        concat_array = [x_html, x_text]
+        if element:
+            x_pos  = self.element_to_position_vector(element)
+            concat_array.append(x_pos)
         # import IPython; IPython.embed()
-        x = np.concatenate([x_html, x_text, x_pos])
+        x = np.concatenate(concat_array)
         return x
 
