@@ -88,3 +88,14 @@ vectorize it using this convenience script:
 
 The resulting `page_data.pickle` will be a class with `X` and `y` attributes.
 
+Once you have training data vectorized, you can train a model using the
+`train.py` script:
+
+    ./train.py --data training_data/page_data.pickle \
+        --output training_data/page_data_kNN.model.pickle \
+        --model kNN
+
+The resulting model will be saved, in the above example, to
+`training_data/page_data_kNN.model.pickle` which can be loaded and ran by 
+`autoscraper-ml`.
+
