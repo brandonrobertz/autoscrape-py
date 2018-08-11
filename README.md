@@ -110,6 +110,6 @@ classification model using the `train.py` script:
         --model kNN
 
 The resulting model will be saved, in the above example, to
-`training_data/page_data_kNN.model.pickle` which can be loaded and ran by 
+`training_data/page_data_kNN.model.pickle` which can be loaded and ran by
 `autoscraper-ml`.
 
