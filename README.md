@@ -70,7 +70,7 @@ For a generic language model, we're using the GloVe [300D, 840B token Common Cra
 You also need the classifier to be trained on a labeled web page dataset. More
 information will be made available soon.
 
-## Model Data
+## Data & ML Models
 
 ![Web code embeddings](https://github.com/brandonrobertz/autoscrape-py/blob/master/images/code_embeddings.png)
 
