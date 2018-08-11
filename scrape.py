@@ -71,6 +71,21 @@ philosophy/mechanism behind their operation:
         ),
     )
     manual_p.add_argument(
+        '--form_input_range', type=str,
+        help=(
+            "The full character list to search form inputs with. "
+            "Normally, the algorithm will use all characters A..Z, with "
+            "repetitions based on the input_minlength parameter. This "
+            "changes that A..Z range. Note that this field needs to contain "
+            "every character to be included. Ranges (A-Z) will not be "
+            "expanded (A-Z would be three characters A, -, Z)."
+        )
+    )
+    manual_p.add_argument(
+        '--wildcard', type=str,
+        help="A wildcard character to append to the form inputs."
+    )
+    manual_p.add_argument(
         '--output_data_dir', type=str,
         help="Output directory to save training page data to.",
     )
@@ -86,17 +101,6 @@ philosophy/mechanism behind their operation:
         help=(
             "A string which will be used to identify forms we want to "
             "scrape. The form text will be used as the haystack."
-        )
-    )
-    manual_p.add_argument(
-        '--form_input_range', type=str,
-        help=(
-            "The full character list to search form inputs with. "
-            "Normally, the algorithm will use all characters A..Z, with "
-            "repetitions based on the input_minlength parameter. This "
-            "changes that A..Z range. Note that this field needs to contain "
-            "every character to be included. Ranges (A-Z) will not be "
-            "expanded (A-Z would be three characters A, -, Z)."
         )
     )
 
@@ -187,6 +191,7 @@ if __name__ == "__main__":
         kwargs["output_data_dir"] = args.output_data_dir
         kwargs["input_minlength"] = args.input_minlength
         kwargs["form_input_range"] = args.form_input_range
+        kwargs["wildcard"] = args.wildcard
         autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "autoscrape-ml":

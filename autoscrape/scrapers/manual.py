@@ -30,7 +30,7 @@ class ManualControlScraper(BaseScraper):
 
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
-                 output_data_dir=None, input_minlength=1,
+                 output_data_dir=None, input_minlength=1, wildcard=None,
                  form_input_range=None):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
@@ -86,7 +86,10 @@ class ManualControlScraper(BaseScraper):
         if self.form_input_range:
             chars = self.form_input_range
         for input in product(chars, repeat=length):
-            yield "".join(input)
+            inp = "".join(input)
+            if self.wildcard:
+                inp += self.wildcard
+            yield inp
 
     def keep_clicking_next_btns(self, maxdepth=0):
         depth = 0

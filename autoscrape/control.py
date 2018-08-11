@@ -32,6 +32,7 @@ class Controller(object):
         self.inputs = []
 
     def load_indices(self):
+        logger.debug("Loading page vectors...")
         self.clickable = self.scraper.get_clickable()
         forms_dict = self.scraper.get_forms()
         self.forms = list(forms_dict.keys())

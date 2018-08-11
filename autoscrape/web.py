@@ -138,8 +138,9 @@ class Scraper(object):
 
     def fetch(self, url):
         """
-        Fetch a page from a given URL (entry point, typically). Most of the time
-        we just want to click a link or submit a form using webdriver.
+        Fetch a page from a given URL (entry point, typically). Most of
+        the time we just want to click a link or submit a form using
+        webdriver.
         """
         logger.debug("Fetching %s" % url)
         self.loadwait(self.driver.get, url)
@@ -242,7 +243,6 @@ class Scraper(object):
         self.elem_stats(elem)
         self.loadwait(elem.submit, check_alerts=True)
         # TODO: better way to wait for this, post-alert clicked
-        time.sleep(5)
         self.path.append(("submit", (tag,), {}))
 
     @property
@@ -284,6 +284,7 @@ class Scraper(object):
         current_url = self.driver_exec(self.page_url)
         tagger = Tagger(driver=self.driver, current_url=current_url)
         forms_dict = tagger.get_forms()
+        logger.debug("page forms: %s" % forms_dict)
         return forms_dict
 
     def get_buttons(self):
