@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
+import hashlib
 import logging
+import os
 import string
 from itertools import product
 
@@ -27,7 +29,8 @@ class ManualControlScraper(BaseScraper):
     # and self-learning but without having to get the ML concepts.
 
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
-                 next_match="next page", form_match="first name"):
+                 next_match="next page", form_match="first name",
+                 output_data_dir=None, input_minlength=1):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
@@ -41,6 +44,37 @@ class ManualControlScraper(BaseScraper):
         self.next_match = next_match
         # string to match a form (by element text) we want to scrape
         self.form_match = form_match
+        # Where to write training data from crawl
+        self.output_data_dir = output_data_dir
+
+    def save_training_page(self, classname=None):
+        """
+        Writes the current page to the output data directory (if provided)
+        to the given class folder.
+        """
+        logger.debug("Saving training page for class: %s" % classname)
+        classes = [
+            "data_pages", "error_pages", "links_to_documents",
+            "links_to_search", "search_pages"
+        ]
+        if classname not in classes:
+            raise ValueError("Base class speficied: %s" % classname)
+
+        if not self.output_data_dir:
+            return
+
+        classdir = os.path.join(self.output_data_dir, classname)
+        if not os.path.exists(classdir):
+            os.mkdir(classdir)
+
+        html = self.control.scraper.page_html
+        url = self.control.scraper.page_url
+        h = hashlib.sha256(html.encode("utf-8")).digest().hex()
+        logger.debug("URL: %s, Hash: %s" % (url, h))
+        filepath = os.path.join(classdir, "%s.html" % h)
+
+        with open(filepath, "w") as f:
+            f.write(html)
 
     def input_generator(self, length=1):
         chars = string.ascii_lowercase
@@ -63,6 +97,7 @@ class ManualControlScraper(BaseScraper):
                 button = button_data[ix]
                 logger.debug("Checking button %s" % button)
                 if self.next_match in button.lower():
+                    self.save_training_page(classname="data_pages")
                     logger.debug("Clicking button %s..." % ix)
                     depth += 1
                     self.control.select_button(ix, iterating_form=True)
@@ -98,7 +133,8 @@ class ManualControlScraper(BaseScraper):
             if self.form_match not in form_data:
                 continue
 
-            for input in self.input_generator(length=1):
+            self.save_training_page(classname="search_pages")
+            for input in self.input_generator(length=self.input_minlength):
                 logger.debug("Inputting %s to input %s" % (input, 0))
                 self.control.input(ix, 0, input)
                 self.control.submit(ix)

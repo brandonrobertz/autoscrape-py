@@ -64,6 +64,17 @@ philosophy/mechanism behind their operation:
         help=formdepth_help,
     )
     manual_p.add_argument(
+        '--input_minlength', type=int, default=1,
+        help=(
+            "Minimum number of characters that can be inserted into "
+            "discovered form input."
+        ),
+    )
+    manual_p.add_argument(
+        '--output_data_dir', type=str,
+        help="Output directory to save training page data to.",
+    )
+    manual_p.add_argument(
         '--next_match', type=str, default="next page",
         help=(
             "A string which will be used to identify 'next' buttons in "
@@ -162,6 +173,8 @@ if __name__ == "__main__":
     elif args.scraper == "manual-control":
         kwargs["next_match"] = args.next_match
         kwargs["form_match"] = args.form_match
+        kwargs["output_data_dir"] = args.output_data_dir
+        kwargs["input_minlength"] = args.input_minlength
         autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "autoscrape-ml":

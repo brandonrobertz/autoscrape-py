@@ -9,6 +9,7 @@ training_data/embeddings/raw_data
 training_data/pages
 training_data/data_notes.txt
 training_data/features.txt
+training_data/manual_control_pages
 *.7z
 deps/
 *.log
