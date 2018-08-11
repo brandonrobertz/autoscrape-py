@@ -22,7 +22,7 @@ class Data:
 
     def load(self, filepath):
         with open(filepath, "rb") as f:
-            tmpd = pickle.load(f)
+            tmp_d = pickle.load(f)
             self.X = tmp_d.X
             self.y = tmp_d.y
 
