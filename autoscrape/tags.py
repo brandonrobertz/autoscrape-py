@@ -42,15 +42,15 @@ class Tagger(object):
                             if (sib.nodeName.toLowerCase() == selector)
                                nth++;
                         }
-                        //if (nth != 1)
-                            selector += ":nth-of-type("+nth+")";
+                        /*if (nth != 1)*/
+                        selector += ":nth-of-type("+nth+")";
                     }
                     path.unshift(selector);
                     el = el.parentNode;
                 }
                 return path.join(" > ");
             }
-            return getPathTo(arguments[0]).toLowerCase();
+            return getPathTo(arguments[0]); /*.toLowerCase();*/
         """
         return self.driver.execute_script(script, element)
 
