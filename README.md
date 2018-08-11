@@ -84,11 +84,12 @@ configuration optionset:
         -- next_match "next page" --form_match "first name"
         [SITE_URL]
 
-The above will find, from [SITE_URL], interactive forms containing the text
-"first name", will input the characters a, b, then c, into the form, and will
-click buttons containing "next page" until it's two layers deep. All training
-data derived from this crawl will be stored in the directory
-`./training_data/pages/html/`.
+The above will find, from [SITE_URL], interactive forms containing the
+text "first name", will input the characters a, b, then c (single
+length permutation, from the `input_minlength` option), into the form,
+and will click buttons containing "next page" until it's two layers
+deep. All training data derived from this crawl will be stored in the
+directory `./training_data/pages/html/`.
 
 Once we have all our embeddings, we need to take our example training web pages
 and vectorize them:
