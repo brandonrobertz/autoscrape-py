@@ -73,6 +73,23 @@ We trained our HTML & JavaScript code character-level language model from 61G of
 
 For a generic language model, we're using the GloVe [300D, 840B token Common Crawl embeddings](https://github.com/stanfordnlp/GloVe#download-pre-trained-word-vectors), which is freely available online.
 
+We can gather training data with the `manual-control` scraper, using this
+configuration optionset:
+
+    ./scrape.py --loglevel DEBUG --maxdepth 2 \
+        manual-control \
+        --output_data_dir ./training_data/pages/html/ \
+        --form_input_range abc --input_minlength 1 \
+        --formdepth 2 \
+        -- next_match "next page" --form_match "first name"
+        [SITE_URL]
+
+The above will find, from [SITE_URL], interactive forms containing the text
+"first name", will input the characters a, b, then c, into the form, and will
+click buttons containing "next page" until it's two layers deep. All training
+data derived from this crawl will be stored in the directory
+`./training_data/pages/html/`.
+
 Once we have all our embeddings, we need to take our example training web pages
 and vectorize them:
 

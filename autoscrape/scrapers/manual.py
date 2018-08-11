@@ -30,7 +30,8 @@ class ManualControlScraper(BaseScraper):
 
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
-                 output_data_dir=None, input_minlength=1):
+                 output_data_dir=None, input_minlength=1,
+                 form_input_range=None):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
@@ -46,6 +47,10 @@ class ManualControlScraper(BaseScraper):
         self.form_match = form_match
         # Where to write training data from crawl
         self.output_data_dir = output_data_dir
+        # minimum length of form inputs (in characters)
+        self.input_minlength = input_minlength
+        # Additonal filter for range of chars inputted to forms as search
+        self.form_input_range = form_input_range
 
     def save_training_page(self, classname=None):
         """
@@ -78,6 +83,8 @@ class ManualControlScraper(BaseScraper):
 
     def input_generator(self, length=1):
         chars = string.ascii_lowercase
+        if self.form_input_range:
+            chars = self.form_input_range
         for input in product(chars, repeat=length):
             yield "".join(input)
 
@@ -134,6 +141,9 @@ class ManualControlScraper(BaseScraper):
                 continue
 
             self.save_training_page(classname="search_pages")
+            inp_gen = self.input_generator(
+                length=self.input_minlength,
+            )
             for input in self.input_generator(length=self.input_minlength):
                 logger.debug("Inputting %s to input %s" % (input, 0))
                 self.control.input(ix, 0, input)
@@ -143,6 +153,9 @@ class ManualControlScraper(BaseScraper):
                 self.control.back()
 
             logger.debug("Completed iteration!")
+            # Only scrape a single form, due to explicit, single
+            # match configuration option
+            return
 
         links = self.control.clickable
         logger.debug("All tags at this depth %s" % links)

@@ -88,6 +88,17 @@ philosophy/mechanism behind their operation:
             "scrape. The form text will be used as the haystack."
         )
     )
+    manual_p.add_argument(
+        '--form_input_range', type=str,
+        help=(
+            "The full character list to search form inputs with. "
+            "Normally, the algorithm will use all characters A..Z, with "
+            "repetitions based on the input_minlength parameter. This "
+            "changes that A..Z range. Note that this field needs to contain "
+            "every character to be included. Ranges (A-Z) will not be "
+            "expanded (A-Z would be three characters A, -, Z)."
+        )
+    )
 
     # ML AutoScraper
     autoscrape_ml_p = subparsers.add_parser(
@@ -175,6 +186,7 @@ if __name__ == "__main__":
         kwargs["form_match"] = args.form_match
         kwargs["output_data_dir"] = args.output_data_dir
         kwargs["input_minlength"] = args.input_minlength
+        kwargs["form_input_range"] = args.form_input_range
         autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "autoscrape-ml":
