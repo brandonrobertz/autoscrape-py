@@ -63,22 +63,18 @@ The experimental machine learning-based `autoscraper-ml` crawler-scraper can be 
         --word_embeddings ./training_data/embeddings/glove.840B.300d.txt \
         [SITE_URL]
 
-`autoscrape-ml` requires pre-trained HTML/JS character embeddings and word embeddings. See `training_data/embeddings/` for more information about that. We will make the embeddings public in the near future.
-
-For a generic language model, we're using the GloVe [300D, 840B token Common Crawl embeddings](https://github.com/stanfordnlp/GloVe#download-pre-trained-word-vectors), which are available online.
-
-You also need the classifier to be trained on a labeled web page dataset. More
-information will be made available soon.
-
 ## Data & ML Models
 
 ![Web code embeddings](https://github.com/brandonrobertz/autoscrape-py/blob/master/images/code_embeddings.png)
 
-Visualization of our trained HTML & JavaScript code character-level language
-model from 61G of StackOverflow data.
+`autoscrape-ml` requires two separate embedding models: a HTML/JS character embeddings and plain word embeddings. (You can check `training_data/embeddings/` for more information about the specifics.)
 
-Once we have all our embeddings and training page data downloaded, we can
-vectorize it using this convenience script:
+We trained our HTML & JavaScript code character-level language model from 61G of StackOverflow comment data. We will make the embeddings public in the near future. Until then, you need to train them yourself using something like word2vec on pre-split character data.
+
+For a generic language model, we're using the GloVe [300D, 840B token Common Crawl embeddings](https://github.com/stanfordnlp/GloVe#download-pre-trained-word-vectors), which is freely available online.
+
+Once we have all our embeddings, we need to take our example training web pages
+and vectorize them:
 
     ./vectorize_data.py --loglevel DEBUG \
         --html_embeddings training_data/embeddings/webcode.300d.txt \
@@ -86,10 +82,10 @@ vectorize it using this convenience script:
         --output_file training_data/page_data.pickle \
         training_data/pages/html/
 
-The resulting `page_data.pickle` will be a class with `X` and `y` attributes.
+The resulting `page_data.pickle` will have `X` and `y` attributes.
 
-Once you have training data vectorized, you can train a model using the
-`train.py` script:
+Once you have training data vectorized, you can train a supervised
+classification model using the `train.py` script:
 
     ./train.py --data training_data/page_data.pickle \
         --output training_data/page_data_kNN.model.pickle \
