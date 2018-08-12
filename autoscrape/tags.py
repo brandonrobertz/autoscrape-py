@@ -12,9 +12,11 @@ class Tagger(object):
     to refer to unique elements on a web page.
     """
 
-    def __init__(self, driver=None, current_url=None):
+    def __init__(self, driver=None, current_url=None, leave_host=False):
         self.driver = driver
         self.current_url = current_url
+        # controls whether or not to include non-base host urls
+        self.leave_host = leave_host
 
     def csspath_from_element(self, element):
         """
@@ -68,10 +70,15 @@ class Tagger(object):
         base_host = urlparse(self.driver.current_url).netloc
 
         for elem in a_elems:
+            href = elem.get_attribute("href")
+            # logger.debug("Elem text=%s, href=%s" % (elem.text, href))
+
             # avoid hidden or disabled links, these can be traps or lead
             # to strange errors
             # vis = elem.get_attribute("visibility")
-            if not elem.is_displayed() or not elem.is_enabled(): # or vis == "None":
+            # or vis == "None":
+            if not elem.is_displayed() and not elem.is_enabled():
+                logger.debug("Skipping non-displayed: %s" % href)
                 continue
 
             href = elem.get_attribute("href")
@@ -88,8 +95,9 @@ class Tagger(object):
             # anchor tags and blank tags (to support JavaScript & btns)
             if href and \
                not href.startswith("https:") and \
-               not href.startswith("http:"):
-                # print("Skipping element w/ href %s" % href)
+               not href.startswith("http:") and \
+               not href.startswith("javascript"):
+                logger.debug("Skipping element w/ href %s" % href)
                 continue
 
             tag = self.csspath_from_element(elem)
@@ -100,10 +108,11 @@ class Tagger(object):
 
             # Don't leave base host ... configurable?
             elem_host = urlparse(href).netloc
-            if elem_host != base_host:
-                # print("Skipping external host link %s" % href)
+            if not self.leave_host and elem_host != base_host:
+                logger.debug("Skipping external host link %s" % href)
                 continue
 
+            # logger.debug("Adding href=%s as tag=%s" % (href, tag))
             tags.append(tag)
 
         return tags
@@ -113,7 +122,7 @@ class Tagger(object):
         Get inputs, either for full page or by a form WebElement.
         Returns a list of tags.
         """
-        x_path = "//input[@type='text']"
+        x_path = "//input[@type='text']|input[@type='text']"
         elem = self.driver
         tags = []
         if form:
@@ -155,8 +164,8 @@ class Tagger(object):
 
         return tags
 
-    def get_buttons(self):
-        x_path = "//button|//input[@type='button']"
+    def get_buttons(self, in_form=False):
+        x_path = "//form//a|//button|//input[@type='button']"
         btns = self.driver.find_elements_by_xpath(x_path)
         print("*** btns", btns)
         # import IPython; IPython.embed()

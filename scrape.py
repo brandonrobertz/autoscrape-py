@@ -103,6 +103,14 @@ philosophy/mechanism behind their operation:
             "scrape. The form text will be used as the haystack."
         )
     )
+    manual_p.add_argument(
+        '--leave_host', type=bool, default=False,
+        help=(
+            "Controls whether the scraper will follow links outside of the "
+            "base_url's host. (default: False, options: True|False)"
+        )
+    )
+
 
     # ML AutoScraper
     autoscrape_ml_p = subparsers.add_parser(
@@ -192,6 +200,7 @@ if __name__ == "__main__":
         kwargs["input_minlength"] = args.input_minlength
         kwargs["form_input_range"] = args.form_input_range
         kwargs["wildcard"] = args.wildcard
+        kwargs["leave_host"] = args.leave_host
         autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "autoscrape-ml":

@@ -3,6 +3,7 @@ import hashlib
 import logging
 import os
 import string
+import sys
 from itertools import product
 
 from . import BaseScraper
@@ -31,11 +32,11 @@ class ManualControlScraper(BaseScraper):
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
                  output_data_dir=None, input_minlength=1, wildcard=None,
-                 form_input_range=None):
+                 form_input_range=None, leave_host=False):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
-        self.control = Controller()
+        self.control = Controller(leave_host=leave_host)
         self.control.initialize(baseurl)
         # depth of DFS in search of form
         self.maxdepth = maxdepth
@@ -51,6 +52,8 @@ class ManualControlScraper(BaseScraper):
         self.input_minlength = input_minlength
         # Additonal filter for range of chars inputted to forms as search
         self.form_input_range = form_input_range
+        # Wildcard character to be added to search inputs
+        self.wildcard = wildcard
 
     def save_training_page(self, classname=None):
         """
@@ -92,6 +95,7 @@ class ManualControlScraper(BaseScraper):
             yield inp
 
     def keep_clicking_next_btns(self, maxdepth=0):
+        logger.debug("*** Entering 'next' iteration routine")
         depth = 0
         while True:
             if self.formdepth and depth > self.formdepth:
@@ -100,18 +104,19 @@ class ManualControlScraper(BaseScraper):
 
             found_next = False
             button_data = self.control.button_vectors()
+            logger.debug("** Next Iteration Depth %s" % depth)
             logger.debug("Button vectors %s" % button_data)
 
             for ix in range(len(button_data)):
-                logger.debug("Depth %s" % depth)
                 button = button_data[ix]
-                logger.debug("Checking button %s" % button)
-                if self.next_match in button.lower():
+                logger.debug("Checking button: %s" % button)
+                if self.next_match.lower() in button.lower():
                     self.save_training_page(classname="data_pages")
-                    logger.debug("Clicking button %s..." % ix)
+                    logger.debug("Next button found! Clicking: %s" % ix)
                     depth += 1
                     self.control.select_button(ix, iterating_form=True)
                     found_next = True
+                    import IPython; IPython.embed()
                     # don't click any other next buttons
                     break
 
@@ -143,6 +148,7 @@ class ManualControlScraper(BaseScraper):
             if self.form_match not in form_data:
                 continue
 
+            logger.debug("*** Found an input form!")
             self.save_training_page(classname="search_pages")
             inp_gen = self.input_generator(
                 length=self.input_minlength,
@@ -158,12 +164,15 @@ class ManualControlScraper(BaseScraper):
             logger.debug("Completed iteration!")
             # Only scrape a single form, due to explicit, single
             # match configuration option
-            return
 
         links = self.control.clickable
         logger.debug("All tags at this depth %s" % links)
 
         for ix in range(len(links)):
+            if depth == self.maxdepth:
+                logger.debug("At maximum depth: %s, skipping links." % depth)
+                break
+
             logger.debug("Attempting click on link %s" % ix)
             if self.control.select_link(ix):
                 logger.debug("Clicked! Recursing ...")

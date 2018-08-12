@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import time
 import logging
+import re
 
 import selenium
 from selenium import webdriver
@@ -18,17 +19,18 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 class Scraper(object):
 
-    def __init__(self, driver="Firefox"):
+    def __init__(self, driver="Firefox", leave_host=False, load_images=True):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
         if driver == "Firefox":
             firefox_profile = webdriver.FirefoxProfile()
-            # disable images
-            firefox_profile.set_preference(
-                'permissions.default.image', 2
-            )
-            # disable flash
+            if not load_images:
+                # disable images
+                firefox_profile.set_preference(
+                    'permissions.default.image', 2
+                )
+            #  disable flash
             firefox_profile.set_preference(
                 'dom.ipc.plugins.enabled.libflashplayer.so', 'false'
             )
@@ -53,6 +55,8 @@ class Scraper(object):
         # sometimes the firefox driver loses its pipe to the browser. in
         # these cases, we can retry this number of times
         self.broken_pipe_retries = 3
+        # setting to False, ensures crawl will stay on same host
+        self.leave_host = leave_host
 
     def __del__(self):
         self.driver_exec(self.driver.close)
@@ -102,6 +106,7 @@ class Scraper(object):
         Run a driver interaction function, wait for the page to
         become ready, and handle any broken pipe errors
         """
+
         start = time.time()
         check_alerts = False
         if "check_alerts" in kwargs:
@@ -109,6 +114,7 @@ class Scraper(object):
             del kwargs["check_alerts"]
 
         self.driver_exec(fn, *args, **kwargs)
+        time.sleep(1)
 
         if check_alerts:
             logger.debug("Checking for popup alerts...")
@@ -164,6 +170,27 @@ class Scraper(object):
         self.driver_exec(self.driver.execute_script, script, elem)
 
     def lookup_by_tag(self, tag):
+        inside_id = False
+        newtag = ""
+        for c in tag:
+            if c == "#":
+                inside_id = True
+                newtag += c
+                continue
+
+            # end of ID
+            elif inside_id and re.search("\s", c):
+                inside_id = False
+
+            elif inside_id and c == ".":
+                c = "\."
+
+            newtag += c
+
+        if newtag != tag:
+            logger.debug("Original tag: %s, newtag: %s" % (tag, newtag))
+            tag = newtag
+
         try:
             return self.driver_exec(
                 self.driver.find_element_by_css_selector, tag
@@ -179,12 +206,14 @@ class Scraper(object):
         displayed = self.driver_exec(elem.is_displayed)
         enabled   = self.driver_exec(elem.is_enabled)
         size      = self.driver_exec(elem.size)
+        text      = self.driver_exec(elem.text)
         logger.debug("  element position %s" % position)
         logger.debug("  displayed: %s" % displayed)
         logger.debug("  enabled: %s" % enabled)
         logger.debug("  size: %s" % size)
         logger.debug("  css visibility: %s" % css_vis)
         logger.debug("  css display: %s" % css_dis)
+        logger.debug("  text: %s" % text.replace("\n", "\\n"))
 
     def click(self, tag, iterating_form=False):
         """
@@ -192,10 +221,13 @@ class Scraper(object):
         hasn't been visited and was actually clicked.
         """
         logger.debug("Click tag %s" % tag)
+
         elem = self.lookup_by_tag(tag)
         if not elem:
             logger.warn("Element by tag not found. Tag: %s" % tag)
             return False
+
+        self.elem_stats(elem)
 
         name = self.driver_exec(elem.tag_name)
         onclick = self.driver_exec(elem.get_attribute, "onclick")
@@ -205,7 +237,6 @@ class Scraper(object):
             logger.warn("Hash visited: %s" % hash)
             return False
 
-        self.elem_stats(elem)
         self.visited.add(hash)
         logger.debug("Clicked hash %s" % hash)
         self.disable_target(elem)
@@ -238,10 +269,24 @@ class Scraper(object):
         Submit a form from a given tag. Assumes all inputs are filled.
         """
         logger.debug("Submitting tag %s" % tag)
-        elem = self.lookup_by_tag(tag)
-        self.driver_exec(self.scrolltoview, elem)
-        self.elem_stats(elem)
-        self.loadwait(elem.submit, check_alerts=True)
+        form = self.lookup_by_tag(tag)
+        self.elem_stats(form)
+        self.driver_exec(self.scrolltoview, form)
+
+        # try to find a Submit button, first
+        sub = self.driver_exec(
+            form.find_element_by_xpath,
+            "//a[contains(., 'Submit')]"
+        )
+        logger.debug("Form sub links: %s" % sub)
+        if sub:
+            logger.debug("Using form submit link")
+            self.loadwait(sub.click)
+        # otherwise, try to submit the form itself
+        else:
+            logger.debug("Using form.submit selenium shim")
+            self.loadwait(form.submit, check_alerts=True)
+
         # TODO: better way to wait for this, post-alert clicked
         self.path.append(("submit", (tag,), {}))
 
@@ -277,18 +322,27 @@ class Scraper(object):
         Get tags, by type (optional), for the currently loaded page.
         """
         current_url = self.driver_exec(self.page_url)
-        tagger = Tagger(driver=self.driver, current_url=current_url)
+        tagger = Tagger(
+            driver=self.driver, current_url=current_url,
+            leave_host=self.leave_host,
+        )
         return tagger.get_clickable()
 
     def get_forms(self):
         current_url = self.driver_exec(self.page_url)
-        tagger = Tagger(driver=self.driver, current_url=current_url)
+        tagger = Tagger(
+            driver=self.driver, current_url=current_url,
+            leave_host=self.leave_host,
+        )
         forms_dict = tagger.get_forms()
         logger.debug("page forms: %s" % forms_dict)
         return forms_dict
 
     def get_buttons(self):
         current_url = self.driver_exec(self.page_url)
-        tagger = Tagger(driver=self.driver, current_url=current_url)
+        tagger = Tagger(
+            driver=self.driver, current_url=current_url,
+            leave_host=self.leave_host,
+        )
         return tagger.get_buttons()
 

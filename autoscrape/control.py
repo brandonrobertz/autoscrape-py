@@ -18,7 +18,8 @@ class Controller(object):
     and elements on the webpage.
     """
 
-    def __init__(self, html_embeddings_file=None, word_embeddings_file=None):
+    def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
+                 leave_host=False):
         """
         Set up our WebDriver and misc utilities.
         """
@@ -26,7 +27,7 @@ class Controller(object):
             html_embeddings_file=html_embeddings_file,
             word_embeddings_file=word_embeddings_file,
         )
-        self.scraper = Scraper()
+        self.scraper = Scraper(leave_host=leave_host)
         self.clickabke = []
         self.forms = []
         self.inputs = []
@@ -110,14 +111,20 @@ class Controller(object):
         return form_data
 
     def button_vectors(self, type="text"):
+        logger.debug("Building button vectors")
         buttons_data = []
-        print("Buttons", self.buttons)
         if type == "text":
             for tag in self.buttons:
                 btn = self.scraper.lookup_by_tag(tag)
                 value = btn.get_attribute("value")
-                text = "%s %s" % (btn.text, value)
-                buttons_data.append(text)
+                text = []
+                if value:
+                    text.append(value)
+                if btn.text:
+                    text.append(btn.text)
+                logger.debug("  %s => value: %s, text: %s" % (
+                    tag, value, btn.text))
+                buttons_data.append(" ".join(text))
         return buttons_data
 
     def link_vectors(self):
