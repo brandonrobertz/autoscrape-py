@@ -106,8 +106,14 @@ class Controller(object):
             for tag in self.forms:
                 form = self.scraper.lookup_by_tag(tag)
                 elems = form.find_elements_by_xpath(".//*")
-                text = " ".join([ e.text for e in elems ])
-                form_data.append(text)
+                text_data = []
+                for e in elems:
+                    if e.text:
+                        text_data.append(e.text)
+                    place = e.get_attribute("placeholder")
+                    if place:
+                        text_data.append(place)
+                form_data.append(" ".join(text_data))
         return form_data
 
     def button_vectors(self, type="text"):
