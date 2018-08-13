@@ -116,7 +116,6 @@ class ManualControlScraper(BaseScraper):
                     depth += 1
                     self.control.select_button(ix, iterating_form=True)
                     found_next = True
-                    # import IPython; IPython.embed()
                     # don't click any other next buttons
                     break
 
@@ -146,7 +145,7 @@ class ManualControlScraper(BaseScraper):
             logger.debug("Form: %s Text: %s" % (ix, form_data))
             logger.debug("Inputs: %s" % inputs)
 
-            if self.form_match not in form_data:
+            if self.form_match.lower() not in form_data.lower():
                 continue
 
             logger.debug("*** Found an input form!")
@@ -167,9 +166,9 @@ class ManualControlScraper(BaseScraper):
             # Only scrape a single form, due to explicit, single
             # match configuration option
 
-        if scraped:
-            logger.debug("Scrape complete! Exiting.")
-            sys.exit(0)
+            if scraped:
+                logger.debug("Scrape complete! Exiting.")
+                sys.exit(0)
 
         links = self.control.clickable
         logger.debug("All tags at this depth %s" % links)

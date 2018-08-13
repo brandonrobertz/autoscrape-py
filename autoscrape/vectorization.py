@@ -122,7 +122,6 @@ class Vectorizer(object):
         if element:
             x_pos  = self.element_to_position_vector(element)
             concat_array.append(x_pos)
-        # import IPython; IPython.embed()
         x = np.concatenate(concat_array)
         return x
 

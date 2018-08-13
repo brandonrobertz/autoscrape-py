@@ -168,7 +168,6 @@ class Tagger(object):
         x_path = "//form//a|//button|//input[@type='button']"
         btns = self.driver.find_elements_by_xpath(x_path)
         print("*** btns", btns)
-        # import IPython; IPython.embed()
 
         tags = []
         for elem in btns:

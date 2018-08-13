@@ -101,6 +101,7 @@ class Controller(object):
         Another alternative strategy would be to try the search and then
         look at the next page.
         """
+        logger.debug("Loading page vectors...")
         form_data = []
         if type == "text":
             for tag in self.forms:
@@ -113,7 +114,10 @@ class Controller(object):
                     place = e.get_attribute("placeholder")
                     if place:
                         text_data.append(place)
-                form_data.append(" ".join(text_data))
+                text_data = " ".join(text_data)
+                logger.debug("Form: %s, Data: %s" % (
+                    tag, text_data))
+                form_data.append(text_data)
         return form_data
 
     def button_vectors(self, type="text"):

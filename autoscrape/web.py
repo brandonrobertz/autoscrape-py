@@ -8,7 +8,7 @@ from selenium import webdriver
 from selenium.common.exceptions import (
     TimeoutException, UnexpectedAlertPresentException,
     StaleElementReferenceException, TimeoutException,
-    NoSuchElementException,
+    NoSuchElementException, ElementNotInteractableException,
 )
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -141,7 +141,10 @@ class Scraper(object):
         Scroll to an element before we interact with it.
         """
         script = "arguments[0].scrollIntoView();"
-        self.driver_exec(self.driver.execute_script, script, elem)
+        try:
+            self.driver_exec(self.driver.execute_script, script, elem)
+        except ElementNotInteractableException as e:
+            pass
 
     def fetch(self, url):
         """
@@ -261,7 +264,10 @@ class Scraper(object):
         elem = self.lookup_by_tag(tag)
         self.driver_exec(self.scrolltoview, elem)
         self.elem_stats(elem)
-        self.driver_exec(elem.clear)
+        try:
+            self.driver_exec(elem.clear)
+        except ElementNotInteractableException as e:
+            pass
         self.driver_exec(elem.send_keys, input)
         self.path.append(("input", (tag,input,), {}))
 
