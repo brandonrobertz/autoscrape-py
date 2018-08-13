@@ -116,7 +116,7 @@ class ManualControlScraper(BaseScraper):
                     depth += 1
                     self.control.select_button(ix, iterating_form=True)
                     found_next = True
-                    import IPython; IPython.embed()
+                    # import IPython; IPython.embed()
                     # don't click any other next buttons
                     break
 
@@ -136,6 +136,7 @@ class ManualControlScraper(BaseScraper):
 
         logger.debug("** DEPTH %s" % depth)
 
+        scraped = False
         form_vectors = self.control.form_vectors(type="text")
         for ix in range(len(form_vectors)):
             form_data = form_vectors[ix]
@@ -159,11 +160,16 @@ class ManualControlScraper(BaseScraper):
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")
                 self.keep_clicking_next_btns(maxdepth=3)
+                scraped = True
                 self.control.back()
 
             logger.debug("Completed iteration!")
             # Only scrape a single form, due to explicit, single
             # match configuration option
+
+        if scraped:
+            logger.debug("Scrape complete! Exiting.")
+            sys.exit(0)
 
         links = self.control.clickable
         logger.debug("All tags at this depth %s" % links)

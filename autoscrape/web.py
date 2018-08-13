@@ -8,6 +8,7 @@ from selenium import webdriver
 from selenium.common.exceptions import (
     TimeoutException, UnexpectedAlertPresentException,
     StaleElementReferenceException, TimeoutException,
+    NoSuchElementException,
 )
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -274,11 +275,16 @@ class Scraper(object):
         self.driver_exec(self.scrolltoview, form)
 
         # try to find a Submit button, first
-        sub = self.driver_exec(
-            form.find_element_by_xpath,
-            "//a[contains(., 'Submit')]"
-        )
-        logger.debug("Form sub links: %s" % sub)
+        sub = None
+        try:
+            sub = self.driver_exec(
+                form.find_element_by_xpath,
+                "//a[contains(., 'Submit')]"
+            )
+            logger.debug("Form sub links: %s" % sub)
+        except NoSuchElementException as e:
+            pass
+
         if sub:
             logger.debug("Using form submit link")
             self.loadwait(sub.click)
@@ -287,8 +293,9 @@ class Scraper(object):
             logger.debug("Using form.submit selenium shim")
             self.loadwait(form.submit, check_alerts=True)
 
-        # TODO: better way to wait for this, post-alert clicked
         self.path.append(("submit", (tag,), {}))
+        # TODO: better way to wait for this, post-alert clicked
+        time.sleep(5)
 
     @property
     def page_html(self):
