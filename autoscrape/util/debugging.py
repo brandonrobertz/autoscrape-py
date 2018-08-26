@@ -7,5 +7,5 @@ def pop_debugger():
     This is here so we can mitigate these issues in a single place if the
     need arises.
     """
-    import IPython; IPython.embed()
+    import IPython; IPython.embed(); import time; time.sleep(2)
 

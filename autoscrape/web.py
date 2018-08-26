@@ -59,7 +59,7 @@ class Scraper(object):
         # setting to False, ensures crawl will stay on same host
         self.leave_host = leave_host
         # characters that need to be escaped if found inside an ID tag
-        self.css_escapables = ".#:"
+        self.css_escapables = ".:"
 
     def __del__(self):
         self.driver_exec(self.driver.close)

@@ -25,7 +25,7 @@ class Tagger(object):
         using JavaScript (without resorting to a complicated tree walking
         algorithm ... which we may need to do if this ends up failing).
 
-        Taken from: https://stackoverflow.com/a/12222317
+        Modified from: https://stackoverflow.com/a/12222317
         """
         script = """
             var getPathTo = function(el) {
@@ -34,25 +34,38 @@ class Tagger(object):
                 var path = [];
                 while (el.nodeType === Node.ELEMENT_NODE) {
                     var selector = el.nodeName.toLowerCase();
-                    if (el.id) {
-                        selector += '#' + el.id;
-                        path.unshift(selector);
-                        break;
-                    } else {
-                        var sib = el, nth = 1;
-                        while (sib = sib.previousElementSibling) {
-                            if (sib.nodeName.toLowerCase() == selector)
-                               nth++;
-                        }
-                        /*if (nth != 1)*/
-                        selector += ":nth-of-type("+nth+")";
+                    // // NOTE: we removed this because web pages often use
+                    // // strange characters in ID names which cause the CSS
+                    // // selector to fail upon lookup. If we only use traversal
+                    // // methods, we don't have that webpage-specific problem
+                    // if (el.id) {
+                    //     selector += '#' + el.id;
+                    //     path.unshift(selector);
+                    //     break;
+                    // }
+
+                    var sib = el, nth = 1;
+                    while (sib = sib.previousElementSibling) {
+                        if (sib.nodeName.toLowerCase() == selector)
+                           nth++;
                     }
+
+                    // // NOTE: always give a nth-of-type tag, even if
+                    // // if there's only a single sibling, just to be
+                    // // extra-specific
+                    // if (nth != 1)
+
+                    selector += ":nth-of-type("+nth+")";
                     path.unshift(selector);
                     el = el.parentNode;
                 }
                 return path.join(" > ");
             }
-            return getPathTo(arguments[0]); /*.toLowerCase();*/
+
+            // NOTE: this used to have a toLowerCase on it, but it caused
+            // problems with some pages. Leaving it as it was found in the
+            // original DOM is best here.
+            return getPathTo(arguments[0]); //.toLowerCase();
         """
         return self.driver.execute_script(script, element)
 
