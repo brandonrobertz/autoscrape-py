@@ -107,7 +107,7 @@ class Scraper(object):
         Run a driver interaction function, wait for the page to
         become ready, and handle any broken pipe errors
         """
-
+        wait_for_stale_time = 10 # seconds
         start = time.time()
         check_alerts = False
         if "check_alerts" in kwargs:
@@ -138,14 +138,16 @@ class Scraper(object):
         t = time.time() - start
         logger.debug("Page wait for load check succeeded in %s" % t)
 
-        t = 10
-        while t > 0:
+        stale_check_max_times = 10.0
+        stale_check_times = 0
+        while stale_check_times < 10:
             try:
                 elem.text
             except StaleElementReferenceException:
+                logger.debug("Stale element found! Loading complete.")
                 break
             t -= 1
-            time.sleep(5 / 10)
+            time.sleep(wait_for_stale_time / stale_check_max_times)
 
     def scrolltoview(self, elem):
         """
@@ -295,7 +297,7 @@ class Scraper(object):
         try:
             sub = self.driver_exec(
                 form.find_element_by_xpath,
-                "input[@type='submit']"
+                "//input[@type='submit']"
             )
             logger.debug("Form submit input button: %s" % sub)
         except NoSuchElementException as e:
@@ -306,7 +308,7 @@ class Scraper(object):
             try:
                 sub = self.driver_exec(
                     form.find_element_by_xpath,
-                    "a[contains(translate(., 'SUBMIT', 'submit'), 'Submit')"
+                    "//a[contains(translate(., 'SUBMIT', 'submit'), 'Submit')"
                 )
                 logger.debug("Form submit link: %s" % sub)
             except NoSuchElementException as e:
