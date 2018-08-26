@@ -32,7 +32,8 @@ class ManualControlScraper(BaseScraper):
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
                  output_data_dir=None, input_minlength=1, wildcard=None,
-                 form_input_range=None, leave_host=False, driver="Firefox"):
+                 form_input_range=None, leave_host=False, driver="Firefox",
+                 link_priority="search"):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
@@ -177,7 +178,7 @@ class ManualControlScraper(BaseScraper):
         link_zip = list(zip(range(len(link_vectors)),link_vectors))
         # TODO: this will be replaced by a ML algorith to sort links by those
         # most likely to be fruitful
-        link_zip.sort(key=lambda r: "search" in r[1].lower(), reverse=True)
+        link_zip.sort(key=lambda r: self.link_priority in r[1].lower(), reverse=True)
         for ix, _ in link_zip:
             if depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)

@@ -115,6 +115,15 @@ philosophy/mechanism behind their operation:
             "base_url's host. (default: False, options: True|False)"
         )
     )
+    manual_p.add_argument(
+        '--link_priority', type=str, default="search",
+        help=(
+            "A string that will be used to sort the text of links "
+            "so that the search phase can be sped up. Default is 'search' "
+            "so all links matching 'search' will be bumped to the top of "
+            "the stack for traversal and search for forms."
+        )
+    )
 
 
     # ML AutoScraper
@@ -207,6 +216,7 @@ if __name__ == "__main__":
         kwargs["form_input_range"] = args.form_input_range
         kwargs["wildcard"] = args.wildcard
         kwargs["leave_host"] = args.leave_host
+        kwargs["link_priority"] = args.link_priority
         autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "autoscrape-ml":
