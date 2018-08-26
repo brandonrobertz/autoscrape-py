@@ -46,7 +46,9 @@ class Controller(object):
         for i in range(len(self.clickable)):
             t = self.clickable[i]
             elem = self.scraper.lookup_by_tag(t)
-            text = elem.text.replace("\n", " ")
+            text = ""
+            if elem:
+                text = elem.text.replace("\n", " ")
             logger.debug("  %s - %s, %s" % (i, t, text))
 
         logger.debug("Forms: %s:" % (len(self.forms)))
@@ -164,14 +166,16 @@ class Controller(object):
         if type == "text":
             for tag in self.buttons:
                 btn = self.scraper.lookup_by_tag(tag)
-                value = btn.get_attribute("value")
+                value = ""
+                if btn:
+                    value = btn.get_attribute("value")
                 text = []
                 if value:
                     text.append(value)
-                if btn.text:
+                if btn and btn.text:
                     text.append(btn.text)
                 logger.debug("  %s => value: %s, text: %s" % (
-                    tag, value, btn.text))
+                    tag, value, text))
                 buttons_data.append(" ".join(text))
         return buttons_data
 
@@ -187,7 +191,11 @@ class Controller(object):
             for i in range(len(self.clickable)):
                 t = self.clickable[i]
                 elem = self.scraper.lookup_by_tag(t)
-                text = elem.text.replace("\n", " ")
+                text = ""
+                if elem:
+                    text = elem.text.replace("\n", " ")
+                else:
+                    logger.warn("Link element couldn't be found: %s" % t)
                 buttons_data.append(text)
         return buttons_data
 

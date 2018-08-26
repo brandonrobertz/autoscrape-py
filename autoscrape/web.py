@@ -114,6 +114,8 @@ class Scraper(object):
             check_alerts = kwargs["check_alerts"]
             del kwargs["check_alerts"]
 
+        elem = self.driver.find_element_by_xpath("//*")
+
         self.driver_exec(fn, *args, **kwargs)
         time.sleep(1)
 
@@ -135,6 +137,15 @@ class Scraper(object):
         wait.until(self.wait_check)
         t = time.time() - start
         logger.debug("Page wait for load check succeeded in %s" % t)
+
+        t = 10
+        while t > 0:
+            try:
+                elem.text
+            except StaleElementReferenceException:
+                break
+            t -= 1
+            time.sleep(5 / 10)
 
     def scrolltoview(self, elem):
         """
