@@ -58,6 +58,8 @@ class Scraper(object):
         self.broken_pipe_retries = 3
         # setting to False, ensures crawl will stay on same host
         self.leave_host = leave_host
+        # characters that need to be escaped if found inside an ID tag
+        self.css_escapables = ".#:"
 
     def __del__(self):
         self.driver_exec(self.driver.close)
@@ -188,6 +190,7 @@ class Scraper(object):
 
     def lookup_by_tag(self, tag):
         inside_id = False
+        # escaping logic
         newtag = ""
         for c in tag:
             if c == "#":
@@ -199,8 +202,9 @@ class Scraper(object):
             elif inside_id and re.search("\s", c):
                 inside_id = False
 
-            elif inside_id and c == ".":
-                c = "\."
+            elif inside_id and c in self.css_escapables:
+                for escapable in self.css_escapables:
+                    c = "\%s" % escapable
 
             newtag += c
 
