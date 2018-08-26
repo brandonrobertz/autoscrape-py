@@ -224,14 +224,12 @@ class Scraper(object):
         Click an element by a given tag. Returns True if the link
         hasn't been visited and was actually clicked.
         """
-        logger.debug("Click tag %s" % tag)
+        logger.debug("Attempting to click tag %s" % tag)
 
         elem = self.lookup_by_tag(tag)
         if not elem:
             logger.warn("Element by tag not found. Tag: %s" % tag)
             return False
-
-        self.elem_stats(elem)
 
         name = self.driver_exec(elem.tag_name)
         onclick = self.driver_exec(elem.get_attribute, "onclick")
@@ -242,9 +240,10 @@ class Scraper(object):
             return False
 
         self.visited.add(hash)
-        logger.debug("Clicked hash %s" % hash)
         self.disable_target(elem)
         self.scrolltoview(elem)
+        self.elem_stats(elem)
+
         try:
             self.loadwait(elem.click)
         except Exception as e:
@@ -280,22 +279,41 @@ class Scraper(object):
         self.elem_stats(form)
         self.driver_exec(self.scrolltoview, form)
 
-        # try to find a Submit button, first
+        # try to find a Submit input button
         sub = None
         try:
             sub = self.driver_exec(
                 form.find_element_by_xpath,
-                "//a[contains(., 'Submit')]"
+                "input[@type='submit']"
             )
-            logger.debug("Form sub links: %s" % sub)
+            logger.debug("Form submit input button: %s" % sub)
         except NoSuchElementException as e:
             pass
 
+        # try to find a Submit link
+        if not sub:
+            try:
+                sub = self.driver_exec(
+                    form.find_element_by_xpath,
+                    "a[contains(translate(., 'SUBMIT', 'submit'), 'Submit')"
+                )
+                logger.debug("Form submit link: %s" % sub)
+            except NoSuchElementException as e:
+                pass
+
+        # attempt to click on the button, if this fails, we will
+        # try to perform a form submit
+        sub_failure = False
         if sub:
             logger.debug("Using form submit link")
-            self.loadwait(sub.click)
+            try:
+                self.loadwait(sub.click)
+            except Exception as e:
+                sub_failure = True
+                logger.warn("Failure to click on submit button/link: %s" % e)
+
         # otherwise, try to submit the form itself
-        else:
+        if not sub or sub_failure:
             logger.debug("Using form.submit selenium shim")
             self.loadwait(form.submit, check_alerts=True)
 

@@ -19,7 +19,7 @@ class Controller(object):
     """
 
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
-                 leave_host=False):
+                 leave_host=False, driver="Firefox"):
         """
         Set up our WebDriver and misc utilities.
         """
@@ -27,8 +27,10 @@ class Controller(object):
             html_embeddings_file=html_embeddings_file,
             word_embeddings_file=word_embeddings_file,
         )
-        self.scraper = Scraper(leave_host=leave_host)
-        self.clickabke = []
+        self.scraper = Scraper(
+            leave_host=leave_host, driver=driver,
+        )
+        self.clickable = []
         self.forms = []
         self.inputs = []
 
@@ -39,6 +41,42 @@ class Controller(object):
         self.forms = list(forms_dict.keys())
         self.inputs = [ tags for tags in forms_dict.values() ]
         self.buttons = self.scraper.get_buttons()
+
+        logger.debug("Clickable links: %s" % (len(self.clickable)))
+        for i in range(len(self.clickable)):
+            t = self.clickable[i]
+            elem = self.scraper.lookup_by_tag(t)
+            text = elem.text.replace("\n", " ")
+            logger.debug("  %s - %s, %s" % (i, t, text))
+
+        logger.debug("Forms: %s:" % (len(self.forms)))
+        for i in range(len(self.forms)):
+            t = self.forms[i]
+            elem = self.scraper.lookup_by_tag(t)
+            text = elem.text.replace("\n", " ")
+            logger.debug("  %s - %s, %s" % (i, t, text))
+
+        logger.debug("Inputs: %s" % (len(self.inputs)))
+        for i in range(len(self.inputs)):
+            t = self.inputs[i]
+            elem = self.scraper.lookup_by_tag(t)
+            text = ""
+            placeholder = ""
+            if elem:
+                text = elem.text.replace("\n", " ")
+                placeholder = elem.get_attribute("placeholder")
+            logger.debug("  %s - %s, %s, %s" % (i, t, text, placeholder))
+
+        logger.debug("Buttons: %s" % (len(self.buttons)))
+        for i in range(len(self.buttons)):
+            t = self.buttons[i]
+            elem = self.scraper.lookup_by_tag(t)
+            text = ""
+            value = ""
+            if elem:
+                text = elem.text.replace("\n", " ")
+                value = elem.get_attribute("value")
+            logger.debug("  %s - %s, %s, %s" % (i, t, text, value))
 
     def initialize(self, url):
         """
@@ -101,7 +139,7 @@ class Controller(object):
         Another alternative strategy would be to try the search and then
         look at the next page.
         """
-        logger.debug("Loading page vectors...")
+        logger.debug("Loading form vectors")
         form_data = []
         if type == "text":
             for tag in self.forms:
@@ -137,11 +175,19 @@ class Controller(object):
                 buttons_data.append(" ".join(text))
         return buttons_data
 
-    def link_vectors(self):
+    def link_vectors(self, type="text"):
         """
         Get a matrix of link vectors. These describe the text of the link
         in a way that a ML algorithm could decide how to prioritize the
         search pattern.
         """
-        pass
+        logger.debug("Building link vectors")
+        buttons_data = []
+        if type == "text":
+            for i in range(len(self.clickable)):
+                t = self.clickable[i]
+                elem = self.scraper.lookup_by_tag(t)
+                text = elem.text.replace("\n", " ")
+                buttons_data.append(text)
+        return buttons_data
 

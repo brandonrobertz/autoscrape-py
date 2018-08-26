@@ -32,11 +32,11 @@ class ManualControlScraper(BaseScraper):
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
                  output_data_dir=None, input_minlength=1, wildcard=None,
-                 form_input_range=None, leave_host=False):
+                 form_input_range=None, leave_host=False, driver="Firefox"):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
-        self.control = Controller(leave_host=leave_host)
+        self.control = Controller(leave_host=leave_host, driver=driver)
         self.control.initialize(baseurl)
         # depth of DFS in search of form
         self.maxdepth = maxdepth
@@ -104,10 +104,12 @@ class ManualControlScraper(BaseScraper):
 
             found_next = False
             button_data = self.control.button_vectors()
-            logger.debug("** Next Iteration Depth %s" % depth)
-            logger.debug("Button vectors %s" % button_data)
+            n_buttons = len(button_data)
+            logger.debug("** 'Next' Iteration Depth %s" % depth)
+            logger.debug("Button vectors (%s): %s" % (
+                n_buttons, button_data))
 
-            for ix in range(len(button_data)):
+            for ix in range(n_buttons):
                 button = button_data[ix]
                 logger.debug("Checking button: %s" % button)
                 if self.next_match.lower() in button.lower():
@@ -128,15 +130,15 @@ class ManualControlScraper(BaseScraper):
             self.control.back()
 
     def run(self, depth=0):
+        logger.debug("** Crawl depth %s" % depth)
         if depth > self.maxdepth:
             logger.debug("Maximum depth %s reached, returning..." % depth)
             self.control.back()
             return
 
-        logger.debug("** DEPTH %s" % depth)
-
         scraped = False
         form_vectors = self.control.form_vectors(type="text")
+
         for ix in range(len(form_vectors)):
             form_data = form_vectors[ix]
             # inputs are keyed by form index
@@ -171,18 +173,20 @@ class ManualControlScraper(BaseScraper):
                 sys.exit(0)
 
         links = self.control.clickable
-        logger.debug("All tags at this depth %s" % links)
-
-        for ix in range(len(links)):
+        link_vectors = self.control.link_vectors()
+        link_zip = list(zip(range(len(link_vectors)),link_vectors))
+        # TODO: this will be replaced by a ML algorith to sort links by those
+        # most likely to be fruitful
+        link_zip.sort(key=lambda r: "search" in r[1].lower(), reverse=True)
+        for ix, _ in link_zip:
             if depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
                 break
 
-            logger.debug("Attempting click on link %s" % ix)
             if self.control.select_link(ix):
                 logger.debug("Clicked! Recursing ...")
                 self.run(depth=depth + 1)
 
-        logger.debug("Going back...")
+        logger.debug("Searching forms and links on page complete")
         self.control.back()
 

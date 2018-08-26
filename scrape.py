@@ -41,6 +41,11 @@ philosophy/mechanism behind their operation:
         help=("Maximum depth to allow the scraper to traverse in search "
               "of a scrapable search form (default: 10)")
     )
+    parser.add_argument(
+        '--driver', type=str,
+        default="Firefox", choices=["Firefox", "Chrome"],
+        help=("Which WebDriver to use (default: Firefox).")
+    )
 
     subparsers = parser.add_subparsers(
         dest="scraper",
@@ -188,6 +193,7 @@ if __name__ == "__main__":
         "maxdepth": args.maxdepth,
         "loglevel": args.loglevel,
         "formdepth": args.formdepth,
+        "driver": args.driver,
     }
 
     if args.scraper == "test":
