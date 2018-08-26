@@ -304,13 +304,20 @@ class Scraper(object):
             pass
 
         # try to find a Submit link
+        # NOTE: instead of using xpath we're going to do a manual search.
+        # this is due to the lack of a regex xpath matcher in some browsers
+        # The below should be the functional equivaliant of something like:
+        #   xpath = //a[matches(., 'submit')
         if not sub:
             try:
-                sub = self.driver_exec(
-                    form.find_element_by_xpath,
-                    "//a[contains(translate(., 'SUBMIT', 'submit'), 'Submit')"
+                possible_subs = self.driver_exec(
+                    form.find_elements_by_xpath,
+                    "//a"
                 )
-                logger.debug("Form submit link: %s" % sub)
+                els = [ el for el in possible_subs if "submit" in el.text.lower() ]
+                if els:
+                    sub = els[0]
+                    logger.debug("Form submit link: %s" % sub)
             except NoSuchElementException as e:
                 pass
 

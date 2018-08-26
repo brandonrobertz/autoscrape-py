@@ -55,6 +55,8 @@ class ManualControlScraper(BaseScraper):
         self.form_input_range = form_input_range
         # Wildcard character to be added to search inputs
         self.wildcard = wildcard
+        # string used to match link text in order to sort them higher
+        self.link_priority = link_priority
 
     def save_training_page(self, classname=None):
         """
