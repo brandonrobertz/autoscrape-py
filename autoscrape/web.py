@@ -132,22 +132,22 @@ class Scraper(object):
             except TimeoutException:
                 pass
 
-        # wait for the page to become ready, up to 30s, checks every 0.5s
-        wait = WebDriverWait(self.driver, 30)
-        wait.until(self.wait_check)
-        t = time.time() - start
-        logger.debug("Page wait for load check succeeded in %s" % t)
-
         stale_check_max_times = 10.0
         stale_check_times = 0
-        while stale_check_times < 10:
+        while stale_check_times < stale_check_max_times:
             try:
                 elem.text
             except StaleElementReferenceException:
                 logger.debug("Stale element found! Loading complete.")
                 break
-            t -= 1
+            stale_check_times += 1
             time.sleep(wait_for_stale_time / stale_check_max_times)
+
+        # wait for the page to become ready, up to 30s, checks every 0.5s
+        wait = WebDriverWait(self.driver, 30)
+        wait.until(self.wait_check)
+        t = time.time() - start
+        logger.debug("Page wait for load check succeeded in %s" % t)
 
     def scrolltoview(self, elem):
         """
