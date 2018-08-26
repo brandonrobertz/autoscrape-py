@@ -49,7 +49,7 @@ class Controller(object):
             text = ""
             if elem:
                 text = elem.text.replace("\n", " ")
-            logger.debug("  %s - %s, %s" % (i, t, text))
+            logger.debug("  %s - ...%s, %s" % (i, t[-25:], text))
 
         logger.debug("Forms: %s:" % (len(self.forms)))
         for i in range(len(self.forms)):
@@ -58,7 +58,7 @@ class Controller(object):
             elem = self.scraper.lookup_by_tag(t)
             if elem:
                 text = elem.text.replace("\n", " ")
-            logger.debug("  %s - %s, %s" % (i, t, text))
+            logger.debug("  %s - ...%s, %s" % (i, t[-25:], text))
 
         logger.debug("Inputs: %s" % (len(self.inputs)))
         for i in range(len(self.inputs)):
@@ -70,7 +70,8 @@ class Controller(object):
                 if elem:
                     text = elem.text.replace("\n", " ")
                     placeholder = elem.get_attribute("placeholder")
-                logger.debug("  %s - %s, %s, %s" % (i, t, text, placeholder))
+                logger.debug("  %s - ...%s, %s, %s" % (
+                    i, t[-25:], text, placeholder))
 
         logger.debug("Buttons: %s" % (len(self.buttons)))
         for i in range(len(self.buttons)):
@@ -81,7 +82,7 @@ class Controller(object):
             if elem:
                 text = elem.text.replace("\n", " ")
                 value = elem.get_attribute("value")
-            logger.debug("  %s - %s, %s, %s" % (i, t, text, value))
+            logger.debug("  %s - ...%s, %s, %s" % (i, t[-25:], text, value))
 
     def initialize(self, url):
         """
@@ -178,7 +179,7 @@ class Controller(object):
                 if btn and btn.text:
                     text.append(btn.text)
                 logger.debug("  %s => value: %s, text: %s" % (
-                    tag, value, text))
+                    tag[-25:], value, text))
                 buttons_data.append(" ".join(text))
         return buttons_data
 
