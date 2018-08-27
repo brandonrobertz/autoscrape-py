@@ -46,6 +46,10 @@ philosophy/mechanism behind their operation:
         default="Firefox", choices=["Firefox", "Chrome"],
         help=("Which WebDriver to use (default: Firefox).")
     )
+    parser.add_argument(
+        '--load_images', type=bool, default=False,
+        help="Whether or not to load images when scraping/crawling.",
+    )
 
     subparsers = parser.add_subparsers(
         dest="scraper",
@@ -222,6 +226,7 @@ if __name__ == "__main__":
         "loglevel": args.loglevel,
         "formdepth": args.formdepth,
         "driver": args.driver,
+        "load_images": args.load_images,
     }
 
     if args.scraper == "test":

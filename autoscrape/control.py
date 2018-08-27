@@ -20,7 +20,8 @@ class Controller(object):
 
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
                  leave_host=False, driver="Firefox",
-                 form_submit_natural_click=False, form_submit_wait=5):
+                 form_submit_natural_click=False, form_submit_wait=5,
+                 load_images=False):
         """
         Set up our WebDriver and misc utilities.
         """
@@ -32,6 +33,7 @@ class Controller(object):
             leave_host=leave_host, driver=driver,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=form_submit_wait,
+            load_images=load_images,
         )
         self.clickable = []
         self.forms = []
