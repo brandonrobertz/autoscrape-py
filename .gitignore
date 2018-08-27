@@ -12,6 +12,7 @@ training_data/features.txt
 training_data/manual_control_pages
 training_data/manual_control_*
 training_data/research_plan.sh
+training_data/screenshots
 *.7z
 deps/
 *.log

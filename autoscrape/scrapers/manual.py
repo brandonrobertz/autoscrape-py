@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+import time
 import hashlib
 import logging
 import os
@@ -67,6 +68,17 @@ class ManualControlScraper(BaseScraper):
         # a period of seconds to force a wait after a submit
         self.form_submit_wait = form_submit_wait
 
+    def save_screenshot(self):
+        t = int(time.time())
+        screenshot_dir = os.path.join(self.output_data_dir, "screenshots")
+        if not os.path.exists(screenshot_dir):
+            os.mkdir(screenshot_dir)
+        filepath = os.path.join(screenshot_dir, "%s.png" % t)
+        logger.debug("Saving screenshot to file: %s." % filepath);
+        with open(filepath, "wb") as f:
+            png = self.control.scraper.driver.get_screenshot_as_png()
+            f.write(png)
+
     def save_training_page(self, classname=None):
         """
         Writes the current page to the output data directory (if provided)
@@ -126,6 +138,7 @@ class ManualControlScraper(BaseScraper):
                 logger.debug("Checking button: %s" % button)
                 if self.next_match.lower() in button.lower():
                     self.save_training_page(classname="data_pages")
+                    self.save_screenshot()
                     logger.debug("Next button found! Clicking: %s" % ix)
                     depth += 1
                     self.control.select_button(ix, iterating_form=True)
@@ -148,6 +161,7 @@ class ManualControlScraper(BaseScraper):
             self.control.back()
             return
 
+        self.save_screenshot()
         scraped = False
         form_vectors = self.control.form_vectors(type="text")
 
@@ -164,14 +178,17 @@ class ManualControlScraper(BaseScraper):
 
             logger.debug("*** Found an input form!")
             self.save_training_page(classname="search_pages")
+            self.save_screenshot()
             inp_gen = self.input_generator(
                 length=self.input_minlength,
             )
             for input in self.input_generator(length=self.input_minlength):
                 logger.debug("Inputting %s to input %s" % (input, 0))
                 self.control.input(ix, 0, input)
+                self.save_screenshot()
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")
+                self.save_screenshot()
                 self.keep_clicking_next_btns(maxdepth=3)
                 scraped = True
                 self.control.back()

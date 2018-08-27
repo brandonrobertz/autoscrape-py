@@ -20,7 +20,7 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 class Scraper(object):
 
-    def __init__(self, driver="Firefox", leave_host=False, load_images=True,
+    def __init__(self, driver="Firefox", leave_host=False, load_images=False,
                  form_submit_natural_click=False, form_submit_wait=5):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
