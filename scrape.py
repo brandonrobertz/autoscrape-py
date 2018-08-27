@@ -109,6 +109,25 @@ philosophy/mechanism behind their operation:
         )
     )
     manual_p.add_argument(
+        '--form_submit_wait', type=int, default=5,
+        help=(
+            "For slow, interactive pages, the various techniques used "
+            "to detect page data load & render don't work well. In these "
+            "cases you can use this option to force a wait period "
+            "after hitting a submit button."
+        )
+    )
+    manual_p.add_argument(
+        '--form_submit_natural_click', type=bool, default=False,
+        help=(
+            "Some pages have complicated listeners set up on submit buttons. "
+            "In these cases, sometimes doing an element.click() does not "
+            "work as there are wrapper listeners which need to be activated. "
+            "This option simulates a click at a position on the page where the "
+            "element lays."
+        )
+    )
+    manual_p.add_argument(
         '--leave_host', type=bool, default=False,
         help=(
             "Controls whether the scraper will follow links outside of the "
@@ -217,6 +236,8 @@ if __name__ == "__main__":
         kwargs["wildcard"] = args.wildcard
         kwargs["leave_host"] = args.leave_host
         kwargs["link_priority"] = args.link_priority
+        kwargs["form_submit_wait"] = args.form_submit_wait
+        kwargs["form_submit_natural_click"] = args.form_submit_natural_click
         autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "autoscrape-ml":

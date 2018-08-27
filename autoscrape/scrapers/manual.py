@@ -33,11 +33,16 @@ class ManualControlScraper(BaseScraper):
                  next_match="next page", form_match="first name",
                  output_data_dir=None, input_minlength=1, wildcard=None,
                  form_input_range=None, leave_host=False, driver="Firefox",
-                 link_priority="search"):
+                 link_priority="search", form_submit_natural_click=False,
+                 form_submit_wait=5):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
-        self.control = Controller(leave_host=leave_host, driver=driver)
+        self.control = Controller(
+            leave_host=leave_host, driver=driver,
+            form_submit_natural_click=form_submit_natural_click,
+            form_submit_wait=form_submit_wait,
+        )
         self.control.initialize(baseurl)
         # depth of DFS in search of form
         self.maxdepth = maxdepth
@@ -57,6 +62,10 @@ class ManualControlScraper(BaseScraper):
         self.wildcard = wildcard
         # string used to match link text in order to sort them higher
         self.link_priority = link_priority
+        # attempt a position-based "natural click" over the element
+        self.form_submit_natural_click = form_submit_natural_click
+        # a period of seconds to force a wait after a submit
+        self.form_submit_wait = form_submit_wait
 
     def save_training_page(self, classname=None):
         """

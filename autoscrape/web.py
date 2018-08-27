@@ -20,7 +20,8 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 class Scraper(object):
 
-    def __init__(self, driver="Firefox", leave_host=False, load_images=True):
+    def __init__(self, driver="Firefox", leave_host=False, load_images=True,
+                 form_submit_natural_click=False, form_submit_wait=5):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
@@ -60,6 +61,8 @@ class Scraper(object):
         self.leave_host = leave_host
         # characters that need to be escaped if found inside an ID tag
         self.css_escapables = ".:"
+        self.form_submit_natural_click=form_submit_natural_click
+        self.form_submit_wait=form_submit_wait
 
     def __del__(self):
         self.driver_exec(self.driver.close)
@@ -287,6 +290,18 @@ class Scraper(object):
         self.driver_exec(elem.send_keys, input)
         self.path.append(("input", (tag,input,), {}))
 
+    def click_at_position_over_element(self, elem):
+        """
+        Perform a "natural" click of an element, so that if there are
+        any parent listeners, they will also be triggered.
+        """
+        logger.debug("Performing a 'natural' click")
+        from selenium.webdriver.common.action_chains import ActionChains
+        ac = ActionChains(self.driver)
+        x_off = 0
+        y_off = 0
+        ac.move_to_element(elem).move_by_offset(x_off, y_off).click().perform()
+
     def submit(self, tag):
         """
         Submit a form from a given tag. Assumes all inputs are filled.
@@ -331,7 +346,10 @@ class Scraper(object):
         if sub:
             logger.debug("Using form submit link")
             try:
-                self.loadwait(sub.click)
+                if self.form_submit_natural_click:
+                    self.click_at_position_over_element(sub)
+                else:
+                    self.loadwait(sub.click)
             except Exception as e:
                 sub_failure = True
                 logger.warn("Failure to click on submit button/link: %s" % e)
@@ -343,7 +361,12 @@ class Scraper(object):
 
         self.path.append(("submit", (tag,), {}))
         # TODO: better way to wait for this, post-alert clicked
-        time.sleep(5)
+        if self.form_submit_wait:
+            logger.debug(
+                "Forcing post-submit wait period of %ss" %
+                self.form_submit_wait
+            )
+            time.sleep(self.form_submit_wait)
 
     @property
     def page_html(self):
