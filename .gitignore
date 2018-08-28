@@ -2,21 +2,12 @@ __pycache__
 *.pyc
 *.swp
 *.swo
-!training_data/embeddings
-training_data/embeddings/data
-training_data/embeddings/models
-training_data/embeddings/raw_data
-training_data/pages
-training_data/data_notes.txt
-training_data/features.txt
-training_data/manual_control_pages
-training_data/manual_control_*
-training_data/research_plan.sh
-training_data/screenshots
 *.7z
-deps/
 *.log
-*.300d.*
-*.100d.*
-webcode.txt
-*.pickle
+
+# Algorithmic/Training Data-Related Files
+# Currently stored in a separate git repo (private, currently)
+# Will be released once ready, minimized, over LFS
+deps/
+training_data/
+
