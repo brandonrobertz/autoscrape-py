@@ -134,15 +134,21 @@ class ManualControlScraper(BaseScraper):
             logger.debug("Button vectors (%s): %s" % (
                 n_buttons, button_data))
 
+            # save the initial landing data page
+            self.save_training_page(classname="data_pages")
+            self.save_screenshot()
+
             for ix in range(n_buttons):
                 button = button_data[ix]
                 logger.debug("Checking button: %s" % button)
                 if self.next_match.lower() in button.lower():
-                    self.save_training_page(classname="data_pages")
-                    self.save_screenshot()
                     logger.debug("Next button found! Clicking: %s" % ix)
                     depth += 1
                     self.control.select_button(ix, iterating_form=True)
+                    # subsequent page loads get saved here
+                    self.save_training_page(classname="data_pages")
+                    self.save_screenshot()
+
                     found_next = True
                     # don't click any other next buttons
                     break
