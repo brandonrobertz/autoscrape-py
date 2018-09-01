@@ -91,6 +91,14 @@ philosophy/mechanism behind their operation:
         )
     )
     manual_p.add_argument(
+        '--form_input_index', type=int, default=0,
+        help=(
+            "Which input to fill, by order of appearance in HTML document. "
+            "Defaults to the first input. (Note for computer-oriented people "
+            "this is one-indexed, not zero)"
+        )
+    )
+    manual_p.add_argument(
         '--wildcard', type=str,
         help="A wildcard character to append to the form inputs."
     )
@@ -243,6 +251,7 @@ if __name__ == "__main__":
         kwargs["link_priority"] = args.link_priority
         kwargs["form_submit_wait"] = args.form_submit_wait
         kwargs["form_submit_natural_click"] = args.form_submit_natural_click
+        kwargs["form_input_index"] = args.form_input_index
         autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "autoscrape-ml":

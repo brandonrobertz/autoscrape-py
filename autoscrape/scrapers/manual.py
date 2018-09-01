@@ -35,7 +35,7 @@ class ManualControlScraper(BaseScraper):
                  output_data_dir=None, input_minlength=1, wildcard=None,
                  form_input_range=None, leave_host=False, driver="Firefox",
                  link_priority="search", form_submit_natural_click=False,
-                 form_submit_wait=5, load_images=False):
+                 form_input_index=0, form_submit_wait=5, load_images=False):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
@@ -68,6 +68,8 @@ class ManualControlScraper(BaseScraper):
         self.form_submit_natural_click = form_submit_natural_click
         # a period of seconds to force a wait after a submit
         self.form_submit_wait = form_submit_wait
+        # which input to target
+        self.form_input_index = form_input_index
 
     def save_screenshot(self):
         t = int(time.time())
@@ -191,7 +193,7 @@ class ManualControlScraper(BaseScraper):
             )
             for input in self.input_generator(length=self.input_minlength):
                 logger.debug("Inputting %s to input %s" % (input, 0))
-                self.control.input(ix, 0, input)
+                self.control.input(ix, self.form_input_index, input)
                 self.save_screenshot()
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")
