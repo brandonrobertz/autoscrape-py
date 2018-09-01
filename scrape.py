@@ -73,6 +73,22 @@ philosophy/mechanism behind their operation:
         help=formdepth_help,
     )
     manual_p.add_argument(
+        '--input_type', type=str, default="character_iteration",
+        choices=["character_iteration", "fixed_strings"],
+        help=(
+            "Type of input filling to use. character_iteration goes over all "
+            "characters in a range a, b, c, ... z, etc, and fixed_strings simply "
+            "uses a set of strings, separated by a comma. You can escape the "
+            "comma with backslash to include strings with commas in them."
+        ),
+    )
+    manual_p.add_argument(
+        '--input_strings', type=str, required=False,
+        help=(
+            "Strings to search forms with in 'fixed_string' mode."
+        ),
+    )
+    manual_p.add_argument(
         '--input_minlength', type=int, default=1,
         help=(
             "Minimum number of characters that can be inserted into "
@@ -80,7 +96,7 @@ philosophy/mechanism behind their operation:
         ),
     )
     manual_p.add_argument(
-        '--form_input_range', type=str,
+        '--form_input_range', type=str, default="a-z",
         help=(
             "The full character list to search form inputs with. "
             "Normally, the algorithm will use all characters A..Z, with "
@@ -94,8 +110,8 @@ philosophy/mechanism behind their operation:
         '--form_input_index', type=int, default=0,
         help=(
             "Which input to fill, by order of appearance in HTML document. "
-            "Defaults to the first input. (Note for computer-oriented people "
-            "this is one-indexed, not zero)"
+            "Default: 0, the first input (this field starts with 0, not 1 "
+            "which would mean the second input)."
         )
     )
     manual_p.add_argument(
@@ -252,6 +268,8 @@ if __name__ == "__main__":
         kwargs["form_submit_wait"] = args.form_submit_wait
         kwargs["form_submit_natural_click"] = args.form_submit_natural_click
         kwargs["form_input_index"] = args.form_input_index
+        kwargs["input_type"] = args.input_type
+        kwargs["input_strings"] = args.input_strings
         autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
     elif args.scraper == "autoscrape-ml":

@@ -5,6 +5,7 @@ import logging
 import os
 import string
 import sys
+import re
 from itertools import product
 
 from . import BaseScraper
@@ -32,7 +33,8 @@ class ManualControlScraper(BaseScraper):
 
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
-                 output_data_dir=None, input_minlength=1, wildcard=None,
+                 output_data_dir=None, input_type="character_iteration",
+                 input_strings="", input_minlength=1, wildcard=None,
                  form_input_range=None, leave_host=False, driver="Firefox",
                  link_priority="search", form_submit_natural_click=False,
                  form_input_index=0, form_submit_wait=5, load_images=False):
@@ -70,6 +72,10 @@ class ManualControlScraper(BaseScraper):
         self.form_submit_wait = form_submit_wait
         # which input to target
         self.form_input_index = form_input_index
+        # how to interact with inputs
+        self.input_type = input_type
+        # list of comma separated strings to use with fixed_strings mode
+        self.input_strings = input_strings
 
     def save_screenshot(self):
         t = int(time.time())
@@ -188,10 +194,18 @@ class ManualControlScraper(BaseScraper):
             logger.debug("*** Found an input form!")
             self.save_training_page(classname="search_pages")
             self.save_screenshot()
-            inp_gen = self.input_generator(
-                length=self.input_minlength,
-            )
-            for input in self.input_generator(length=self.input_minlength):
+
+            logger.debug("Input strategy: %s" % self.input_type)
+            inpup_gen = []
+            if self.input_type == "character_iteration":
+                inpup_gen = self.input_generator(length=self.input_minlength)
+            elif self.input_type == "fixed_strings" and self.input_strings:
+                inpup_gen = re.split(r'(?<!\\),', self.input_strings)
+                logger.debug("Manual input strings: %s" % inpup_gen)
+            else:
+                raise Exception("Invalid input type combination supplied!")
+
+            for input in inpup_gen:
                 logger.debug("Inputting %s to input %s" % (input, 0))
                 self.control.input(ix, self.form_input_index, input)
                 self.save_screenshot()
