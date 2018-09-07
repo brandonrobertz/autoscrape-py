@@ -171,21 +171,23 @@ class ManualControlScraper(BaseScraper):
                     "string": indiv_search,
                 }]
 
+        # This format is the following:
+        # 0:firstinput,1:secondinput;0:another,1:another2
         elif self.input_type == "multi_manual" and self.input_strings:
             # split the independent searches first
             inputs = re.split(r'(?<!\\);', self.input_strings)
-            indiv_search = []
             for inp in inputs:
+                indiv_search = []
                 # split the inputs to be filled per search
                 indiv_inputs_list = re.split(r'(?<!\\),', inp)
                 for indiv_inputs in indiv_inputs_list:
                     ix, string = indiv_inputs.split(":", 1)
                     indiv_search.append({
                         "index": int(ix),
-                        "string": string,
+                        "string": string.replace("\,", ",").replace("\;", ";"),
                     })
 
-            yield indiv_search
+                yield indiv_search
 
         # bad combination of options. TODO: we need to make the
         # cli parser validate this better. maybe when we move to
@@ -265,6 +267,7 @@ class ManualControlScraper(BaseScraper):
             input_gen = self.make_input_generator()
 
             for input_phase in input_gen:
+                logger.debug("Input plan: %s" % input_phase)
                 for single_input in input_phase:
                     input_index = single_input["index"]
                     input_string = single_input["string"]
