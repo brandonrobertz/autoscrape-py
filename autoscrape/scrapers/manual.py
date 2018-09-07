@@ -117,15 +117,82 @@ class ManualControlScraper(BaseScraper):
         with open(filepath, "w") as f:
             f.write(html)
 
-    def input_generator(self, length=1):
+    def character_iteration_input_generator(self, length=1):
         chars = string.ascii_lowercase
         if self.form_input_range:
             chars = self.form_input_range
+
         for input in product(chars, repeat=length):
+
             inp = "".join(input)
             if self.wildcard:
                 inp += self.wildcard
-            yield inp
+
+            yield [{
+                "index": self.form_input_index,
+                "string": inp,
+            }]
+
+    def make_input_generator(self):
+        """
+        Make a form input generator by parsing our kwargs. Output
+        is a multidimensional array, where the first dimension is
+        independent searches to attempt and the second dimension is
+        which inputs for fill. Example:
+
+            [
+              [
+                { "index": 0, "string": "test%" }
+              ],
+              [
+                { "index": 0, "string": "test%" },
+                { "index": 1, "string": "form%" },
+              ],
+            ]
+
+        This will try two independent searches w/ form iterations,
+        the first time it will fill input 0 with "test%" and the second
+        time it will fill inputs 0 and 1 with strings "test%" and
+        "form%", respectively.
+        """
+        logger.debug("Input strategy: %s" % self.input_type)
+        input_gen = []
+        if self.input_type == "character_iteration":
+            return self.character_iteration_input_generator(
+                length=self.input_minlength
+            )
+
+        elif self.input_type == "fixed_strings" and self.input_strings:
+            indiv_searches = re.split(r'(?<!\\),', self.input_strings)
+            logger.debug("Manual input strings: %s" % input_gen)
+            for indiv_search in indiv_searches:
+                yield [{
+                    "index": self.form_input_index,
+                    "string": indiv_search,
+                }]
+
+        elif self.input_type == "multi_manual" and self.input_strings:
+            # split the independent searches first
+            inputs = re.split(r'(?<!\\);', self.input_strings)
+            indiv_search = []
+            for inp in inputs:
+                # split the inputs to be filled per search
+                indiv_inputs_list = re.split(r'(?<!\\),', inp)
+                for indiv_inputs in indiv_inputs_list:
+                    ix, string = indiv_inputs.split(":", 1)
+                    indiv_search.append({
+                        "index": int(ix),
+                        "string": string,
+                    })
+
+            yield indiv_search
+
+        # bad combination of options. TODO: we need to make the
+        # cli parser validate this better. maybe when we move to
+        # click or some other library
+        else:
+            raise Exception("Invalid input type combination supplied!")
+
 
     def keep_clicking_next_btns(self, maxdepth=0):
         logger.debug("*** Entering 'next' iteration routine")
@@ -195,19 +262,15 @@ class ManualControlScraper(BaseScraper):
             self.save_training_page(classname="search_pages")
             self.save_screenshot()
 
-            logger.debug("Input strategy: %s" % self.input_type)
-            inpup_gen = []
-            if self.input_type == "character_iteration":
-                inpup_gen = self.input_generator(length=self.input_minlength)
-            elif self.input_type == "fixed_strings" and self.input_strings:
-                inpup_gen = re.split(r'(?<!\\),', self.input_strings)
-                logger.debug("Manual input strings: %s" % inpup_gen)
-            else:
-                raise Exception("Invalid input type combination supplied!")
+            input_gen = self.make_input_generator()
 
-            for input in inpup_gen:
-                logger.debug("Inputting %s to input %s" % (input, 0))
-                self.control.input(ix, self.form_input_index, input)
+            for input_phase in input_gen:
+                for single_input in input_phase:
+                    input_index = single_input["index"]
+                    input_string = single_input["string"]
+                    logger.debug("Inputting %s to input %s" % (
+                        input_string, input_index))
+                    self.control.input(ix, input_index, input_string)
                 self.save_screenshot()
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")

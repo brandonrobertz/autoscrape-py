@@ -74,18 +74,23 @@ philosophy/mechanism behind their operation:
     )
     manual_p.add_argument(
         '--input_type', type=str, default="character_iteration",
-        choices=["character_iteration", "fixed_strings"],
+        choices=["character_iteration", "fixed_strings", "multi_manual"],
         help=(
             "Type of input filling to use. character_iteration goes over all "
             "characters in a range a, b, c, ... z, etc, and fixed_strings simply "
             "uses a set of strings, separated by a comma. You can escape the "
-            "comma with backslash to include strings with commas in them."
+            "comma with backslash to include strings with commas in them. The "
+            "multi_manual mode allows for setting multiple inputs, by index in "
+            "the following format: 1:A,3:B;1:B,3:C where 1 and 3 are the "
+            "input indices followed by the inputs (separated by colon). The "
+            "form will be searched twice, with both inputs incrementing by one "
+            "letter (full searches are separated by semicolon)."
         ),
     )
     manual_p.add_argument(
         '--input_strings', type=str, required=False,
         help=(
-            "Strings to search forms with in 'fixed_string' mode."
+            "Strings to search forms with in 'fixed_string' or 'multi_manual' mode."
         ),
     )
     manual_p.add_argument(
