@@ -393,6 +393,8 @@ class Scraper(object):
         """
         if element is None:
             element = self.driver
+        # TODO: replace this performance bottleneck. See comment in
+        # control.py:form_vectors(...)
         elems = element.find_elements_by_xpath(".//*")
         text = []
         for el in elems:

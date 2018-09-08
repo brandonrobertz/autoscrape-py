@@ -155,6 +155,10 @@ class Controller(object):
         if type == "text":
             for tag in self.forms:
                 form = self.scraper.lookup_by_tag(tag)
+                # TODO: this is a major bottleneck. find a way
+                # to ensure all text of children is extracted
+                # (non-duplicately via descendants) in a more
+                # performant way
                 elems = form.find_elements_by_xpath(".//*")
                 text_data = []
                 for e in elems:
