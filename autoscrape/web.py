@@ -45,6 +45,7 @@ class Scraper(object):
                 firefox_options=firefox_options,
                 firefox_profile=firefox_profile,
             )
+
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
         elif driver == "Chrome":

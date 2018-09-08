@@ -54,7 +54,7 @@ philosophy/mechanism behind their operation:
         help=("Which WebDriver to use (default: Firefox).")
     )
     parser.add_argument(
-        '--load_images', type=str2bool, default=False,
+        '--load_images', type=str2bool, default=True,
         help="Whether or not to load images when scraping/crawling.",
     )
     parser.add_argument(
