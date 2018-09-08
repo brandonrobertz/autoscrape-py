@@ -159,9 +159,11 @@ class ManualControlScraper(BaseScraper):
         logger.debug("Input strategy: %s" % self.input_type)
         input_gen = []
         if self.input_type == "character_iteration":
-            return self.character_iteration_input_generator(
+            indiv_search_gen = self.character_iteration_input_generator(
                 length=self.input_minlength
             )
+            for indiv_search in indiv_search_gen:
+                yield indiv_search
 
         elif self.input_type == "fixed_strings" and self.input_strings:
             indiv_searches = re.split(r'(?<!\\),', self.input_strings)
@@ -195,7 +197,6 @@ class ManualControlScraper(BaseScraper):
         # click or some other library
         else:
             raise Exception("Invalid input type combination supplied!")
-
 
     def keep_clicking_next_btns(self, maxdepth=0):
         logger.debug("*** Entering 'next' iteration routine")

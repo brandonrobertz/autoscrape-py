@@ -155,22 +155,10 @@ class Controller(object):
         if type == "text":
             for tag in self.forms:
                 form = self.scraper.lookup_by_tag(tag)
-                # TODO: this is a major bottleneck. find a way
-                # to ensure all text of children is extracted
-                # (non-duplicately via descendants) in a more
-                # performant way
-                elems = form.find_elements_by_xpath(".//*")
-                text_data = []
-                for e in elems:
-                    if e.text:
-                        text_data.append(e.text)
-                    place = e.get_attribute("placeholder")
-                    if place:
-                        text_data.append(place)
-                text_data = " ".join(text_data)
-                logger.debug("Form: %s, Data: %s" % (
-                    tag, text_data))
-                form_data.append(text_data)
+                txt = self.scraper.element_text(form)
+                if txt:
+                    form_data.append(txt)
+
         return form_data
 
     def button_vectors(self, type="text"):

@@ -129,6 +129,7 @@ class Scraper(object):
             check_alerts = kwargs["check_alerts"]
             del kwargs["check_alerts"]
 
+        # get any element as a reference for staleness check
         elem = self.driver.find_element_by_xpath("//*")
 
         self.driver_exec(fn, *args, **kwargs)
@@ -393,17 +394,25 @@ class Scraper(object):
         """
         if element is None:
             element = self.driver
-        # TODO: replace this performance bottleneck. See comment in
-        # control.py:form_vectors(...)
+        # TODO: this is a major bottleneck. find a way
+        # to ensure all text of children is extracted
+        # (non-duplicately via descendants) in a more
+        # performant way
         elems = element.find_elements_by_xpath(".//*")
         text = []
         for el in elems:
             try:
-                text.append(el.text)
+                txt = el.text
+                if txt:
+                    text.append(txt.strip())
             except Exception as e:
                 logger.error("Error getting text element: %s, Err: %s" % (
                     el, e))
-                continue
+
+            placeholder = el.get_attribute("placeholder")
+            if placeholder:
+                text.append(placeholder.strip())
+
         logger.debug("Element texts: %s" % text)
         return " ".join(text)
 
