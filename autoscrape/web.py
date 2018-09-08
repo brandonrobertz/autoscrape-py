@@ -21,11 +21,16 @@ logger = logging.getLogger('AUTOSCRAPE')
 class Scraper(object):
 
     def __init__(self, driver="Firefox", leave_host=False, load_images=False,
-                 form_submit_natural_click=False, form_submit_wait=5):
+                 form_submit_natural_click=False, form_submit_wait=5,
+                 headless=True):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
         if driver == "Firefox":
+            firefox_options = webdriver.firefox.options.Options()
+            if headless:
+                logger.debug("Headless mode enabled")
+                firefox_options.add_argument("--headless")
             firefox_profile = webdriver.FirefoxProfile()
             if not load_images:
                 # disable images
@@ -37,17 +42,21 @@ class Scraper(object):
                 'dom.ipc.plugins.enabled.libflashplayer.so', 'false'
             )
             self.driver = webdriver.Firefox(
-                firefox_profile=firefox_profile
+                firefox_options=firefox_options,
+                firefox_profile=firefox_profile,
             )
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
         elif driver == "Chrome":
-            chromeOptions = webdriver.ChromeOptions()
+            chrome_options = webdriver.ChromeOptions()
+            if headless:
+                chrome_options.add_argument("--headless")
+                chrome_options.add_argument("--window-size=1920x1080")
             prefs = {
                 "profile.managed_default_content_settings.images":2
             }
-            chromeOptions.add_experimental_option("prefs",prefs)
-            self.driver = webdriver.Chrome(chrome_options=chromeOptions)
+            chrome_options.add_experimental_option("prefs",prefs)
+            self.driver = webdriver.Chrome(chrome_options=chrome_options)
 
         # set of clicked elements
         self.visited = set()

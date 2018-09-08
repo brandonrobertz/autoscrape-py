@@ -4,6 +4,13 @@ import argparse
 
 import autoscrape
 
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 class SmartFormatter(argparse.HelpFormatter):
 
@@ -47,8 +54,12 @@ philosophy/mechanism behind their operation:
         help=("Which WebDriver to use (default: Firefox).")
     )
     parser.add_argument(
-        '--load_images', type=bool, default=False,
+        '--load_images', type=str2bool, default=False,
         help="Whether or not to load images when scraping/crawling.",
+    )
+    parser.add_argument(
+        '--headless', type=str2bool, default=False,
+        help="Whether to run the browser in a hidden state (Default: False)",
     )
 
     subparsers = parser.add_subparsers(
@@ -151,7 +162,7 @@ philosophy/mechanism behind their operation:
         )
     )
     manual_p.add_argument(
-        '--form_submit_natural_click', type=bool, default=False,
+        '--form_submit_natural_click', type=str2bool, default=False,
         help=(
             "Some pages have complicated listeners set up on submit buttons. "
             "In these cases, sometimes doing an element.click() does not "
@@ -161,7 +172,7 @@ philosophy/mechanism behind their operation:
         )
     )
     manual_p.add_argument(
-        '--leave_host', type=bool, default=False,
+        '--leave_host', type=str2bool, default=False,
         help=(
             "Controls whether the scraper will follow links outside of the "
             "base_url's host. (default: False, options: True|False)"
@@ -256,6 +267,7 @@ if __name__ == "__main__":
         "formdepth": args.formdepth,
         "driver": args.driver,
         "load_images": args.load_images,
+        "headless": args.headless,
     }
 
     if args.scraper == "test":
