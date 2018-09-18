@@ -199,6 +199,11 @@ class ManualControlScraper(BaseScraper):
             raise Exception("Invalid input type combination supplied!")
 
     def keep_clicking_next_btns(self, maxdepth=0):
+        """
+        This looks for "next" buttons, or (in the future) page number
+        links, and clicks them until one is not found. This saves the
+        pages as it goes.
+        """
         logger.debug("*** Entering 'next' iteration routine")
         depth = 0
         while True:
@@ -219,6 +224,8 @@ class ManualControlScraper(BaseScraper):
 
             for ix in range(n_buttons):
                 button = button_data[ix]
+                # TODO: replace this with a ML model to decide whether or
+                # not this is a "next" button.
                 logger.debug("Checking button: %s" % button)
                 if self.next_match.lower() in button.lower():
                     logger.debug("Next button found! Clicking: %s" % ix)
@@ -259,6 +266,8 @@ class ManualControlScraper(BaseScraper):
             logger.debug("Form: %s Text: %s" % (ix, form_data))
             logger.debug("Inputs: %s" % inputs)
 
+            # TODO: ML model here to determine if this form is
+            # scrapeable. Currently this uses strict text match.
             if self.form_match.lower() not in form_data.lower():
                 continue
 
@@ -268,6 +277,10 @@ class ManualControlScraper(BaseScraper):
 
             input_gen = self.make_input_generator()
 
+            # TODO: ML model here to determine which inputs require
+            # input before submission. The form-selecting classifier
+            # above has already made the decision to submit this form,
+            # so that is assumed at this point.
             for input_phase in input_gen:
                 logger.debug("Input plan: %s" % input_phase)
                 for single_input in input_phase:
@@ -292,12 +305,15 @@ class ManualControlScraper(BaseScraper):
                 logger.debug("Scrape complete! Exiting.")
                 sys.exit(0)
 
+        # TODO: this will be replaced by a ML algorith to sort links by those
+        # most likely to be fruitful
         links = self.control.clickable
         link_vectors = self.control.link_vectors()
         link_zip = list(zip(range(len(link_vectors)),link_vectors))
-        # TODO: this will be replaced by a ML algorith to sort links by those
-        # most likely to be fruitful
-        link_zip.sort(key=lambda r: self.link_priority in r[1].lower(), reverse=True)
+        link_zip.sort(
+            key=lambda r: self.link_priority in r[1].lower(),
+            reverse=True
+        )
         for ix, _ in link_zip:
             if depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
