@@ -65,12 +65,19 @@ The experimental machine learning-based `autoscraper-ml` crawler-scraper can be 
 
 Full listing of options
 
-    scrape.py [OPTION]... BASEURL
+    Interactively crawl, find searchable forms, input data to them
+    and scrape data on the results, from an initial BASEURL.
      
-        Interactively crawl, find searchable forms, input data to them
-        and scrape the data on a webpage, from an initial BASEURL.
+    Usage:
+        scrape.py [OPTION...]  BASEURL
      
-    Crawl-specific options
+    Crawl-Specific Options
+        These options control the crawling capabilities of the scraper.
+        You can either have the crawler simply crawl a site, saving data
+        as it goes along (see below,  Data-Saving Options) or combine
+        crawl with form-discovery and scraping (see Interactive Form Search
+        Options below).
+        
         --maxdepth 10
             Maximum depth to crawl a site (in search of form if the
             option "--form-match [string]" is specified, see below).
@@ -82,11 +89,15 @@ Full listing of options
             A string to sort the links by. In this case, any link
             containing "search" will be clicked before any other links.
         
-    Interactive form search options
-        --form-match "Search Form"
+    Interactive Form Search Options
+        These options control the interactive form capabilities of the
+        scraper. In order to use this, you need both --form-match and
+        --input filled properly for your desired search form. This can be
+        combined with the crawling capabilities, described above.
+         
+        --form-match [SEARCH_STRING]
             The crawler will identify a form to search/scrape if it
-            contains the specified string. (In this case it will identify
-            a form containing the text "Search Form".) If matched, it will be
+            contains the specified string. If matched, it will be
             interactively scraped using the below instructions.
         
         --input "c:0:True,i:0:atext,s:1:France"
@@ -98,7 +109,8 @@ Full listing of options
             type has its own list, so a form with one input, one checkbox,
             and one option select, will all be at index 0.) The final command,
             sepearated by another colon, describes what to do with the input.
-                Multiple inputs are separated by a comma, so you can interact
+            
+            Multiple inputs are separated by a comma, so you can interact
             with multiple inputs before submitting the form.
             
             To illustrate this, the above command does the following:
@@ -127,7 +139,7 @@ Full listing of options
             This should be used in cases where the builtin
             wait-for-page-load isn't working properly (JS-heavy pages, etc).
      
-    Webdriver-specific and general settings
+    Webdriver-Specific and General Options
         --load-images False
             By default, images on a page will not be fetched. This speeds
             up scrapes on sites and lowers bandwidth needs.
@@ -142,12 +154,13 @@ Full listing of options
         --loglevel "INFO"
              Loglevel, note that DEBUG is extremely verbose
      
-    Data saving
-        --output-data-dir "scrape_data"
-            Where to save pages during a crawl. This directory will
-            be created if it does not currently exist. This directory
-            will have several sub-directories that contain the different
-            types of pages found (i.e., search_pages, data_pages, screenshots).
+    Data Saving Options
+        --output-data-dir [OUTPUT_DATA_DIR]
+            If specified, this indicates where to save pages during a
+            crawl. This directory will be created if it does not
+            currently exist.  This directory will have several
+            sub-directories that contain the different types of pages
+            found (i.e., search_pages, data_pages, screenshots).
 
 ## Data & ML Models
 

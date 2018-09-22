@@ -10,6 +10,7 @@ from itertools import product
 
 from . import BaseScraper
 from ..control import Controller
+from ..input_parser import InputParser
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -33,12 +34,10 @@ class ManualControlScraper(BaseScraper):
 
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
-                 output_data_dir=None, input_type="character_iteration",
-                 input_strings="", input_minlength=1, wildcard=None,
-                 form_input_range=None, leave_host=False, driver="Firefox",
-                 link_priority="search", form_submit_natural_click=False,
-                 form_input_index=0, form_submit_wait=5, load_images=False,
-                 headless=True):
+                 output_data_dir=None, input=None, leave_host=False,
+                 driver="Firefox", link_priority="search",
+                 form_submit_natural_click=False, form_submit_wait=5,
+                 load_images=False, headless=True):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
@@ -71,19 +70,18 @@ class ManualControlScraper(BaseScraper):
         self.form_submit_natural_click = form_submit_natural_click
         # a period of seconds to force a wait after a submit
         self.form_submit_wait = form_submit_wait
-        # which input to target
-        self.form_input_index = form_input_index
-        # how to interact with inputs
-        self.input_type = input_type
-        # list of comma separated strings to use with fixed_strings mode
-        self.input_strings = input_strings
+        # a generator, outputting individual form interaction plans
+        self.input_gen = InputParser(self.inputs).generate()
 
     def save_screenshot(self):
-        t = int(time.time())
+        if not self.output_data_dir:
+            return
+
         screenshot_dir = os.path.join(self.output_data_dir, "screenshots")
         if not os.path.exists(screenshot_dir):
             os.mkdir(screenshot_dir)
-        filepath = os.path.join(screenshot_dir, "%s.png" % t)
+
+        filepath = os.path.join(screenshot_dir, "%s.png" % int(time.time()))
         logger.debug("Saving screenshot to file: %s." % filepath);
         with open(filepath, "wb") as f:
             png = self.control.scraper.driver.get_screenshot_as_png()
@@ -94,6 +92,9 @@ class ManualControlScraper(BaseScraper):
         Writes the current page to the output data directory (if provided)
         to the given class folder.
         """
+        if not self.output_data_dir:
+            return
+
         logger.debug("Saving training page for class: %s" % classname)
         classes = [
             "data_pages", "error_pages", "links_to_documents",
@@ -117,86 +118,6 @@ class ManualControlScraper(BaseScraper):
 
         with open(filepath, "w") as f:
             f.write(html)
-
-    def character_iteration_input_generator(self, length=1):
-        chars = string.ascii_lowercase
-        if self.form_input_range:
-            chars = self.form_input_range
-
-        for input in product(chars, repeat=length):
-
-            inp = "".join(input)
-            if self.wildcard:
-                inp += self.wildcard
-
-            yield [{
-                "index": self.form_input_index,
-                "string": inp,
-            }]
-
-    def make_input_generator(self):
-        """
-        Make a form input generator by parsing our kwargs. Output
-        is a multidimensional array, where the first dimension is
-        independent searches to attempt and the second dimension is
-        which inputs for fill. Example:
-
-            [
-              [
-                { "index": 0, "string": "test%" }
-              ],
-              [
-                { "index": 0, "string": "test%" },
-                { "index": 1, "string": "form%" },
-              ],
-            ]
-
-        This will try two independent searches w/ form iterations,
-        the first time it will fill input 0 with "test%" and the second
-        time it will fill inputs 0 and 1 with strings "test%" and
-        "form%", respectively.
-        """
-        logger.debug("Input strategy: %s" % self.input_type)
-        input_gen = []
-        if self.input_type == "character_iteration":
-            indiv_search_gen = self.character_iteration_input_generator(
-                length=self.input_minlength
-            )
-            for indiv_search in indiv_search_gen:
-                yield indiv_search
-
-        elif self.input_type == "fixed_strings" and self.input_strings:
-            indiv_searches = re.split(r'(?<!\\),', self.input_strings)
-            logger.debug("Manual input strings: %s" % input_gen)
-            for indiv_search in indiv_searches:
-                yield [{
-                    "index": self.form_input_index,
-                    "string": indiv_search,
-                }]
-
-        # This format is the following:
-        # 0:firstinput,1:secondinput;0:another,1:another2
-        elif self.input_type == "multi_manual" and self.input_strings:
-            # split the independent searches first
-            inputs = re.split(r'(?<!\\);', self.input_strings)
-            for inp in inputs:
-                indiv_search = []
-                # split the inputs to be filled per search
-                indiv_inputs_list = re.split(r'(?<!\\),', inp)
-                for indiv_inputs in indiv_inputs_list:
-                    ix, string = indiv_inputs.split(":", 1)
-                    indiv_search.append({
-                        "index": int(ix),
-                        "string": string.replace("\,", ",").replace("\;", ";"),
-                    })
-
-                yield indiv_search
-
-        # bad combination of options. TODO: we need to make the
-        # cli parser validate this better. maybe when we move to
-        # click or some other library
-        else:
-            raise Exception("Invalid input type combination supplied!")
 
     def keep_clicking_next_btns(self, maxdepth=0):
         """
@@ -275,8 +196,6 @@ class ManualControlScraper(BaseScraper):
             self.save_training_page(classname="search_pages")
             self.save_screenshot()
 
-            input_gen = self.make_input_generator()
-
             # TODO: ML model here to determine which inputs require
             # input before submission. The form-selecting classifier
             # above has already made the decision to submit this form,
@@ -285,15 +204,32 @@ class ManualControlScraper(BaseScraper):
                 logger.debug("Input plan: %s" % input_phase)
                 for single_input in input_phase:
                     input_index = single_input["index"]
-                    input_string = single_input["string"]
-                    logger.debug("Inputting %s to input %s" % (
-                        input_string, input_index))
-                    self.control.input(ix, input_index, input_string)
+                    if single_input["type"] == "input":
+                        input_string = single_input["string"]
+                        logger.debug("Inputting %s to input %s" % (
+                            input_string, ix))
+                        self.control.input(ix, input_index, input_string)
+                    elif single_input["type"] == "select":
+                        input_string = single_input["string"]
+                        logger.debug("Selecting option %s in input %s" % (
+                            input_string, input_index))
+                        self.control.input_select_option(
+                            ix, input_index, input_string
+                        )
+                    elif single_input["type"] == "checkbox":
+                        to_check = single_input["action"]
+                        logger.debug("%s checkbox input %s" % (
+                            "Checking" if to_check else "Unchecking",
+                            input_index
+                        ))
+                        self.control.input_select_option(
+                            ix, input_index, to_check
+                        )
                 self.save_screenshot()
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")
                 self.save_screenshot()
-                self.keep_clicking_next_btns(maxdepth=3)
+                self.keep_clicking_next_btns(maxdepth=self.formdepth)
                 scraped = True
                 self.control.back()
 

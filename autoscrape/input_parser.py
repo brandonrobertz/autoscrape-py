@@ -14,6 +14,22 @@ class InputParser:
             return False
         return True
 
+    def character_iteration_input_generator(self, length=1):
+        chars = string.ascii_lowercase
+        if self.form_input_range:
+            chars = self.form_input_range
+
+        for input in product(chars, repeat=length):
+
+            inp = "".join(input)
+            if self.wildcard:
+                inp += self.wildcard
+
+            yield [{
+                "index": self.form_input_index,
+                "string": inp,
+            }]
+
     def generate(self):
         """
         Make a form input generator by parsing our input string. Output
