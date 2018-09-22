@@ -91,7 +91,15 @@ Full listing of options
         
         --input "c:0:True,i:0:atext,s:1:France"
             Interactive search descriptor. This describes how to interact with
-            a matched form. The above command does the following:
+            a matched form. The inputs are described in the following format:
+            a single-input type can be one of three types: checkbox ("c"),
+            input box ("i"), and option select ("s"). The type is separated
+            by a colon, and the input index position is next. (Each input
+            type has its own list, so a form with one input, one checkbox,
+            and one option select, will all be at index 0.) The final command,
+            sepearated by another colon, describes what to do with the input.
+            
+            To illustrate this, the above command does the following:
                  - the first input checkbox is checked (uncheck is False)
                  - the first input box gets filled with the string "first"
                  - the second select input gets the "France" option chosen
