@@ -98,11 +98,13 @@ Full listing of options
             type has its own list, so a form with one input, one checkbox,
             and one option select, will all be at index 0.) The final command,
             sepearated by another colon, describes what to do with the input.
+                Multiple inputs are separated by a comma, so you can interact
+            with multiple inputs before submitting the form.
             
             To illustrate this, the above command does the following:
-                 - the first input checkbox is checked (uncheck is False)
-                 - the first input box gets filled with the string "first"
-                 - the second select input gets the "France" option chosen
+                - the first input checkbox is checked (uncheck is False)
+                - the first input box gets filled with the string "first"
+                - the second select input gets the "France" option chosen
         
         --next-match "next page"
             A string to match a "next" button with, after searching a form.
