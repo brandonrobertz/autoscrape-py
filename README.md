@@ -61,7 +61,84 @@ The experimental machine learning-based `autoscraper-ml` crawler-scraper can be 
         --maxdepth 10 \
         --html_embeddings ./training_data/embeddings/webcode.300d.txt \
         --word_embeddings ./training_data/embeddings/glove.840B.300d.txt \
-        [SITE_URL]
+        [BASEURL]
+
+Full listing of options
+
+    scrape.py [OPTION]... BASEURL
+     
+        Interactively crawl, find searchable forms, input data to them
+        and scrape the data on a webpage, from an initial BASEURL.
+     
+    Crawl-specific options
+        --maxdepth 10
+            Maximum depth to crawl a site (in search of form if the
+            option "--form-match [string]" is specified, see below).
+        
+        --leave-host False
+            Whether the crawl can leave the base URL host.
+        
+        --link-priority "search"
+            A string to sort the links by. In this case, any link
+            containing "search" will be clicked before any other links.
+        
+    Interactive form search options
+        --form-match "Search Form"
+            The crawler will identify a form to search/scrape if it
+            contains the specified string. (In this case it will identify
+            a form containing the text "Search Form".) If matched, it will be
+            interactively scraped using the below instructions.
+        
+        --input "c:0:True,i:0:atext,s:1:France"
+            Interactive search descriptor. This describes how to interact with
+            a matched form. The above command does the following:
+                 - iterate through all checkboxes in form position 0
+                 - the first input checkbox is checked (uncheck is False)
+                 - the first input box, gets filled with the string "first"
+                 - the second select input, gets the "France" selection chosen
+        
+        --next-match "next page"
+            A string to match a "next" button with, after searching a form.
+            The scraper will continue to click "next" buttons after a search
+            until no matches are found, unless limited by the --formdepth
+            option (see below).
+       
+        --formdepth 0
+            How deep the scraper will iterate, by clicking "next" buttons.
+        
+        --form-submit-natural-click False
+            Some webpages make clicking a link element difficult due to
+            JavaScript onClick events. In cases where a click does nothing,
+            you can use this option to get the scraper to emulate a mouse
+            click over the link's poition on the page, activating any higher
+            level JS interactions.
+        
+        --form-submit-wait 5
+            How many seconds to force wait after a submit to a form.
+            This should be used in cases where the builtin
+            wait-for-page-load isn't working properly (JS-heavy pages, etc).
+     
+    Webdriver-specific and general settings
+        --load-images False
+            By default, images on a page will not be fetched. This speeds
+            up scrapes on sites and lowers bandwidth needs.
+        
+        --headless True
+            This hides the browser while it is bring automatically ran. If
+            you need to debug a scrape, set this to False.
+        
+        --driver "Firefox"
+            Which browser to use. Current support for "Firefox" and "Chrome".
+         
+        --loglevel "INFO"
+             Loglevel, note that DEBUG is extremely verbose
+     
+    Data saving
+        --output-data-dir "scrape_data"
+            Where to save pages during a crawl. This directory will
+            be created if it does not currently exist. This directory
+            will have several sub-directories that contain the different
+            types of pages found (i.e., search_pages, data_pages, screenshots).
 
 ## Data & ML Models
 
@@ -112,4 +189,6 @@ classification model using the `train.py` script:
 The resulting model will be saved, in the above example, to
 `training_data/page_data_kNN.model.pickle` which can be loaded and ran by
 `autoscraper-ml`.
+
+
 
