@@ -160,24 +160,11 @@ Autoscrape manual-mode full options:
     containing "next page" until there are no more. All data found during
     the scrape will be saved to the ./firstname_lastname_scrape directory.
 
-### Fully Automated Scrapers
-
-More advanced scrapers are currently under active development.
-
-The experimental machine learning-based `autoscraper-ml` crawler-scraper can be ran with this set of options:
-
-    ./scrape.py autoscrape-ml \
-        --loglevel DEBUG \
-        --maxdepth 10 \
-        --html_embeddings ./training_data/embeddings/webcode.300d.txt \
-        --word_embeddings ./training_data/embeddings/glove.840B.300d.txt \
-        [BASEURL]
-
-## Data & ML Models
+## Fully Automated Scrapers, Data & ML Models
 
 ![Web code embeddings](https://github.com/brandonrobertz/autoscrape-py/blob/master/images/code_embeddings.png)
 
-NOTE: This is extremely experimental and very much under active development.
+NOTE: This is extremely experimental and is very much under active development.
 
 `autoscrape-ml` requires two separate embedding models: a HTML/JS character embeddings and plain word embeddings. (You can check `training_data/embeddings/` for more information about the specifics.)
 
