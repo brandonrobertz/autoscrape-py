@@ -28,48 +28,27 @@ Then set up your python virtual environment (Python 3.6 required) and install th
 
 You can run a test to ensure your webdriver is set up correctly by running the `test` crawler:
 
-    ./scrape.py --loglevel DEBUG --maxdepth 10 test [SITE_URL]
+    ./scrape.py --loglevel DEBUG --maxdepth 10 [SITE_URL]
 
 The `test` crawler will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data.
 
 ### Manual Config-Based Scraper
 
-There's also the `manual-control` scraper, which runs based on some
-command line options to control crawling for search forms and
-interacting with them. Currently, the config-based iterating model can
-be ran like this:
+Autoscrape has a manually controlled mode, similar to wget, except this
+uses interactive capabilities and can input data to search forms, follow
+"next page"-type buttons, etc.  This functionality can be used either
+as a standalone crawler/scraper or as a method to build a training set
+for the automated scrapers.
 
-    ./scrape.py \
-        --loglevel DEBUG
-        --maxdepth 10 \
-        --next_match "next page" \
-        --form_match "first name" \
-        manual-control [SITE_URL]
+Autoscrape manual-mode full options:
 
-In the above example, the scraper will crawl until it finds a form
-that contains the text "first name", then begins to scrape it, clicking
-on buttons/links containing "next page" until there are no more.
-
-### Fully Automated Scrapers
-
-More advanced scrapers are currently under active development.
-
-The experimental machine learning-based `autoscraper-ml` crawler-scraper can be ran with this set of options:
-
-    ./scrape.py autoscrape-ml \
-        --loglevel DEBUG \
-        --maxdepth 10 \
-        --html_embeddings ./training_data/embeddings/webcode.300d.txt \
-        --word_embeddings ./training_data/embeddings/glove.840B.300d.txt \
-        [BASEURL]
-
-Full listing of options
-
-    Interactively crawl, find searchable forms, input data to them
-    and scrape data on the results, from an initial BASEURL.
+    AUTOSCRAPE - Interactively crawl, find searchable forms, input data
+    to them and scrape data on the results, from an initial BASEURL.
      
-    Usage:
+    USAGE
         scrape.py [OPTION...]  BASEURL
+     
+    OPTIONS
      
     Crawl-Specific Options
         These options control the crawling capabilities of the scraper.
@@ -162,9 +141,43 @@ Full listing of options
             sub-directories that contain the different types of pages
             found (i.e., search_pages, data_pages, screenshots).
 
+    EXAMPLES
+    
+    ./scrape.py \
+        --loglevel DEBUG
+        --maxdepth 10 \
+        --form-match "first name" \
+        --input "i:0:firstname,i:1:lastname" \
+        --next-match "next page" \
+        --output-data-dir "firstname_lastname_scrape" \
+        [SITE_URL]
+    
+    In the above example, the scraper will crawl until it finds a form
+    that contains the text "first name". At that point, it will type
+    "firstname" in the first text input box and "lastname" into the second
+    input box, then submits the form. Then it will wait for the submission
+    to be completed/loaded and will continue clicking on buttons/links
+    containing "next page" until there are no more. All data found during
+    the scrape will be saved to the ./firstname_lastname_scrape directory.
+
+### Fully Automated Scrapers
+
+More advanced scrapers are currently under active development.
+
+The experimental machine learning-based `autoscraper-ml` crawler-scraper can be ran with this set of options:
+
+    ./scrape.py autoscrape-ml \
+        --loglevel DEBUG \
+        --maxdepth 10 \
+        --html_embeddings ./training_data/embeddings/webcode.300d.txt \
+        --word_embeddings ./training_data/embeddings/glove.840B.300d.txt \
+        [BASEURL]
+
 ## Data & ML Models
 
 ![Web code embeddings](https://github.com/brandonrobertz/autoscrape-py/blob/master/images/code_embeddings.png)
+
+NOTE: This is extremely experimental and very much under active development.
 
 `autoscrape-ml` requires two separate embedding models: a HTML/JS character embeddings and plain word embeddings. (You can check `training_data/embeddings/` for more information about the specifics.)
 
@@ -176,16 +189,14 @@ We can gather training data with the `manual-control` scraper, using this
 configuration optionset:
 
     ./scrape.py --loglevel DEBUG --maxdepth 2 \
-        manual-control \
-        --output_data_dir ./training_data/pages/html/ \
-        --form_input_range abc --input_minlength 1 \
-        --formdepth 2 \
-        -- next_match "next page" --form_match "first name"
+        --output-data_dir ./training_data/pages/html/ \
+        --form-match "first name" \
+        --input "i:0:a;i:0:b;i:0:c" --formdepth 2 \
+        --next-match "next page" \
         [SITE_URL]
 
 The above will find, from [SITE_URL], interactive forms containing the
-text "first name", will input the characters a, b, then c (single
-length permutation, from the `input_minlength` option), into the form,
+text "first name", will input the characters a, b, then c, into the form,
 and will click buttons containing "next page" until it's two layers
 deep. All training data derived from this crawl will be stored in the
 directory `./training_data/pages/html/`.
