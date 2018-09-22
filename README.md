@@ -92,10 +92,9 @@ Full listing of options
         --input "c:0:True,i:0:atext,s:1:France"
             Interactive search descriptor. This describes how to interact with
             a matched form. The above command does the following:
-                 - iterate through all checkboxes in form position 0
                  - the first input checkbox is checked (uncheck is False)
-                 - the first input box, gets filled with the string "first"
-                 - the second select input, gets the "France" selection chosen
+                 - the first input box gets filled with the string "first"
+                 - the second select input gets the "France" option chosen
         
         --next-match "next page"
             A string to match a "next" button with, after searching a form.
