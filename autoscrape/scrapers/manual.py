@@ -200,7 +200,7 @@ class ManualControlScraper(BaseScraper):
             # input before submission. The form-selecting classifier
             # above has already made the decision to submit this form,
             # so that is assumed at this point.
-            for input_phase in input_gen:
+            for input_phase in self.input_gen:
                 logger.debug("Input plan: %s" % input_phase)
                 for single_input in input_phase:
                     input_index = single_input["index"]

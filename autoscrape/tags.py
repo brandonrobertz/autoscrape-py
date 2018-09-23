@@ -177,9 +177,11 @@ class Tagger(object):
                 logger.warn("No tag for element %s" % elem)
                 continue
 
-            tags[tag].append(self.get_inputs(form=elem, type="text"))
-            tags[tag].append(self.get_inputs(form=elem, type="select"))
-            tags[tag].append(self.get_inputs(form=elem, type="checkbox"))
+            tags[tag] = [
+                self.get_inputs(form=elem, itype="text"),
+                self.get_inputs(form=elem, itype="select"),
+                self.get_inputs(form=elem, itype="checkbox"),
+            ]
 
         return tags
 
