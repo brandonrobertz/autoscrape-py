@@ -23,237 +23,321 @@ class SmartFormatter(argparse.HelpFormatter):
 
 def parse_args():
     desc = """
-A programming-free automatic web crawler and structured data scraper for
-interaction-heavy websites.
+AUTOSCRAPE - Interactively crawl, find searchable forms, input data
+to them and scrape data on the results, from an initial BASEURL.
+ 
+USAGE
+    scrape.py [OPTION...]  BASEURL
+ 
+OPTIONS
+ 
+Crawl-Specific Options
+    These options control the crawling capabilities of the scraper.
+    You can either have the crawler simply crawl a site, saving data
+    as it goes along (see below,  Data-Saving Options) or combine
+    crawl with form-discovery and scraping (see Interactive Form Search
+    Options below).
+    
+    --maxdepth 10
+        Maximum depth to crawl a site (in search of form if the
+        option "--form-match [string]" is specified, see below).
+    
+    --leave-host False
+        Whether the crawl can leave the base URL host.
+    
+    --link-priority "search"
+        A string to sort the links by. In this case, any link
+        containing "search" will be clicked before any other links.
+    
+Interactive Form Search Options
+    These options control the interactive form capabilities of the
+    scraper. In order to use this, you need both --form-match and
+    --input filled properly for your desired search form. This can be
+    combined with the crawling capabilities, described above.
+     
+    --form-match [SEARCH_STRING]
+        The crawler will identify a form to search/scrape if it
+        contains the specified string. If matched, it will be
+        interactively scraped using the below instructions.
+    
+    --input "c:0:True,i:0:atext,s:1:France"
+        Interactive search descriptor. This describes how to interact with
+        a matched form. The inputs are described in the following format:
+        a single-input type can be one of three types: checkbox ("c"),
+        input box ("i"), and option select ("s"). The type is separated
+        by a colon, and the input index position is next. (Each input
+        type has its own list, so a form with one input, one checkbox,
+        and one option select, will all be at index 0.) The final command,
+        sepearated by another colon, describes what to do with the input.
+        
+        Multiple inputs are separated by a comma, so you can interact
+        with multiple inputs before submitting the form.
+        
+        To illustrate this, the above command does the following:
+            - the first input checkbox is checked (uncheck is False)
+            - the first input box gets filled with the string "first"
+            - the second select input gets the "France" option chosen
+    
+    --next-match "next page"
+        A string to match a "next" button with, after searching a form.
+        The scraper will continue to click "next" buttons after a search
+        until no matches are found, unless limited by the --formdepth
+        option (see below).
+   
+    --formdepth 0
+        How deep the scraper will iterate, by clicking "next" buttons.
+    
+    --form-submit-natural-click False
+        Some webpages make clicking a link element difficult due to
+        JavaScript onClick events. In cases where a click does nothing,
+        you can use this option to get the scraper to emulate a mouse
+        click over the link's poition on the page, activating any higher
+        level JS interactions.
+    
+    --form-submit-wait 5
+        How many seconds to force wait after a submit to a form.
+        This should be used in cases where the builtin
+        wait-for-page-load isn't working properly (JS-heavy pages, etc).
+ 
+Webdriver-Specific and General Options
+    --load-images False
+        By default, images on a page will not be fetched. This speeds
+        up scrapes on sites and lowers bandwidth needs.
+    
+    --headless True
+        This hides the browser while it is bring automatically ran. If
+        you need to debug a scrape, set this to False.
+    
+    --driver "Firefox"
+        Which browser to use. Current support for "Firefox" and "Chrome".
+     
+    --loglevel "INFO"
+         Loglevel, note that DEBUG is extremely verbose
+ 
+Data Saving Options
+    --output-data-dir [OUTPUT_DATA_DIR]
+        If specified, this indicates where to save pages during a
+        crawl. This directory will be created if it does not
+        currently exist.  This directory will have several
+        sub-directories that contain the different types of pages
+        found (i.e., search_pages, data_pages, screenshots).
 
-There are several different scrapers available, each with a different
-philosophy/mechanism behind their operation:
+EXAMPLES
 
-  manual-control: command line config-based crawler/scraper
-  autoscrape-ml:  machine-learning based crawler/scraper
-  autoscrape-rl:  self-learning RL-based crawler/scraper
-  test:           crawler to only ensure things are set up properly
+    ./scrape.py
+        --loglevel DEBUG
+        --maxdepth 10
+        --form-match "first name"
+        --input "i:0:firstname,i:1:lastname"
+        --next-match "next page"
+        --output-data-dir "firstname_lastname_scrape"
+        [BASEURL]
+
+In the above example, the scraper will crawl until it finds a form that
+contains the text "first name". At that point, it will type "firstname"
+in the first text input box and "lastname" into the second input box,
+then submits the form. Then it will wait for the submission to be
+completed/loaded and will continue clicking on buttons/links containing
+"next page" until there are no more. All data found during the scrape
+will be saved to the ./firstname_lastname_scrape directory.
 """
 
     parser = argparse.ArgumentParser(
         description=desc, formatter_class=argparse.RawTextHelpFormatter,
     )
+
     parser.add_argument(
-        '--loglevel', type=str, default="INFO",
-        choices=["DEBUG", "INFO", "WARN", "ERROR"],
-        help="Loglevel (default: INFO)"
+        "BASEURL", type=str,
+        help="The base URL to begin crawling/scraping from."
+    )
+
+    # Crawl-Specific Options
+    parser.add_argument(
+        "--maxdepth", type=int, default=10,
+        help=(
+            "Maximum depth to crawl a site (in search of form if the "
+            "option \"--form-match [string]\" is specified, see below)."
+        )
     )
     parser.add_argument(
-        '--maxdepth', type=int, default=10,
-        help=("Maximum depth to allow the scraper to traverse in search "
-              "of a scrapable search form (default: 10)")
+        '--leave-host', type=str2bool, default=False,
+        help=(
+            "Whether the crawl can leave the base URL host."
+        )
+    )
+    parser.add_argument(
+        "--link-priority", type=str, default="search",
+        help=(
+            "A string to sort the links by. By default, any link "
+            "containing \"search\" will be clicked before any other links."
+        )
+    )
+
+    # Interactive Form Search Options
+    parser.add_argument(
+        "--form-match", type=str, default=None, required=False,
+        help=(
+            "The crawler will identify a form to search/scrape if it "
+            "contains the specified string. If matched, it will be "
+            "interactively scraped using the below instructions."
+        )
+    )
+    parser.add_argument(
+        "--input", type=str, default=None, required=False,
+        help=(
+            "Interactive search descriptor. This describes how to "
+            "interact with a matched form. The inputs are described in "
+            "the following format: a single-input type can be one of "
+            "three types: checkbox (\"c\"), input box (\"i\"), and option "
+            "select (\"s\"). The type is separated by a colon, and the "
+            "input index position is next. (Each input type has its own "
+            "list, so a form with one input, one checkbox, and one "
+            "option select, will all be at index 0.) The final command, "
+            "sepearated by another colon, describes what to do with the "
+            "input. Multiple inputs are separated by a comma, so you can "
+            "interact with multiple inputs before submitting the form."
+        )
+    )
+    parser.add_argument(
+        "--next-match", type=str, default="next page",
+        help=(
+            "A string to match a \"next\" button with, after searching a form. "
+            "The scraper will continue to click \"next\" buttons after a search "
+            "until no matches are found, unless limited by the --formdepth "
+            "option (see below)."
+        )
+    )
+    parser.add_argument(
+        "--formdepth", type=int, default=0,
+        help=(
+            "How deep the scraper will iterate, by clicking \"next\" "
+            "buttons."
+        )
+    )
+    parser.add_argument(
+        "--form-submit-natural-click", type=str2bool, default=False,
+        help=(
+            "Some webpages make clicking a link element difficult due to "
+            "JavaScript onClick events. In cases where a click does "
+            "nothing, you can use this option to get the scraper to "
+            "emulate a mouse click over the link's poition on the "
+            "page, activating any higher level JS interactions."
+        )
+    )
+    parser.add_argument(
+        "--form-submit-wait", type=int, default=5,
+        help=(
+            "How many seconds to force wait after a submit to a form. "
+            "This should be used in cases where the builtin "
+            "wait-for-page-load isn't working properly (JS-heavy pages, "
+            "etc). "
+        )
+    )
+
+    # Webdriver-Specific and General Options
+    parser.add_argument(
+        '--load-images', type=str2bool, default=False,
+        help=(
+            "By default, images on a page will not be fetched. "
+            "This speeds up scrapes on sites and lowers bandwidth "
+            "needs."
+        )
+    )
+    parser.add_argument(
+        '--headless', type=str2bool, default=True,
+        help=(
+            "This hides the browser while it is bring automatically ran. If "
+            "you need to debug a scrape, set this to False."
+        )
     )
     parser.add_argument(
         '--driver', type=str,
         default="Firefox", choices=["Firefox", "Chrome"],
-        help=("Which WebDriver to use (default: Firefox).")
+        help=(
+            "Which browser to use."
+        )
     )
     parser.add_argument(
-        '--load_images', type=str2bool, default=True,
-        help="Whether or not to load images when scraping/crawling.",
+        '--loglevel', type=str, default="INFO",
+        choices=["DEBUG", "INFO", "WARN", "ERROR"],
+        help=(
+            "Loglevel, note that DEBUG is extremely verbose"
+        )
     )
+
+    # Data Saving Options
     parser.add_argument(
-        '--headless', type=str2bool, default=False,
-        help="Whether to run the browser in a hidden state (Default: False)",
-    )
-
-    subparsers = parser.add_subparsers(
-        dest="scraper",
-        help="Specified crawler type (required)"
-    )
-
-    baseurl_desc = "The base URL to begin crawling/scraping from."
-    formdepth_help = "Once a search form has been found, this controls how many pages will be scraped (default: 0, no limit)"
-
-    # Manual-Control Scraper
-    manual_p = subparsers.add_parser(
-        "manual-control",
-        description="A Depth-First Search scraper that looks for forms, inputs, and next buttons by some manual criteria and iterates accordingly.  This scraper is config-based, and identifies search forms and buttons by configurable string matching from command line options. This scraper can be used to build training data for the other ML/RL scrapers or be used on its own as a config-based scraper."
-    )
-    manual_p.add_argument(
-        "baseurl", type=str,
-        help=baseurl_desc
-    )
-    manual_p.add_argument(
-        '--formdepth', type=int, default=0,
-        help=formdepth_help,
-    )
-    manual_p.add_argument(
-        '--input_type', type=str, default="character_iteration",
-        choices=["character_iteration", "fixed_strings", "multi_manual"],
+        '--output-data-dir', type=str,
         help=(
-            "Type of input filling to use. character_iteration goes over all "
-            "characters in a range a, b, c, ... z, etc, and fixed_strings simply "
-            "uses a set of strings, separated by a comma. You can escape the "
-            "comma with backslash to include strings with commas in them. The "
-            "multi_manual mode allows for setting multiple inputs, by index in "
-            "the following format: 1:A,3:B;1:B,3:C where 1 and 3 are the "
-            "input indices followed by the inputs (separated by colon). The "
-            "form will be searched twice, with both inputs incrementing by one "
-            "letter (full searches are separated by semicolon)."
-        ),
-    )
-    manual_p.add_argument(
-        '--input_strings', type=str, required=False,
-        help=(
-            "Strings to search forms with in 'fixed_string' or 'multi_manual' mode."
-        ),
-    )
-    manual_p.add_argument(
-        '--input_minlength', type=int, default=1,
-        help=(
-            "Minimum number of characters that can be inserted into "
-            "discovered form input."
-        ),
-    )
-    manual_p.add_argument(
-        '--form_input_range', type=str, default="a-z",
-        help=(
-            "The full character list to search form inputs with. "
-            "Normally, the algorithm will use all characters A..Z, with "
-            "repetitions based on the input_minlength parameter. This "
-            "changes that A..Z range. Note that this field needs to contain "
-            "every character to be included. Ranges (A-Z) will not be "
-            "expanded (A-Z would be three characters A, -, Z)."
-        )
-    )
-    manual_p.add_argument(
-        '--form_input_index', type=int, default=0,
-        help=(
-            "Which input to fill, by order of appearance in HTML document. "
-            "Default: 0, the first input (this field starts with 0, not 1 "
-            "which would mean the second input)."
-        )
-    )
-    manual_p.add_argument(
-        '--wildcard', type=str,
-        help="A wildcard character to append to the form inputs."
-    )
-    manual_p.add_argument(
-        '--output_data_dir', type=str,
-        help="Output directory to save training page data to.",
-    )
-    manual_p.add_argument(
-        '--next_match', type=str, default="next page",
-        help=(
-            "A string which will be used to identify 'next' buttons in "
-            "paginated form results."
-        )
-    )
-    manual_p.add_argument(
-        '--form_match', type=str, default="first name",
-        help=(
-            "A string which will be used to identify forms we want to "
-            "scrape. The form text will be used as the haystack."
-        )
-    )
-    manual_p.add_argument(
-        '--form_submit_wait', type=int, default=5,
-        help=(
-            "For slow, interactive pages, the various techniques used "
-            "to detect page data load & render don't work well. In these "
-            "cases you can use this option to force a wait period "
-            "after hitting a submit button."
-        )
-    )
-    manual_p.add_argument(
-        '--form_submit_natural_click', type=str2bool, default=False,
-        help=(
-            "Some pages have complicated listeners set up on submit buttons. "
-            "In these cases, sometimes doing an element.click() does not "
-            "work as there are wrapper listeners which need to be activated. "
-            "This option simulates a click at a position on the page where the "
-            "element lays."
-        )
-    )
-    manual_p.add_argument(
-        '--leave_host', type=str2bool, default=False,
-        help=(
-            "Controls whether the scraper will follow links outside of the "
-            "base_url's host. (default: False, options: True|False)"
-        )
-    )
-    manual_p.add_argument(
-        '--link_priority', type=str, default="search",
-        help=(
-            "A string that will be used to sort the text of links "
-            "so that the search phase can be sped up. Default is 'search' "
-            "so all links matching 'search' will be bumped to the top of "
-            "the stack for traversal and search for forms."
+            "If specified, this indicates where to save pages during a "
+            "crawl. This directory will be created if it does not "
+            "currently exist.  This directory will have several "
+            "sub-directories that contain the different types of pages "
+            "found (i.e., search_pages, data_pages, screenshots)."
         )
     )
 
+    # # ML AutoScraper
+    # autoscrape_ml_p = subparsers.add_parser(
+    #     "autoscrape-ml",
+    #     description="A fully-automated web scraper that runs based on the outputs of several machine learning classifiers which have been trained on other crawls."
+    # )
+    # autoscrape_ml_p.add_argument(
+    #     "baseurl", type=str,
+    #     help=baseurl_desc
+    # )
+    # autoscrape_ml_p.add_argument(
+    #     '--word_embeddings', type=str,
+    #     help=(
+    #         'Path to a word embeddings file for page text vectorization. '
+    #         'This is only used for the autoscrape-ml model.'
+    #     )
+    # )
+    # autoscrape_ml_p.add_argument(
+    #     '--html_embeddings', type=str,
+    #     help=(
+    #         'Path to a HTML char embeddings file for page HTML/code '
+    #         'vectorization. This is only used for the autoscrape-ml model.'
+    #     )
+    # )
 
-    # ML AutoScraper
-    autoscrape_ml_p = subparsers.add_parser(
-        "autoscrape-ml",
-        description="A fully-automated web scraper that runs based on the outputs of several machine learning classifiers which have been trained on other crawls."
-    )
-    autoscrape_ml_p.add_argument(
-        "baseurl", type=str,
-        help=baseurl_desc
-    )
-    autoscrape_ml_p.add_argument(
-        '--formdepth', type=int, default=0,
-        help=formdepth_help,
-    )
-    autoscrape_ml_p.add_argument(
-        '--word_embeddings', type=str,
-        help=(
-            'Path to a word embeddings file for page text vectorization. '
-            'This is only used for the autoscrape-ml model.'
-        )
-    )
-    autoscrape_ml_p.add_argument(
-        '--html_embeddings', type=str,
-        help=(
-            'Path to a HTML char embeddings file for page HTML/code '
-            'vectorization. This is only used for the autoscrape-ml model.'
-        )
-    )
+    # # Reinforcement AutoScraper
+    # autoscrape_rl_p = subparsers.add_parser(
+    #     "autoscrape-rl",
+    #     description="A fully-automated web scraper that runs using a self-learning technique called reinforcement learning, where a scraper learns how to interact with a page by trial-and-error."
+    # )
+    # autoscrape_rl_p.add_argument(
+    #     "baseurl", type=str,
+    #     help=baseurl_desc
+    # )
+    # autoscrape_rl_p.add_argument(
+    #     '--formdepth', type=int, default=0,
+    #     help=formdepth_help,
+    # )
+    # autoscrape_rl_p.add_argument(
+    #     '--word_embeddings', type=str,
+    #     help=(
+    #         'Path to a word embeddings file for page text vectorization. '
+    #         'This is only used for the autoscrape-ml model.'
+    #     )
+    # )
+    # autoscrape_rl_p.add_argument(
+    #     '--html_embeddings', type=str,
+    #     help=(
+    #         'Path to a HTML char embeddings file for page HTML/code '
+    #         'vectorization. This is only used for the autoscrape-ml model.'
+    #     )
+    # )
 
-    # Reinforcement AutoScraper
-    autoscrape_rl_p = subparsers.add_parser(
-        "autoscrape-rl",
-        description="A fully-automated web scraper that runs using a self-learning technique called reinforcement learning, where a scraper learns how to interact with a page by trial-and-error."
-    )
-    autoscrape_rl_p.add_argument(
-        "baseurl", type=str,
-        help=baseurl_desc
-    )
-    autoscrape_rl_p.add_argument(
-        '--formdepth', type=int, default=0,
-        help=formdepth_help,
-    )
-    autoscrape_rl_p.add_argument(
-        '--word_embeddings', type=str,
-        help=(
-            'Path to a word embeddings file for page text vectorization. '
-            'This is only used for the autoscrape-ml model.'
-        )
-    )
-    autoscrape_rl_p.add_argument(
-        '--html_embeddings', type=str,
-        help=(
-            'Path to a HTML char embeddings file for page HTML/code '
-            'vectorization. This is only used for the autoscrape-ml model.'
-        )
-    )
-
-    # DFS Test Scraper
-    test_p = subparsers.add_parser(
-        "test",
-        description="A depth-first search crawler which doesn't interact with forms. This is just a test crawler to ensure basic systems are working."
-    )
-    test_p.add_argument(
-        "baseurl", type=str,
-        help=baseurl_desc
-    )
+    # # DFS Test Scraper
+    # test_p = subparsers.add_parser(
+    #     "test",
+    #     description="A depth-first search crawler which doesn't interact with forms. This is just a test crawler to ensure basic systems are working."
+    # )
+    # test_p.add_argument(
+    #     "baseurl", type=str,
+    #     help=baseurl_desc
+    # )
 
     args = parser.parse_args()
     return args
@@ -268,32 +352,22 @@ if __name__ == "__main__":
         "driver": args.driver,
         "load_images": args.load_images,
         "headless": args.headless,
+        "next_match": args.next_match,
+        "form_match": args.form_match,
+        "output_data_dir": args.output_data_dir,
+        "leave_host": args.leave_host,
+        "link_priority": args.link_priority,
+        "form_submit_wait": args.form_submit_wait,
+        "form_submit_natural_click": args.form_submit_natural_click,
+        "input": args.input
     }
+    autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
 
-    if args.scraper == "test":
-        autoscrape.TestScraper(args.baseurl, **kwargs).run()
+    # elif args.scraper == "autoscrape-ml":
+    #     kwargs["html_embeddings"] = args.html_embeddings or None
+    #     kwargs["word_embeddings"] = args.word_embeddings or None
+    #     autoscrape.MLAutoScraper(args.baseurl, **kwargs).run()
 
-    elif args.scraper == "manual-control":
-        kwargs["next_match"] = args.next_match
-        kwargs["form_match"] = args.form_match
-        kwargs["output_data_dir"] = args.output_data_dir
-        kwargs["input_minlength"] = args.input_minlength
-        kwargs["form_input_range"] = args.form_input_range
-        kwargs["wildcard"] = args.wildcard
-        kwargs["leave_host"] = args.leave_host
-        kwargs["link_priority"] = args.link_priority
-        kwargs["form_submit_wait"] = args.form_submit_wait
-        kwargs["form_submit_natural_click"] = args.form_submit_natural_click
-        kwargs["form_input_index"] = args.form_input_index
-        kwargs["input_type"] = args.input_type
-        kwargs["input_strings"] = args.input_strings
-        autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
-
-    elif args.scraper == "autoscrape-ml":
-        kwargs["html_embeddings"] = args.html_embeddings or None
-        kwargs["word_embeddings"] = args.word_embeddings or None
-        autoscrape.MLAutoScraper(args.baseurl, **kwargs).run()
-
-    else:
-        print("No scraper found for %s" % args.scraper)
+    # else:
+    #     print("No scraper found for %s" % args.scraper)
 
