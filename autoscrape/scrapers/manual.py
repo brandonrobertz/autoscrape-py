@@ -21,6 +21,11 @@ class ManualControlScraper(BaseScraper):
     A Depth-First Search scraper that looks for forms, inputs, and next
     buttons by some manual criteria and iterates accordingly.
     """
+    training_classes = [
+        "data_pages", "error_pages", "links_to_documents",
+        "links_to_search", "search_pages", "crawl_pages",
+        "interaction_pages",
+    ]
 
     # TODO: save the path to the matched search form to a file. then
     # upon subsequent loads, we can try that path first and then go
@@ -71,15 +76,21 @@ class ManualControlScraper(BaseScraper):
         else:
             self.input_gen = []
 
-    def save_screenshot(self):
+    def save_screenshot(self, classname=None):
         if not self.output_data_dir:
+            logger.debug("No output data dir! Not saving screenshot.")
             return
+
+        if classname not in self.training_classes:
+            raise ValueError("Base class speficied: %s" % classname)
 
         screenshot_dir = os.path.join(self.output_data_dir, "screenshots")
         if not os.path.exists(screenshot_dir):
             os.mkdir(screenshot_dir)
 
-        filepath = os.path.join(screenshot_dir, "%s.png" % int(time.time()))
+        filepath = os.path.join(screenshot_dir, "%s_%s.png" % (
+            int(time.time()), classname
+        ))
         logger.debug("Saving screenshot to file: %s." % filepath);
         with open(filepath, "wb") as f:
             png = self.control.scraper.driver.get_screenshot_as_png()
@@ -91,14 +102,11 @@ class ManualControlScraper(BaseScraper):
         to the given class folder.
         """
         if not self.output_data_dir:
+            logger.debug("No output data dir! Not saving data.")
             return
 
         logger.debug("Saving training page for class: %s" % classname)
-        classes = [
-            "data_pages", "error_pages", "links_to_documents",
-            "links_to_search", "search_pages"
-        ]
-        if classname not in classes:
+        if classname not in self.training_classes:
             raise ValueError("Base class speficied: %s" % classname)
 
         if not self.output_data_dir:
@@ -139,7 +147,7 @@ class ManualControlScraper(BaseScraper):
 
             # save the initial landing data page
             self.save_training_page(classname="data_pages")
-            self.save_screenshot()
+            self.save_screenshot(classname="data_pages")
 
             for ix in range(n_buttons):
                 button = button_data[ix]
@@ -152,7 +160,7 @@ class ManualControlScraper(BaseScraper):
                     self.control.select_button(ix, iterating_form=True)
                     # subsequent page loads get saved here
                     self.save_training_page(classname="data_pages")
-                    self.save_screenshot()
+                    self.save_screenshot(classname="data_pages")
 
                     found_next = True
                     # don't click any other next buttons
@@ -173,7 +181,8 @@ class ManualControlScraper(BaseScraper):
             self.control.back()
             return
 
-        self.save_screenshot()
+        self.save_training_page(classname="crawl_pages")
+        self.save_screenshot(classname="crawl_pages")
         scraped = False
         form_vectors = self.control.form_vectors(type="text")
 
@@ -194,7 +203,7 @@ class ManualControlScraper(BaseScraper):
 
             logger.debug("*** Found an input form!")
             self.save_training_page(classname="search_pages")
-            self.save_screenshot()
+            self.save_screenshot(classname="search_pages")
 
             # TODO: ML model here to determine which inputs require
             # input before submission. The form-selecting classifier
@@ -225,10 +234,10 @@ class ManualControlScraper(BaseScraper):
                         self.control.input_checkbox(
                             ix, input_index, to_check
                         )
-                self.save_screenshot()
+                self.save_screenshot(classname="interaction_pages")
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")
-                self.save_screenshot()
+                self.save_screenshot(classname="interaction_pages")
                 self.keep_clicking_next_btns(maxdepth=self.formdepth)
                 scraped = True
                 self.control.back()
