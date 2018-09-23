@@ -79,15 +79,16 @@ class Controller(object):
         logger.debug("Inputs: %s" % (len(self.inputs)))
         for i in range(len(self.inputs)):
             input_group = self.inputs[i]
-            for t in input_group:
-                elem = self.scraper.lookup_by_tag(t)
-                text = ""
-                placeholder = ""
-                if elem:
-                    text = elem.text.replace("\n", " ")
-                    placeholder = elem.get_attribute("placeholder")
-                logger.debug("  %s - ...%s, %s, %s" % (
-                    i, t[-25:], text, placeholder))
+            for itype_ix in range(len(input_group)):
+                for t in input_group[itype_ix]:
+                    elem = self.scraper.lookup_by_tag(t)
+                    text = ""
+                    placeholder = ""
+                    if elem:
+                        text = elem.text.replace("\n", " ")
+                        placeholder = elem.get_attribute("placeholder")
+                    logger.debug("  %s - ...%s, %s, %s" % (
+                        i, t[-25:], text, placeholder))
 
         logger.debug("Buttons: %s" % (len(self.buttons)))
         for i in range(len(self.buttons)):
