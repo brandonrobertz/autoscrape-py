@@ -23,13 +23,14 @@ class Scraper(object):
 
     def __init__(self, driver="Firefox", leave_host=False, load_images=False,
                  form_submit_natural_click=False, form_submit_wait=5,
-                 headless=True):
+                 not_headless=False):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
         if driver == "Firefox":
             firefox_options = webdriver.firefox.options.Options()
-            if headless:
+            # double contradiction for docopt hack :{
+            if not not_headless:
                 logger.debug("Headless mode enabled")
                 firefox_options.add_argument("--headless")
             firefox_profile = webdriver.FirefoxProfile()
@@ -54,7 +55,7 @@ class Scraper(object):
         # if using chromium and ubuntu, apt install chromium-chromedriver
         elif driver == "Chrome":
             chrome_options = webdriver.ChromeOptions()
-            if headless:
+            if not not_headless:
                 chrome_options.add_argument("--headless")
                 chrome_options.add_argument("--window-size=1920x1080")
             prefs = {
@@ -413,11 +414,19 @@ class Scraper(object):
     @property
     def page_html(self):
         """
-        Get the current DOM of the page.
+        Get the current DOM HTML of the page.
         """
         return self.driver_exec(self.driver.page_source)
 
     def download_page(self, url):
+        """
+        Fetch the given url, returning a byte stream of the page data. This
+        really is only useful in situations where the scraper is on a binary
+        filetype, such as PDF, etc.
+
+        Note that we're doing this as opposed to some XHR thing inside the
+        selenium driver due to CORS issues.
+        """
         response = urllib.request.urlopen(url)
         return response.read()
 

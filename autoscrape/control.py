@@ -21,7 +21,7 @@ class Controller(object):
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
                  leave_host=False, driver="Firefox",
                  form_submit_natural_click=False, form_submit_wait=5,
-                 load_images=False, headless=True):
+                 load_images=False, not_headless=True):
         """
         Set up our WebDriver and misc utilities.
         """
@@ -33,7 +33,7 @@ class Controller(object):
             leave_host=leave_host, driver=driver,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=form_submit_wait,
-            load_images=load_images, headless=headless
+            load_images=load_images, not_headless=not_headless
         )
         self.clickable = []
         # simply a list of form tags, each forms input contents is

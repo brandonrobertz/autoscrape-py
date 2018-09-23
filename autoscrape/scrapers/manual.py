@@ -43,21 +43,21 @@ class ManualControlScraper(BaseScraper):
                  output_data_dir=None, input=None, leave_host=False,
                  driver="Firefox", link_priority="search",
                  form_submit_natural_click=False, form_submit_wait=5,
-                 load_images=False, headless=True):
+                 load_images=False, not_headless=False):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
         self.control = Controller(
             leave_host=leave_host, driver=driver,
             form_submit_natural_click=form_submit_natural_click,
-            form_submit_wait=form_submit_wait,
-            load_images=load_images, headless=headless,
+            form_submit_wait=int(form_submit_wait),
+            load_images=load_images, not_headless=not_headless,
         )
         self.control.initialize(baseurl)
         # depth of DFS in search of form
-        self.maxdepth = maxdepth
+        self.maxdepth = int(maxdepth)
         # current depth of iterating through 'next' form buttons
-        self.formdepth = formdepth
+        self.formdepth = int(formdepth)
         # match for link to identify a "next" button
         self.next_match = next_match
         # string to match a form (by element text) we want to scrape
@@ -69,7 +69,7 @@ class ManualControlScraper(BaseScraper):
         # attempt a position-based "natural click" over the element
         self.form_submit_natural_click = form_submit_natural_click
         # a period of seconds to force a wait after a submit
-        self.form_submit_wait = form_submit_wait
+        self.form_submit_wait = int(form_submit_wait)
         # a generator, outputting individual form interaction plans
         if input:
             self.input_gen = InputParser(input).generate()
