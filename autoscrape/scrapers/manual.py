@@ -6,6 +6,7 @@ import os
 import string
 import sys
 import re
+from urllib.parse import urlparse
 from itertools import product
 
 from . import BaseScraper
@@ -86,7 +87,7 @@ class ManualControlScraper(BaseScraper):
 
         screenshot_dir = os.path.join(self.output_data_dir, "screenshots")
         if not os.path.exists(screenshot_dir):
-            os.mkdir(screenshot_dir)
+            os.makedirs(screenshot_dir)
 
         filepath = os.path.join(screenshot_dir, "%s_%s.png" % (
             int(time.time()), classname
@@ -109,21 +110,35 @@ class ManualControlScraper(BaseScraper):
         if classname not in self.training_classes:
             raise ValueError("Base class speficied: %s" % classname)
 
-        if not self.output_data_dir:
-            return
-
         classdir = os.path.join(self.output_data_dir, classname)
         if not os.path.exists(classdir):
-            os.mkdir(classdir)
+            os.makedirs(classdir)
 
-        html = self.control.scraper.page_html
+        data = self.control.scraper.page_html
         url = self.control.scraper.page_url
-        h = hashlib.sha256(html.encode("utf-8")).digest().hex()
-        logger.debug("URL: %s, Hash: %s" % (url, h))
-        filepath = os.path.join(classdir, "%s.html" % h)
+        # try and extract the extension from the URL
+        path = urlparse(url).path
+        ext = os.path.splitext(path)[1]
+        ext = ext if ext else ".html"
+        # try a dynamic ajax download via injected script
+        if ext not in  [".html", ".htm", ".php"]:
+            data = self.control.scraper.download_page(url)
+        # hash the contents of the file, so we don't *not* save dynamic
+        # JS pages with the same URl and that we *don't* excessively save
+        # the same page over and over
+        if type(data) == bytes:
+            sha256 = hashlib.sha256()
+            sha256.update(data)
+            h = sha256.digest().hex()
+            writetype = "wb"
+        else:
+            h = hashlib.sha256(data.encode("utf-8")).digest().hex()
+            writetype = "w"
+        logger.debug("URL: %s, Hash: %s, Extension: %s" % (url, h, ext))
+        filepath = os.path.join(classdir, "%s%s" % (h, ext))
 
-        with open(filepath, "w") as f:
-            f.write(html)
+        with open(filepath, writetype) as f:
+            f.write(data)
 
     def keep_clicking_next_btns(self, maxdepth=0):
         """

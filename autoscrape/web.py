@@ -2,6 +2,7 @@
 import time
 import logging
 import re
+import urllib.request
 
 import selenium
 from selenium import webdriver
@@ -40,6 +41,9 @@ class Scraper(object):
             #  disable flash
             firefox_profile.set_preference(
                 'dom.ipc.plugins.enabled.libflashplayer.so', 'false'
+            )
+            firefox_profile.set_preference(
+                'security.fileuri.strict_origin_policy', 'false'
             )
             self.driver = webdriver.Firefox(
                 firefox_options=firefox_options,
@@ -408,7 +412,14 @@ class Scraper(object):
 
     @property
     def page_html(self):
+        """
+        Get the current DOM of the page.
+        """
         return self.driver_exec(self.driver.page_source)
+
+    def download_page(self, url):
+        response = urllib.request.urlopen(url)
+        return response.read()
 
     @property
     def page_url(self):
