@@ -1,7 +1,5 @@
 import re
 
-import exrex
-
 
 class InputParser:
     def __init__(self, input):
@@ -39,20 +37,20 @@ class InputParser:
 
         From this input string:
 
-          "i:0:[a-z]%,c:1:True,s:2:France"
+          "i:0:a%,c:1:True,s:2:France"
 
         We get the following output generator:
 
             [
               [
                 { "index": 0, "string": "a%", "type": "input" }
-                { "index": 1, "select": True, "type": "checkbox" }
+                { "index": 1, "action": True, "type": "checkbox" }
                 { "index": 2, "string": "France", "type": "select" }
               ],
               ...,
               [
                 { "index": 0, "string": "z%", "type": "input" },
-                { "index": 1, "select": True, "type": "checkbox" }
+                { "index": 1, "action": True, "type": "checkbox" }
                 { "index": 2, "string": "France", "type": "select" }
               ]
             ]
@@ -62,6 +60,9 @@ class InputParser:
         checked and input 2, a choice select, selected to the "France"
         option).
         """
+        # TODO: Find an overall way to support ranges without resulting
+        # to clunky regex (which don't support ordering). Right now just
+        # use GNU Parallel or something to do ranges.
         # split the independent searches first
         inputs = re.split(r'(?<!\\);', self.input)
         for inp in inputs:
@@ -72,7 +73,6 @@ class InputParser:
                 # input type, input index, action
                 itype, ix, action = indiv_inputs.split(":", 2)
                 action = action.replace("\,", ",").replace("\;", ";")
-                # action_gen = list(exrex.generate(action))
                 ix = int(ix)
                 if itype == "i":
                     indiv_search.append({
@@ -96,27 +96,4 @@ class InputParser:
                     raise Exception("Invalid input type found: %s" % itype)
 
             yield indiv_search
-
-        # # now, since the "action" on some of the individual searches above
-        # # can have regex, we need to unroll them, one-by-one, and expand
-        # # the regex into a generator yielding all specified searches
-        # expanded = []
-        # for search in searches:
-        #     print("search", search)
-        #     indiv_search = []
-        #     for ix in range(len(search)):
-        #         this = search[ix]
-        #         # don't do anything special for checkboxes, it's boolean
-        #         if this["type"] == "checkbox":
-        #             indiv_search.append(this)
-        #             continue
-        #         for string in exrex.generate(this["string"]):
-        #             indiv_search.append({
-        #                 "index": this["index"],
-        #                 "type": this["type"],
-        #                 "string": string
-        #             })
-        #             self.append_rest(ix, search)
-        #         print("indiv_input", indiv_input)
-        # return expanded
 
