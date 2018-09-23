@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
-AUTOSCRAPE - Interactively crawl, find searchable forms, input data to them and scrape data on the results, from an initial BASEURL.
+AUTOSCRAPE - Interactively crawl, find searchable forms,
+input data to them and scrape data on the results, from an
+initial BASEURL.
 
 Usage:
     scrape.py [options] BASEURL
