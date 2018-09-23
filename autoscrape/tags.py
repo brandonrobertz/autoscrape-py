@@ -137,7 +137,9 @@ class Tagger(object):
         "checkbox", or None (all types), indicating the type of input.
         """
         x_path = "//input|input"
-        if itype:
+        if itype == "select":
+            x_path = "//select|select"
+        elif itype:
             x_path = "//input[@type='%s']|input[@type='%s']" % (itype, itype)
 
         elem = self.driver

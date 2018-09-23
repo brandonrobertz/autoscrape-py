@@ -11,6 +11,7 @@ from selenium.common.exceptions import (
     StaleElementReferenceException, TimeoutException,
     NoSuchElementException, ElementNotInteractableException,
 )
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from .tags import Tagger
@@ -291,6 +292,31 @@ class Scraper(object):
         ))
         return True
 
+    def expand_key_substitutions(self, input):
+        """
+        This split an input string into a series of either
+        plain text chunks of webdriver Key objects.
+        """
+        replacements = {
+            "[:left:]": Keys.ARROW_LEFT,
+            "[:right:]": Keys.ARROW_RIGHT,
+            "[:down:]": Keys.ARROW_DOWN,
+            "[:up:]": Keys.ARROW_UP,
+            "[:enter:]": Keys.ENTER,
+        }
+        split_replacements = re.split(
+            "(\[:left:\]|\[:right:\]|\[:down:\]|\[:up:\]|\[:enter:\])",
+            input
+        )
+        logger.debug("Split replacements input string: %s" % split_replacements)
+        for chunk in split_replacements:
+            if not chunk:
+                continue
+            if chunk in replacements:
+                yield replacements[chunk]
+                continue
+            yield chunk
+
     def input(self, tag, input):
         """
         Enter some input into an element by a given tag.
@@ -303,7 +329,8 @@ class Scraper(object):
             self.driver_exec(elem.clear)
         except ElementNotInteractableException as e:
             pass
-        self.driver_exec(elem.send_keys, input)
+        for inp in self.expand_key_substitutions(input):
+            elem.send_keys(inp)
         self.path.append(("input", (tag,input,), {}))
 
     def input_select_option(self, tag, option_str):
