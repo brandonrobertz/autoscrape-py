@@ -87,7 +87,7 @@ Webdriver-Specific and General Options:
         This speeds up scrapes on sites and lowers bandwidth
         needs. This option fetches all images on a page.
 
-    --not-headless
+    --show-browser
         By default, we hide the browser during operation.
         This option displays a browser window, mostly
         for debugging purposes.
@@ -97,8 +97,8 @@ Webdriver-Specific and General Options:
         and "Chrome". [default: Firefox]
 
     --loglevel LEVEL
-         Loglevel, note that DEBUG is extremely verbose.
-         [default: INFO]
+        Loglevel, note that DEBUG is extremely verbose.
+        [default: INFO]
 
 Data Saving Options:
     --output-data-dir OUTPUT_DATA_DIR

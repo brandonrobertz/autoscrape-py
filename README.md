@@ -128,7 +128,7 @@ Autoscrape manual-mode full options:
             This speeds up scrapes on sites and lowers bandwidth
             needs. This option fetches all images on a page.
     
-        --not-headless
+        --show-browser
             By default, we hide the browser during operation.
             This option displays a browser window, mostly
             for debugging purposes.

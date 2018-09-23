@@ -43,7 +43,7 @@ class ManualControlScraper(BaseScraper):
                  output_data_dir=None, input=None, leave_host=False,
                  driver="Firefox", link_priority="search",
                  form_submit_natural_click=False, form_submit_wait=5,
-                 load_images=False, not_headless=False):
+                 load_images=False, show_browser=False):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
@@ -51,7 +51,7 @@ class ManualControlScraper(BaseScraper):
             leave_host=leave_host, driver=driver,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=int(form_submit_wait),
-            load_images=load_images, not_headless=not_headless,
+            load_images=load_images, show_browser=show_browser,
         )
         self.control.initialize(baseurl)
         # depth of DFS in search of form

@@ -24,14 +24,13 @@ class Scraper(object):
 
     def __init__(self, driver="Firefox", leave_host=False, load_images=False,
                  form_submit_natural_click=False, form_submit_wait=5,
-                 not_headless=False):
+                 show_browser=False):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
         if driver == "Firefox":
             firefox_options = webdriver.firefox.options.Options()
-            # double contradiction for docopt hack :{
-            if not not_headless:
+            if not show_browser:
                 logger.debug("Headless mode enabled")
                 firefox_options.add_argument("--headless")
             firefox_profile = webdriver.FirefoxProfile()
@@ -56,7 +55,7 @@ class Scraper(object):
         # if using chromium and ubuntu, apt install chromium-chromedriver
         elif driver == "Chrome":
             chrome_options = webdriver.ChromeOptions()
-            if not not_headless:
+            if not show_browser:
                 chrome_options.add_argument("--headless")
                 chrome_options.add_argument("--window-size=1920x1080")
             prefs = {
