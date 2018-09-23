@@ -361,7 +361,8 @@ if __name__ == "__main__":
         "form_submit_natural_click": args.form_submit_natural_click,
         "input": args.input
     }
-    autoscrape.ManualControlScraper(args.baseurl, **kwargs).run()
+    print("Args", kwargs)
+    autoscrape.ManualControlScraper(args.BASEURL, **kwargs).run()
 
     # elif args.scraper == "autoscrape-ml":
     #     kwargs["html_embeddings"] = args.html_embeddings or None

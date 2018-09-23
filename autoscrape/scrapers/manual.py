@@ -58,12 +58,6 @@ class ManualControlScraper(BaseScraper):
         self.form_match = form_match
         # Where to write training data from crawl
         self.output_data_dir = output_data_dir
-        # minimum length of form inputs (in characters)
-        self.input_minlength = input_minlength
-        # Additonal filter for range of chars inputted to forms as search
-        self.form_input_range = form_input_range
-        # Wildcard character to be added to search inputs
-        self.wildcard = wildcard
         # string used to match link text in order to sort them higher
         self.link_priority = link_priority
         # attempt a position-based "natural click" over the element
@@ -71,7 +65,11 @@ class ManualControlScraper(BaseScraper):
         # a period of seconds to force a wait after a submit
         self.form_submit_wait = form_submit_wait
         # a generator, outputting individual form interaction plans
-        self.input_gen = InputParser(self.inputs).generate()
+        if input:
+            self.input_gen = InputParser(input).generate()
+        # if not specified, do nothing with forms
+        else:
+            self.input_gen = []
 
     def save_screenshot(self):
         if not self.output_data_dir:
@@ -179,6 +177,8 @@ class ManualControlScraper(BaseScraper):
         scraped = False
         form_vectors = self.control.form_vectors(type="text")
 
+        # NOTE: we never get into this loop if self.input_gen is empty
+        # this arises when input was not handed to the initializer
         for ix in range(len(form_vectors)):
             form_data = form_vectors[ix]
             # inputs are keyed by form index

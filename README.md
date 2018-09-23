@@ -28,9 +28,9 @@ Then set up your python virtual environment (Python 3.6 required) and install th
 
 You can run a test to ensure your webdriver is set up correctly by running the `test` crawler:
 
-    ./scrape.py --loglevel DEBUG --maxdepth 10 [SITE_URL]
+    ./scrape.py --headless False [SITE_URL]
 
-The `test` crawler will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data.
+The `test` crawler will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data or save any crawl data.
 
 ### Manual Config-Based Scraper
 
