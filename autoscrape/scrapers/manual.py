@@ -181,9 +181,9 @@ class ManualControlScraper(BaseScraper):
         # this arises when input was not handed to the initializer
         for ix in range(len(form_vectors)):
             form_data = form_vectors[ix]
-            # inputs are keyed by form index
-            inputs = self.control.inputs[ix]
 
+            # inputs are keyed by form index, purely here for debug purposes
+            inputs = self.control.inputs[ix]
             logger.debug("Form: %s Text: %s" % (ix, form_data))
             logger.debug("Inputs: %s" % inputs)
 
@@ -222,7 +222,7 @@ class ManualControlScraper(BaseScraper):
                             "Checking" if to_check else "Unchecking",
                             input_index
                         ))
-                        self.control.input_select_option(
+                        self.control.input_checkbox(
                             ix, input_index, to_check
                         )
                 self.save_screenshot()

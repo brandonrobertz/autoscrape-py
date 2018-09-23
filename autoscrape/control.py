@@ -36,7 +36,18 @@ class Controller(object):
             load_images=load_images, headless=headless
         )
         self.clickable = []
+        # simply a list of form tags, each forms input contents is
+        # contained in the self.inputs multi-dimensional array, below
         self.forms = []
+        # this expands into the following format:
+        # [ form_tag:
+        #   [
+        #     [text input tags...],
+        #     [select input tags...],
+        #     [checkbox input tags...]
+        #   ],
+        #   other forms ...,
+        # ]
         self.inputs = []
 
     def load_indices(self):
@@ -115,8 +126,25 @@ class Controller(object):
         return clicked
 
     def input(self, form_ix, index, chars):
-        tag = self.inputs[form_ix][index]
+        """
+        Add some string to a text input under a given form.
+        """
+        tag = self.inputs[form_ix][0][index]
         self.scraper.input(tag, chars)
+
+    def input_select_option(self, form_ix, index, option_str):
+        """
+        Select an option for a select input under a given form.
+        """
+        tag = self.inputs[form_ix][1][index]
+        self.scraper.input_select_option(tag, option_str)
+
+    def input_checkbox(self, form_ix, index, to_check):
+        """
+        Check/uncheck a checkbox input under a given form.
+        """
+        tag = self.inputs[form_ix][2][index]
+        self.scraper.input_checkbox(tag, to_check)
 
     def submit(self, index):
         tag = self.forms[index]

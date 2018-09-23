@@ -10,7 +10,7 @@ from selenium.common.exceptions import (
     StaleElementReferenceException, TimeoutException,
     NoSuchElementException, ElementNotInteractableException,
 )
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from .tags import Tagger
 
@@ -300,6 +300,33 @@ class Scraper(object):
             pass
         self.driver_exec(elem.send_keys, input)
         self.path.append(("input", (tag,input,), {}))
+
+    def input_select_option(self, tag, option_str):
+        """
+        Select an input select option based on its visible string value.
+        """
+        logger.debug("Selecting option %s for tag %s" % (option_str, tag))
+        elem = self.lookup_by_tag(tag)
+        self.driver_exec(self.scrolltoview, elem)
+        # TODO: wrap in driver_exec after testing
+        select = Select(elem)
+        # select by visible text
+        select.select_by_visible_text(option_str)
+        self.path.append(("input_select_option", (tag,option_str,), {}))
+
+    def input_checkbox(self, tag, to_check):
+        """
+        Check, uncheck, or don't touch an input checkbox, based
+        on its current checked value.
+        """
+        logger.debug("Inputting %s into tag %s" % (input, tag))
+        elem = self.lookup_by_tag(tag)
+        self.driver_exec(self.scrolltoview, elem)
+        # TODO: wrap in driver_exec after testing
+        if elem.is_selected() != to_check:
+            elem.click()
+            self.driver_exec(elem.clear)
+        self.path.append(("input_checkbox", (tag,to_check,), {}))
 
     def click_at_position_over_element(self, elem):
         """

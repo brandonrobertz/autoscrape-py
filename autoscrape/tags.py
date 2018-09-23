@@ -130,12 +130,16 @@ class Tagger(object):
 
         return tags
 
-    def get_inputs(self, form=None):
+    def get_inputs(self, form=None, itype=None):
         """
         Get inputs, either for full page or by a form WebElement.
-        Returns a list of tags.
+        Returns a list of tags. itype can be one of "text", "select",
+        "checkbox", or None (all types), indicating the type of input.
         """
-        x_path = "//input[@type='text']|input[@type='text']"
+        x_path = "//input|input"
+        if itype:
+            x_path = "//input[@type='%s']|input[@type='%s']" % (itype, itype)
+
         elem = self.driver
         tags = []
         if form:
@@ -173,7 +177,9 @@ class Tagger(object):
                 logger.warn("No tag for element %s" % elem)
                 continue
 
-            tags[tag] = self.get_inputs(form=elem)
+            tags[tag].append(self.get_inputs(form=elem, type="text"))
+            tags[tag].append(self.get_inputs(form=elem, type="select"))
+            tags[tag].append(self.get_inputs(form=elem, type="checkbox"))
 
         return tags
 
