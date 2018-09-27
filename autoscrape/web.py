@@ -64,6 +64,24 @@ class Scraper(object):
             chrome_options.add_experimental_option("prefs",prefs)
             self.driver = webdriver.Chrome(chrome_options=chrome_options)
 
+        elif driver == "remote":
+            self.driver = webdriver.Remote(
+                command_executor="http://localhost:4444/wd/hub",
+                desired_capabilities={
+                    "browserName": "chrome",
+                    "goog:chromeOptions": {
+                        "args": [
+                            "--disable-logging",
+                            "--headless",
+                            "--window-size=1920x1080",
+                        ],
+                        "prefs": {
+                            "profile.managed_default_content_settings.images": 2
+                        },
+                        "extensions": [],
+                    }
+                })
+
         # set of clicked elements
         self.visited = set()
         # queue of the path that led us to the current page

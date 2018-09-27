@@ -93,8 +93,8 @@ Webdriver-Specific and General Options:
         for debugging purposes.
 
     --driver DRIVER
-        Which browser to use. Current support for "Firefox"
-        and "Chrome". [default: Firefox]
+        Which browser to use. Current support for "Firefox",
+        "Chrome", and "remote". [default: Firefox]
 
     --loglevel LEVEL
         Loglevel, note that DEBUG is extremely verbose.
