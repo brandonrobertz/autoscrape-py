@@ -188,7 +188,7 @@ class Tagger(object):
         return tags
 
     def get_buttons(self, in_form=False):
-        x_path = "//form//a|//button|//input[@type='button']"
+        x_path = "//form//a|//button|//input[@type='button']|//input[@type='submit']"
         btns = self.driver.find_elements_by_xpath(x_path)
 
         tags = []
