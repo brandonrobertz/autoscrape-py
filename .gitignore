@@ -14,3 +14,6 @@ autoscrape-data/
 deps/
 training_data/
 
+# webdriver remote settings
+nodeConfig.json
+
