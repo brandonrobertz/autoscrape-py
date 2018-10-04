@@ -20,6 +20,7 @@ class Controller(object):
 
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
                  leave_host=False, driver="Firefox",
+                 remote_hub="http://localhost:4444/wd/hub",
                  form_submit_natural_click=False, form_submit_wait=5,
                  load_images=False, show_browser=False):
         """
@@ -30,7 +31,7 @@ class Controller(object):
             word_embeddings_file=word_embeddings_file,
         )
         self.scraper = Scraper(
-            leave_host=leave_host, driver=driver,
+            leave_host=leave_host, driver=driver, remote_hub=remote_hub,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=form_submit_wait,
             load_images=load_images, show_browser=show_browser
@@ -58,48 +59,48 @@ class Controller(object):
         self.inputs = [ tags for tags in forms_dict.values() ]
         self.buttons = self.scraper.get_buttons()
 
-        logger.debug("Clickable links: %s" % (len(self.clickable)))
-        for i in range(len(self.clickable)):
-            t = self.clickable[i]
-            elem = self.scraper.lookup_by_tag(t)
-            text = ""
-            if elem:
-                text = elem.text.replace("\n", " ")
-            logger.debug("  %s - ...%s, %s" % (i, t[-25:], text))
+        # logger.debug("Clickable links: %s" % (len(self.clickable)))
+        # for i in range(len(self.clickable)):
+        #     t = self.clickable[i]
+        #     elem = self.scraper.lookup_by_tag(t)
+        #     text = ""
+        #     if elem:
+        #         text = elem.text.replace("\n", " ")
+        #     logger.debug("  %s - ...%s, %s" % (i, t[-25:], text))
 
-        logger.debug("Forms: %s:" % (len(self.forms)))
-        for i in range(len(self.forms)):
-            t = self.forms[i]
-            text = ""
-            elem = self.scraper.lookup_by_tag(t)
-            if elem:
-                text = elem.text.replace("\n", " ")
-            logger.debug("  %s - ...%s, %s" % (i, t[-25:], text))
+        # logger.debug("Forms: %s:" % (len(self.forms)))
+        # for i in range(len(self.forms)):
+        #     t = self.forms[i]
+        #     text = ""
+        #     elem = self.scraper.lookup_by_tag(t)
+        #     if elem:
+        #         text = elem.text.replace("\n", " ")
+        #     logger.debug("  %s - ...%s, %s" % (i, t[-25:], text))
 
-        logger.debug("Inputs: %s" % (len(self.inputs)))
-        for i in range(len(self.inputs)):
-            input_group = self.inputs[i]
-            for itype_ix in range(len(input_group)):
-                for t in input_group[itype_ix]:
-                    elem = self.scraper.lookup_by_tag(t)
-                    text = ""
-                    placeholder = ""
-                    if elem:
-                        text = elem.text.replace("\n", " ")
-                        placeholder = elem.get_attribute("placeholder")
-                    logger.debug("  %s - ...%s, %s, %s" % (
-                        i, t[-25:], text, placeholder))
+        # logger.debug("Inputs: %s" % (len(self.inputs)))
+        # for i in range(len(self.inputs)):
+        #     input_group = self.inputs[i]
+        #     for itype_ix in range(len(input_group)):
+        #         for t in input_group[itype_ix]:
+        #             elem = self.scraper.lookup_by_tag(t)
+        #             text = ""
+        #             placeholder = ""
+        #             if elem:
+        #                 text = elem.text.replace("\n", " ")
+        #                 placeholder = elem.get_attribute("placeholder")
+        #             logger.debug("  %s - ...%s, %s, %s" % (
+        #                 i, t[-25:], text, placeholder))
 
-        logger.debug("Buttons: %s" % (len(self.buttons)))
-        for i in range(len(self.buttons)):
-            t = self.buttons[i]
-            elem = self.scraper.lookup_by_tag(t)
-            text = ""
-            value = ""
-            if elem:
-                text = elem.text.replace("\n", " ")
-                value = elem.get_attribute("value")
-            logger.debug("  %s - ...%s, %s, %s" % (i, t[-25:], text, value))
+        # logger.debug("Buttons: %s" % (len(self.buttons)))
+        # for i in range(len(self.buttons)):
+        #     t = self.buttons[i]
+        #     elem = self.scraper.lookup_by_tag(t)
+        #     text = ""
+        #     value = ""
+        #     if elem:
+        #         text = elem.text.replace("\n", " ")
+        #         value = elem.get_attribute("value")
+        #     logger.debug("  %s - ...%s, %s, %s" % (i, t[-25:], text, value))
 
     def initialize(self, url):
         """

@@ -24,7 +24,7 @@ class Scraper(object):
 
     def __init__(self, driver="Firefox", leave_host=False, load_images=False,
                  form_submit_natural_click=False, form_submit_wait=5,
-                 show_browser=False):
+                 show_browser=False, remote_hub="http://localhost:4444/wd/hub"):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
@@ -66,7 +66,7 @@ class Scraper(object):
 
         elif driver == "remote":
             self.driver = webdriver.Remote(
-                command_executor="http://localhost:4444/wd/hub",
+                command_executor=remote_hub,
                 desired_capabilities={
                     "browserName": "chrome",
                     "goog:chromeOptions": {
@@ -258,20 +258,21 @@ class Scraper(object):
             logger.error(msg % (tag, e))
 
     def elem_stats(self, elem):
-        position  = self.driver_exec(elem.location)
-        css_vis   = self.driver_exec(elem.value_of_css_property, "visibility")
-        css_dis   = self.driver_exec(elem.value_of_css_property, "display")
-        displayed = self.driver_exec(elem.is_displayed)
-        enabled   = self.driver_exec(elem.is_enabled)
-        size      = self.driver_exec(elem.size)
-        text      = self.driver_exec(elem.text)
-        logger.debug("  element position %s" % position)
-        logger.debug("  displayed: %s" % displayed)
-        logger.debug("  enabled: %s" % enabled)
-        logger.debug("  size: %s" % size)
-        logger.debug("  css visibility: %s" % css_vis)
-        logger.debug("  css display: %s" % css_dis)
-        logger.debug("  text: %s" % text.replace("\n", "\\n"))
+        # position  = self.driver_exec(elem.location)
+        # css_vis   = self.driver_exec(elem.value_of_css_property, "visibility")
+        # css_dis   = self.driver_exec(elem.value_of_css_property, "display")
+        # displayed = self.driver_exec(elem.is_displayed)
+        # enabled   = self.driver_exec(elem.is_enabled)
+        # size      = self.driver_exec(elem.size)
+        # text      = self.driver_exec(elem.text)
+        # logger.debug("  element position %s" % position)
+        # logger.debug("  displayed: %s" % displayed)
+        # logger.debug("  enabled: %s" % enabled)
+        # logger.debug("  size: %s" % size)
+        # logger.debug("  css visibility: %s" % css_vis)
+        # logger.debug("  css display: %s" % css_dis)
+        # logger.debug("  text: %s" % text.replace("\n", "\\n"))
+        pass
 
     def click(self, tag, iterating_form=False):
         """

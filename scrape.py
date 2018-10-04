@@ -96,6 +96,11 @@ Webdriver-Specific and General Options:
         Which browser to use. Current support for "Firefox",
         "Chrome", and "remote". [default: Firefox]
 
+    --remote-hub URI
+        If using "remote" driver, specify the hub URI to
+        connect to. Needs the proto, address, port, and path.
+        [default: http://localhost:4444/wd/hub]
+
     --loglevel LEVEL
         Loglevel, note that DEBUG is extremely verbose.
         [default: INFO]

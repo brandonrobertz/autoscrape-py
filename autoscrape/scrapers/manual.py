@@ -41,14 +41,14 @@ class ManualControlScraper(BaseScraper):
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
                  output_data_dir=None, input=None, leave_host=False,
-                 driver="Firefox", link_priority="search",
-                 form_submit_natural_click=False, form_submit_wait=5,
-                 load_images=False, show_browser=False):
+                 driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
+                 link_priority="search", form_submit_natural_click=False,
+                 form_submit_wait=5, load_images=False, show_browser=False):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
         self.control = Controller(
-            leave_host=leave_host, driver=driver,
+            leave_host=leave_host, driver=driver, remote_hub=remote_hub,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=int(form_submit_wait),
             load_images=load_images, show_browser=show_browser,
@@ -121,7 +121,7 @@ class ManualControlScraper(BaseScraper):
         ext = os.path.splitext(path)[1]
         ext = ext if ext else ".html"
         # try a dynamic ajax download via injected script
-        if ext not in  [".html", ".htm", ".php"]:
+        if ext not in  [".html", ".htm", ".php", ".aspx", ".asp"]:
             data = self.control.scraper.download_page(url)
         # hash the contents of the file, so we don't *not* save dynamic
         # JS pages with the same URl and that we *don't* excessively save
