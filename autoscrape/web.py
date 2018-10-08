@@ -339,7 +339,7 @@ class Scraper(object):
         """
         Enter some input into an element by a given tag.
         """
-        logger.debug("Inputting %s into tag %s" % (input, tag))
+        logger.info("Injecting text \"%s\" to input" % (input))
         elem = self.lookup_by_tag(tag)
         self.driver_exec(self.scrolltoview, elem)
         self.elem_stats(elem)
@@ -355,7 +355,7 @@ class Scraper(object):
         """
         Select an input select option based on its visible string value.
         """
-        logger.debug("Selecting option %s for tag %s" % (option_str, tag))
+        logger.info("Selecting option %s" % (option_str))
         elem = self.lookup_by_tag(tag)
         self.driver_exec(self.scrolltoview, elem)
         # TODO: wrap in driver_exec after testing
@@ -369,7 +369,7 @@ class Scraper(object):
         Check, uncheck, or don't touch an input checkbox, based
         on its current checked value.
         """
-        logger.debug("Inputting %s into tag %s" % (input, tag))
+        logger.info("Checking to checkbox selected=%s" % (to_check))
         elem = self.lookup_by_tag(tag)
         self.driver_exec(self.scrolltoview, elem)
         # TODO: wrap in driver_exec after testing
@@ -383,7 +383,7 @@ class Scraper(object):
         Perform a "natural" click of an element, so that if there are
         any parent listeners, they will also be triggered.
         """
-        logger.debug("Performing a 'natural' click")
+        logger.info("Performing a 'natural' click")
         from selenium.webdriver.common.action_chains import ActionChains
         ac = ActionChains(self.driver)
         x_off = 0
@@ -394,7 +394,7 @@ class Scraper(object):
         """
         Submit a form from a given tag. Assumes all inputs are filled.
         """
-        logger.info("Submitting form tag %s" % tag)
+        logger.info("Submitting form by tag: %s" % tag)
         form = self.lookup_by_tag(tag)
         self.elem_stats(form)
         self.driver_exec(self.scrolltoview, form)
@@ -432,7 +432,6 @@ class Scraper(object):
         # try to perform a form submit
         sub_failure = False
         if sub:
-            logger.debug("Using form submit link")
             try:
                 if self.form_submit_natural_click:
                     self.click_at_position_over_element(sub)
@@ -472,6 +471,7 @@ class Scraper(object):
         Note that we're doing this as opposed to some XHR thing inside the
         selenium driver due to CORS issues.
         """
+        logger.info("Fetching non-HTML page directly: %s" % url)
         response = urllib.request.urlopen(url)
         return response.read()
 

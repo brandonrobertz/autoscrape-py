@@ -99,7 +99,7 @@ class Tagger(object):
                 continue
 
             if href.split("#")[0] == self.current_url:
-                print("Skipping current url (%s) href %s" % (
+                logger.debug("Skipping current url (%s) href %s" % (
                     self.current_url, href
                 ))
                 continue

@@ -274,19 +274,22 @@ class ManualControlScraper(BaseScraper):
         link_vectors = self.control.link_vectors()
         link_zip = list(zip(range(len(link_vectors)),link_vectors))
         if self.link_priority:
+            logger.debug("Sorting by link priority: %s" % self.link_priority)
             link_zip.sort(
                 key=lambda x: not re.findall(self.link_priority, x[1])
             )
         if self.ignore_links:
+            logger.debug("Ignoring links matching: %s" % self.ignore_links)
             link_zip = filter(
                 lambda x: not re.findall(self.ignore_links, x[1]),
                 link_zip
             )
-        for ix, _ in link_zip:
+        for ix, text in link_zip:
             if depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
                 break
 
+            logger.info("Clicking link text: %s" % text)
             if self.control.select_link(ix):
                 logger.debug("Clicked! Recursing ...")
                 self.run(depth=depth + 1)
