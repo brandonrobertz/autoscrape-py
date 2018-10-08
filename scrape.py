@@ -21,8 +21,13 @@ Crawl-Specific Options:
 
     --link-priority SORT_STRING
         A string to sort the links by. In this case, any link
-        containing "search" will be clicked before any other
-        links. [default: search]
+        containing "SORT_STRING" will be clicked before any other
+        links.
+
+    --ignore-links MATCH_STRING
+        This option can be used to remove any links matching
+        MATCH_STRING (can be a regex or just a string match)
+        from consideration for clicking.
 
 Interactive Form Search Options:
     --form-match SEARCH_STRING

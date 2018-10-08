@@ -115,7 +115,7 @@ class Scraper(object):
             except BrokenPipeError as e:
                 if pipe_retries > self.broken_pipe_retries:
                     msg = "Exceeded max broken pipe retries: %s"
-                    logger.info(msg % self.broken_pipe_retries)
+                    logger.debug(msg % self.broken_pipe_retries)
                     msg = "Broken pipe err. fn: %s, args: %s, kwargs: %s"
                     logger.error(msg % (fn, args, kwargs))
                     raise e
@@ -204,7 +204,7 @@ class Scraper(object):
         the time we just want to click a link or submit a form using
         webdriver.
         """
-        logger.debug("Fetching %s" % url)
+        logger.info("Fetching %s" % url)
         self.loadwait(self.driver.get, url)
         self.path.append(("fetch", (url,), {}))
 
@@ -394,7 +394,7 @@ class Scraper(object):
         """
         Submit a form from a given tag. Assumes all inputs are filled.
         """
-        logger.debug("Submitting tag %s" % tag)
+        logger.info("Submitting form tag %s" % tag)
         form = self.lookup_by_tag(tag)
         self.elem_stats(form)
         self.driver_exec(self.scrolltoview, form)

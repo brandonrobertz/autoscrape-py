@@ -42,7 +42,8 @@ class ManualControlScraper(BaseScraper):
                  next_match="next page", form_match="first name",
                  output_data_dir=None, input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
-                 link_priority="search", form_submit_natural_click=False,
+                 link_priority=None, ignore_links=None,
+                 form_submit_natural_click=False,
                  form_submit_wait=5, load_images=False, show_browser=False):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
@@ -66,6 +67,8 @@ class ManualControlScraper(BaseScraper):
         self.output_data_dir = output_data_dir
         # string used to match link text in order to sort them higher
         self.link_priority = link_priority
+        # string or regex to be used to omit links from clickable
+        self.ignore_links = ignore_links
         # attempt a position-based "natural click" over the element
         self.form_submit_natural_click = form_submit_natural_click
         # a period of seconds to force a wait after a submit
@@ -213,7 +216,7 @@ class ManualControlScraper(BaseScraper):
 
             # TODO: ML model here to determine if this form is
             # scrapeable. Currently this uses strict text match.
-            if self.form_match.lower() not in form_data.lower():
+            if self.form_match and self.form_match.lower() not in form_data.lower():
                 continue
 
             logger.debug("*** Found an input form!")
@@ -270,10 +273,15 @@ class ManualControlScraper(BaseScraper):
         links = self.control.clickable
         link_vectors = self.control.link_vectors()
         link_zip = list(zip(range(len(link_vectors)),link_vectors))
-        link_zip.sort(
-            key=lambda r: self.link_priority in r[1].lower(),
-            reverse=True
-        )
+        if self.link_priority:
+            link_zip.sort(
+                key=lambda x: not re.findall(self.link_priority, x[1])
+            )
+        if self.ignore_links:
+            link_zip = filter(
+                lambda x: not re.findall(self.ignore_links, x[1]),
+                link_zip
+            )
         for ix, _ in link_zip:
             if depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
