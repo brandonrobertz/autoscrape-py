@@ -183,6 +183,7 @@ class Tagger(object):
                 self.get_inputs(form=elem, itype="text"),
                 self.get_inputs(form=elem, itype="select"),
                 self.get_inputs(form=elem, itype="checkbox"),
+                self.get_inputs(form=elem, itype="date"),
             ]
 
         return tags

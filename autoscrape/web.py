@@ -10,6 +10,7 @@ from selenium.common.exceptions import (
     TimeoutException, UnexpectedAlertPresentException,
     StaleElementReferenceException, TimeoutException,
     NoSuchElementException, ElementNotInteractableException,
+    InvalidElementStateException,
 )
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -346,6 +347,9 @@ class Scraper(object):
         try:
             self.driver_exec(elem.clear)
         except ElementNotInteractableException as e:
+            pass
+        # this handles date fields which aren't clearable
+        except InvalidElementStateException as e:
             pass
         for inp in self.expand_key_substitutions(input):
             elem.send_keys(inp)

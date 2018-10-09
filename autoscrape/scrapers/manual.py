@@ -252,6 +252,12 @@ class ManualControlScraper(BaseScraper):
                         self.control.input_checkbox(
                             ix, input_index, to_check
                         )
+                    elif single_input["type"] == "date":
+                        input_string = single_input["string"]
+                        logger.debug("Setting date to %s in date input %s" % (
+                            input_string, ix))
+                        self.control.input_date(ix, input_index, input_string)
+
                 self.save_screenshot(classname="interaction_pages")
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")

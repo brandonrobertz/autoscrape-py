@@ -148,6 +148,14 @@ class Controller(object):
         tag = self.inputs[form_ix][2][index]
         self.scraper.input_checkbox(tag, to_check)
 
+    def input_date(self, form_ix, index, chars):
+        """
+        Select a date from an input type="date". String needs to
+        be in the MM-DD-YYYY format.
+        """
+        tag = self.inputs[form_ix][3][index]
+        self.scraper.input(tag, chars)
+
     def submit(self, index):
         tag = self.forms[index]
         self.scraper.submit(tag)

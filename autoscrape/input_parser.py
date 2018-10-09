@@ -92,6 +92,12 @@ class InputParser:
                         "type": "checkbox",
                         "action": self.str2bool(action),
                     })
+                elif itype == "d":
+                    indiv_search.append({
+                        "index": ix,
+                        "type": "date",
+                        "string": action,
+                    })
                 else:
                     raise Exception("Invalid input type found: %s" % itype)
 
