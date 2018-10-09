@@ -120,6 +120,13 @@ Data Saving Options:
         sub-directories that contain the different types of pages
         found (i.e., search_pages, data_pages, screenshots).
         [default: autoscrape-data]
+
+    --keep-filename
+        By default, we hash the files in a scrape in order to
+        account for dynamic content under a single-page app
+        (SPA) website implmentation. This option will force
+        the scraper to retain the original filename, from the
+        URL when saving scrape data.
 """
 
 from docopt import docopt

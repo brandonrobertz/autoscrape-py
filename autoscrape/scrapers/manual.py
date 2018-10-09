@@ -1,12 +1,8 @@
 # -*- coding: UTF-8 -*-
-import time
-import hashlib
 import logging
-import os
 import string
 import sys
 import re
-from urllib.parse import urlparse
 from itertools import product
 
 from . import BaseScraper
@@ -40,7 +36,8 @@ class ManualControlScraper(BaseScraper):
 
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
-                 output_data_dir=None, input=None, leave_host=False,
+                 output_data_dir=None, keep_filename=False,
+                 input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
                  link_priority=None, ignore_links=None,
                  form_submit_natural_click=False,
@@ -65,6 +62,8 @@ class ManualControlScraper(BaseScraper):
         self.form_match = form_match
         # Where to write training data from crawl
         self.output_data_dir = output_data_dir
+        # If this is true, do not use a file hash for the filename
+        self.keep_filename = keep_filename
         # string used to match link text in order to sort them higher
         self.link_priority = link_priority
         # string or regex to be used to omit links from clickable
@@ -79,69 +78,6 @@ class ManualControlScraper(BaseScraper):
         # if not specified, do nothing with forms
         else:
             self.input_gen = []
-
-    def save_screenshot(self, classname=None):
-        if not self.output_data_dir:
-            logger.debug("No output data dir! Not saving screenshot.")
-            return
-
-        if classname not in self.training_classes:
-            raise ValueError("Base class speficied: %s" % classname)
-
-        screenshot_dir = os.path.join(self.output_data_dir, "screenshots")
-        if not os.path.exists(screenshot_dir):
-            os.makedirs(screenshot_dir)
-
-        filepath = os.path.join(screenshot_dir, "%s_%s.png" % (
-            int(time.time()), classname
-        ))
-        logger.debug("Saving screenshot to file: %s." % filepath);
-        with open(filepath, "wb") as f:
-            png = self.control.scraper.driver.get_screenshot_as_png()
-            f.write(png)
-
-    def save_training_page(self, classname=None):
-        """
-        Writes the current page to the output data directory (if provided)
-        to the given class folder.
-        """
-        if not self.output_data_dir:
-            logger.debug("No output data dir! Not saving data.")
-            return
-
-        logger.debug("Saving training page for class: %s" % classname)
-        if classname not in self.training_classes:
-            raise ValueError("Base class speficied: %s" % classname)
-
-        classdir = os.path.join(self.output_data_dir, classname)
-        if not os.path.exists(classdir):
-            os.makedirs(classdir)
-
-        data = self.control.scraper.page_html
-        url = self.control.scraper.page_url
-        # try and extract the extension from the URL
-        path = urlparse(url).path
-        ext = os.path.splitext(path)[1]
-        ext = ext if ext else ".html"
-        # try a dynamic ajax download via injected script
-        if ext not in  [".html", ".htm", ".php", ".aspx", ".asp"]:
-            data = self.control.scraper.download_page(url)
-        # hash the contents of the file, so we don't *not* save dynamic
-        # JS pages with the same URl and that we *don't* excessively save
-        # the same page over and over
-        if type(data) == bytes:
-            sha256 = hashlib.sha256()
-            sha256.update(data)
-            h = sha256.digest().hex()
-            writetype = "wb"
-        else:
-            h = hashlib.sha256(data.encode("utf-8")).digest().hex()
-            writetype = "w"
-        logger.debug("URL: %s, Hash: %s, Extension: %s" % (url, h, ext))
-        filepath = os.path.join(classdir, "%s%s" % (h, ext))
-
-        with open(filepath, writetype) as f:
-            f.write(data)
 
     def keep_clicking_next_btns(self, maxdepth=0):
         """

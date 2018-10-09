@@ -163,16 +163,24 @@ Data Saving Options:
         found (i.e., search_pages, data_pages, screenshots).
         [default: autoscrape-data]
 
+    --keep-filename
+        By default, we hash the files in a scrape in order to
+        account for dynamic content under a single-page app
+        (SPA) website implmentation. This option will force
+        the scraper to retain the original filename, from the
+        URL when saving scrape data.
+
+
 EXAMPLES
 
 ./scrape.py \
---loglevel DEBUG
---maxdepth 10 \
---form-match "first name" \
---input "i:0:firstname,i:1:lastname" \
---next-match "next page" \
---output-data-dir "firstname_lastname_scrape" \
-[BASEURL]
+  --loglevel DEBUG
+  --maxdepth 10 \
+  --form-match "first name" \
+  --input "i:0:firstname,i:1:lastname" \
+  --next-match "next page" \
+  --output-data-dir "firstname_lastname_scrape" \
+  [BASEURL]
 
 In the above example, the scraper will crawl until it finds a form
 that contains the text "first name". At that point, it will type
