@@ -82,16 +82,17 @@ Interactive Form Search Options:
         interact with a matched form. The inputs are
         described in the following format:
 
-        "c:0:True,i:0:atext,s:1:France"
+        "c:0:True,i:0:atext,s:1:France:d:0:01-20-1991"
 
         A single-input type can be one of three types:
-        checkbox ("c"), input box ("i"), and option select
-        ("s"). The type is separated by a colon, and the
-        input index position is next. (Each input type has
-        its own list, so a form with one input, one
-        checkbox, and one option select, will all be at
-        index 0.) The final command, sepearated by another
-        colon, describes what to do with the input.
+        checkbox ("c"), input box ("i"), option select
+        ("s"), and date inputs ("d", with inputs in the
+        "MM-DD-YYYY" format). The type is separated by a
+        colon, and the input index position is next. (Each
+        input type has its own list, so a form with one
+        input, one checkbox, and one option select, will all
+        be at index 0.) The final command, sepearated by
+        another colon, describes what to do with the input.
 
         Multiple inputs are separated by a comma, so you can
         interact with multiple inputs before submitting the
@@ -101,6 +102,7 @@ Interactive Form Search Options:
             - first input checkbox is checked (uncheck is False)
             - first input box gets filled with the string "first"
             - second select input gets the "France" option chosen
+            - first date input gets set to Jan 20, 1991
 
     --next-match NEXT_BTN_STRING
         A string to match a "next" button with, after
