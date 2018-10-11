@@ -127,6 +127,11 @@ Data Saving Options:
         (SPA) website implmentation. This option will force
         the scraper to retain the original filename, from the
         URL when saving scrape data.
+
+    --save-screenshots
+        This option makes the scraper save screenshots of each
+        page, interaction, and search. Screenshots will be
+        saved to the screenshots folder of the output dir.
 """
 
 from docopt import docopt

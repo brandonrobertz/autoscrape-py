@@ -292,7 +292,7 @@ class Scraper(object):
         href = self.driver_exec(elem.get_attribute, "href")
         hash = "%s|%s|%s" % (href, onclick, name)
         if hash in self.visited and not iterating_form:
-            logger.warn("Hash visited: %s" % hash)
+            logger.debug("Hash visited: %s" % hash)
             return False
 
         self.visited.add(hash)

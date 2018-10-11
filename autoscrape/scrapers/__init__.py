@@ -41,8 +41,7 @@ class BaseScraper(object):
         Screenshots are saved by the timestamp and the "class"
         of the page currently visited (data_page, etc).
         """
-        if not self.output_data_dir:
-            logger.debug("No output data dir! Not saving screenshot.")
+        if not self.output_data_dir or not self.save_screenshots:
             return
 
         if classname not in self.training_classes:

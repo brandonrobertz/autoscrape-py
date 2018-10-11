@@ -37,7 +37,7 @@ class ManualControlScraper(BaseScraper):
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
                  next_match="next page", form_match="first name",
                  output_data_dir=None, keep_filename=False,
-                 input=None, leave_host=False,
+                 save_screenshots=False, input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
                  link_priority=None, ignore_links=None,
                  form_submit_natural_click=False,
@@ -64,6 +64,8 @@ class ManualControlScraper(BaseScraper):
         self.output_data_dir = output_data_dir
         # If this is true, do not use a file hash for the filename
         self.keep_filename = keep_filename
+        # To save screenshots or not (they're large and expensive)
+        self.save_screenshots = save_screenshots
         # string used to match link text in order to sort them higher
         self.link_priority = link_priority
         # string or regex to be used to omit links from clickable
