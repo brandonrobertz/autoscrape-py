@@ -34,8 +34,8 @@ class ManualControlScraper(BaseScraper):
     # so users can get familiar with the concepts of self-exploration
     # and self-learning but without having to get the ML concepts.
 
-    def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
-                 next_match="next page", form_match="first name",
+    def __init__(self, baseurl, loglevel=None, maxdepth=0, formdepth=0,
+                 next_match=None, form_match=None,
                  output_data_dir=None, keep_filename=False,
                  save_screenshots=False, input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
@@ -131,9 +131,9 @@ class ManualControlScraper(BaseScraper):
             self.control.back()
 
     def run(self, depth=0):
-        logger.debug("** Crawl depth %s" % depth)
-        if depth > self.maxdepth:
-            logger.debug("Maximum depth %s reached, returning..." % depth)
+        logger.info("Crawl depth %s" % depth)
+        if self.maxdepth and depth > self.maxdepth:
+            logger.info("Maximum depth %s reached, returning..." % depth)
             self.control.back()
             return
 
@@ -145,6 +145,11 @@ class ManualControlScraper(BaseScraper):
         # NOTE: we never get into this loop if self.input_gen is empty
         # this arises when input was not handed to the initializer
         for ix in range(len(form_vectors)):
+            # don't bother with looking for forms if we didn't specify
+            # th form_match option
+            if not self.form_match:
+                continue
+
             form_data = form_vectors[ix]
 
             # inputs are keyed by form index, purely here for debug purposes
@@ -154,7 +159,7 @@ class ManualControlScraper(BaseScraper):
 
             # TODO: ML model here to determine if this form is
             # scrapeable. Currently this uses strict text match.
-            if self.form_match and self.form_match.lower() not in form_data.lower():
+            if self.form_match.lower() not in form_data.lower():
                 continue
 
             logger.debug("*** Found an input form!")
@@ -229,7 +234,7 @@ class ManualControlScraper(BaseScraper):
                 link_zip
             )
         for ix, text in link_zip:
-            if depth == self.maxdepth:
+            if self.maxdepth and depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
                 break
 

@@ -11,8 +11,8 @@ Usage:
 Crawl-Specific Options:
     --maxdepth DEPTH
         Maximum depth to crawl a site (in search of form
-        if the option "--form-match [string]" is specified,
-        see below). [default: 10]
+        if the option --form-match STRING is specified,
+        see below). Zero mean no limit. [default: 0]
 
     --leave-host
         By default, autoscrape will not leave the host given
