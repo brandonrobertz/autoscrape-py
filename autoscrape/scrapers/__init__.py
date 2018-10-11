@@ -80,9 +80,12 @@ class BaseScraper(object):
         parsed = urlparse(url)
         host = parsed.netloc
         file_part = parsed.path.replace("/", "_")
-        if not re.match(".*\.[^\']+$", file_part):
-            return "%s_%s.html" % (host, file_part)
-        return "%s_%s" % (host, file_part)
+        extension = os.path.splitext(parsed.path)[1] or ".html"
+        filename = "%s_%s" % (host, file_part)
+        if parsed.query:
+            query_part = "_".join(parsed.query.split("&"))
+            filename = "%s__%s" % (filename, query_part)
+        return "%s%s" % (filename, extension)
 
     def save_training_page(self, classname=None):
         """
