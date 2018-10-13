@@ -16,7 +16,11 @@ You need to have geckodriver installed. You can do that here:
 
 Version 0.20.1 is recommended as of July, 2018.
 
-Then set up your python virtual environment (Python 3.6 required) and install the pip dependencies:
+If you prefer to use Chrome, you will need the ChromeDriver (we've tested using v2.41). It can be found in your distribution's package manager or here:
+
+    https://sites.google.com/a/chromium.org/chromedriver/downloads
+
+Next you need to set up your python virtual environment (Python 3.6 required) and install the Python dependencies:
 
     pip install -r requirements.txt
     # If you're developing on the scraper
@@ -28,9 +32,9 @@ Then set up your python virtual environment (Python 3.6 required) and install th
 
 You can run a test to ensure your webdriver is set up correctly by running the `test` crawler:
 
-    ./scrape.py --headless False [SITE_URL]
+    ./scrape.py --show-browser [SITE_URL]
 
-The `test` crawler will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data or save any crawl data.
+The `test` crawler will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data. Data will be saved to `./autoscrape-data/` (the default output directory).
 
 ### Manual Config-Based Scraper
 
@@ -184,8 +188,6 @@ Data Saving Options:
 EXAMPLES
 
 ./scrape.py \
-  --loglevel DEBUG
-  --maxdepth 10 \
   --form-match "first name" \
   --input "i:0:firstname,i:1:lastname" \
   --next-match "next page" \
