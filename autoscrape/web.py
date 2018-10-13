@@ -15,7 +15,9 @@ from selenium.common.exceptions import (
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
+
 from .tags import Tagger
+from .search.graph import Graph
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -88,6 +90,8 @@ class Scraper(object):
         # queue of the path that led us to the current page
         # this is in the form of (command, *args, **kwargs)
         self.path = []
+        # tree building
+        self.graph = Graph()
         # sometimes the firefox driver loses its pipe to the browser. in
         # these cases, we can retry this number of times
         self.broken_pipe_retries = 3
@@ -97,9 +101,6 @@ class Scraper(object):
         self.css_escapables = ".:"
         self.form_submit_natural_click=form_submit_natural_click
         self.form_submit_wait=form_submit_wait
-
-    def __del__(self):
-        self.driver_exec(self.driver.close)
 
     def driver_exec(self, fn, *args, **kwargs):
         """
@@ -208,11 +209,14 @@ class Scraper(object):
         logger.info("Fetching %s" % url)
         self.loadwait(self.driver.get, url)
         self.path.append(("fetch", (url,), {}))
+        node = "Fetch, url: %s" % url
+        self.graph.add_root_node(node, url=url, action="fetch")
 
     def back(self):
         logger.debug("Going back...")
         self.loadwait(self.driver.back)
         self.path.pop()
+        self.graph.move_to_parent()
 
     def disable_target(self, elem):
         """
@@ -291,6 +295,7 @@ class Scraper(object):
         onclick = self.driver_exec(elem.get_attribute, "onclick")
         href = self.driver_exec(elem.get_attribute, "href")
         hash = "%s|%s|%s" % (href, onclick, name)
+        text = self.driver_exec(elem.text)
         if hash in self.visited and not iterating_form:
             logger.debug("Hash visited: %s" % hash)
             return False
@@ -309,6 +314,18 @@ class Scraper(object):
         self.path.append((
             "click", (tag,), {"iterating_form": iterating_form}
         ))
+        node_meta = {
+            "action": "click",
+            "iterating_form": iterating_form,
+            "text": text,
+            "tag": tag,
+        }
+        node = "Click, text: %s, hash: %s, tag: %s" % (text, hash, tag)
+        self.graph.add_node(
+            node,
+            **node_meta
+        )
+        self.graph.move_to_node(node)
         return True
 
     def expand_key_substitutions(self, input):
@@ -354,6 +371,11 @@ class Scraper(object):
         for inp in self.expand_key_substitutions(input):
             elem.send_keys(inp)
         self.path.append(("input", (tag,input,), {}))
+        node_meta = {
+            "action %s" % tag: "input",
+            "input %s" % tag: input,
+        }
+        self.graph.add_meta_to_current(**node_meta)
 
     def input_select_option(self, tag, option_str):
         """
@@ -367,6 +389,11 @@ class Scraper(object):
         # select by visible text
         select.select_by_visible_text(option_str)
         self.path.append(("input_select_option", (tag,option_str,), {}))
+        node_meta = {
+            "action %s" % tag: "input_select_option",
+            "option %s" % tag: option_str,
+        }
+        self.graph.add_meta_to_current(**node_meta)
 
     def input_checkbox(self, tag, to_check):
         """
@@ -381,6 +408,11 @@ class Scraper(object):
             elem.click()
             self.driver_exec(elem.clear)
         self.path.append(("input_checkbox", (tag,to_check,), {}))
+        node_meta = {
+            "action %s" % tag: "input_checkbox",
+            "check %s" % tag: to_check,
+        }
+        self.graph.add_meta_to_current(**node_meta)
 
     def click_at_position_over_element(self, elem):
         """
@@ -451,6 +483,12 @@ class Scraper(object):
             self.loadwait(form.submit, check_alerts=True)
 
         self.path.append(("submit", (tag,), {}))
+        node = "Submit, tag: %s" % (tag)
+        self.graph.add_node(node, {
+            "action %s": "submit",
+            "natural_click %s" % tag: self.form_submit_natural_click,
+        })
+
         # TODO: better way to wait for this, post-alert clicked
         if self.form_submit_wait:
             logger.debug(
@@ -458,6 +496,9 @@ class Scraper(object):
                 self.form_submit_wait
             )
             time.sleep(self.form_submit_wait)
+
+        # move to the node if we're successful (got here, so we assume)
+        self.graph.move_to_node(node)
 
     @property
     def page_html(self):
@@ -477,7 +518,9 @@ class Scraper(object):
         """
         logger.info("Fetching non-HTML page directly: %s" % url)
         response = urllib.request.urlopen(url)
-        return response.read()
+        data = response.read()
+        self.graph.add_meta_to_current(action_download=url)
+        return data
 
     @property
     def page_url(self):
@@ -540,4 +583,7 @@ class Scraper(object):
             leave_host=self.leave_host,
         )
         return tagger.get_buttons()
+
+    def close(self):
+        self.driver_exec(self.driver.close)
 

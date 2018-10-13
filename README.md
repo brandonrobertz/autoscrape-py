@@ -175,6 +175,12 @@ Data Saving Options:
         page, interaction, and search. Screenshots will be
         saved to the screenshots folder of the output dir.
 
+    --save-graph
+        This option allows the scraper to build a directed graph
+        of the entire scrape and will save it to the "graph"
+        subdirectory under the output dir. The output file
+        is a timestamped networkx pickled graph.
+
 EXAMPLES
 
 ./scrape.py \

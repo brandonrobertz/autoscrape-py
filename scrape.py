@@ -132,6 +132,12 @@ Data Saving Options:
         This option makes the scraper save screenshots of each
         page, interaction, and search. Screenshots will be
         saved to the screenshots folder of the output dir.
+
+    --save-graph
+        This option allows the scraper to build a directed graph
+        of the entire scrape and will save it to the "graph"
+        subdirectory under the output dir. The output file
+        is a timestamped networkx pickled graph.
 """
 
 from docopt import docopt
@@ -149,7 +155,8 @@ if __name__ == "__main__":
     for option in docopt_args:
         args[option[2:].replace('-', '_')] = docopt_args[option]
 
-    autoscrape.ManualControlScraper(BASEURL, **args).run()
+    scraper = autoscrape.ManualControlScraper(BASEURL, **args)
+    scraper.run()
 
     # elif args.scraper == "autoscrape-ml":
     #     kwargs["html_embeddings"] = args.html_embeddings or None

@@ -93,7 +93,6 @@ class BaseScraper(object):
         to the given class folder.
         """
         if not self.output_data_dir:
-            logger.debug("No output data dir! Not saving data.")
             return
 
         logger.debug("Saving training page for class: %s" % classname)
@@ -143,4 +142,29 @@ class BaseScraper(object):
 
         with open(filepath, writetype) as f:
             f.write(data)
+
+    def save_scraper_graph(self):
+        """
+        Saves our graph that was built throughout the scrape. This can
+        be used to visualize the scrape, debug it, and replicate it.
+
+        Graph is saved to the graph subdirectory of the output_data_dir
+        path, with the filename a microscond timestamp with the .gpickle
+        extension.
+
+        If output_data_dir is not set, then calling this function has no
+        effect.
+        """
+        if not self.output_data_dir or not self.save_graph:
+            return
+
+        filename = "%s.gpickle" % int(time.time() * 1000)
+        basedir = os.path.join(self.output_data_dir, "graph")
+        if not os.path.exists(basedir):
+            logger.debug("Creating graph subdir: %s" % basedir)
+            os.makedirs(basedir)
+
+        graph_save_path = os.path.join(basedir, filename)
+        logger.debug("Saving graph to: %s" % graph_save_path)
+        self.control.scraper.graph.save_graph(graph_save_path)
 

@@ -37,7 +37,8 @@ class ManualControlScraper(BaseScraper):
     def __init__(self, baseurl, loglevel=None, maxdepth=0, formdepth=0,
                  next_match=None, form_match=None,
                  output_data_dir=None, keep_filename=False,
-                 save_screenshots=False, input=None, leave_host=False,
+                 save_screenshots=False, save_graph=False,
+                 input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
                  link_priority=None, ignore_links=None,
                  form_submit_natural_click=False,
@@ -66,6 +67,8 @@ class ManualControlScraper(BaseScraper):
         self.keep_filename = keep_filename
         # To save screenshots or not (they're large and expensive)
         self.save_screenshots = save_screenshots
+        # whether to save the graph
+        self.save_graph = save_graph
         # string used to match link text in order to sort them higher
         self.link_priority = link_priority
         # string or regex to be used to omit links from clickable
@@ -130,7 +133,7 @@ class ManualControlScraper(BaseScraper):
             logger.debug("Going back from 'next'...")
             self.control.back()
 
-    def run(self, depth=0):
+    def scrape(self, depth=0):
         logger.info("Crawl depth %s" % depth)
         if self.maxdepth and depth > self.maxdepth:
             logger.info("Maximum depth %s reached, returning..." % depth)
@@ -241,8 +244,14 @@ class ManualControlScraper(BaseScraper):
             logger.info("Clicking link text: %s" % text)
             if self.control.select_link(ix):
                 logger.debug("Clicked! Recursing ...")
-                self.run(depth=depth + 1)
+                self.scrape(depth=depth + 1)
 
         logger.debug("Searching forms and links on page complete")
         self.control.back()
+
+    def run(self, *args, **kwargs):
+        self.scrape(*args, **kwargs)
+        if self.output_data_dir and self.save_graph:
+            self.save_scraper_graph()
+        self.control.scraper.close()
 
