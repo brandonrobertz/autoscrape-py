@@ -79,8 +79,10 @@ class BaseScraper(object):
         """
         parsed = urlparse(url)
         host = parsed.netloc
-        file_part = parsed.path.replace("/", "_")
-        extension = os.path.splitext(parsed.path)[1] or ".html"
+        # split filename/path and extension
+        file_parts = os.path.splitext(parsed.path)
+        file_part = file_parts[0].replace("/", "_")
+        extension = file_parts[1] or ".html"
         filename = "%s_%s" % (host, file_part)
         if parsed.query:
             query_part = "_".join(parsed.query.split("&"))
@@ -109,7 +111,7 @@ class BaseScraper(object):
         # try and extract the extension from the URL
         path = urlparse(url).path
         ext = os.path.splitext(path)[1]
-        ext = ext if ext else ".html"
+        ext = ext if ext else "html"
         if ext[0] == ".":
             ext = ext[1:]
 
