@@ -314,13 +314,12 @@ class Scraper(object):
         self.path.append((
             "click", (tag,), {"iterating_form": iterating_form}
         ))
-        node_meta = {
-            "action": "click",
-            "iterating_form": iterating_form,
-            "text": text,
-            "tag": tag,
-        }
         node = "Click, text: %s, hash: %s, tag: %s" % (text, hash, tag)
+        node_meta = {
+            "click": tag,
+            "click_text": text,
+            "click_iterating_form": iterating_form,
+        }
         self.graph.add_node(
             node,
             **node_meta
@@ -371,11 +370,12 @@ class Scraper(object):
         for inp in self.expand_key_substitutions(input):
             elem.send_keys(inp)
         self.path.append(("input", (tag,input,), {}))
-        node_meta = {
-            "action %s" % tag: "input",
-            "input %s" % tag: input,
+        action = {
+            "action": "input",
+            "text": input,
+            "tag": tag,
         }
-        self.graph.add_meta_to_current(**node_meta)
+        self.graph.add_action_to_current(action)
 
     def input_select_option(self, tag, option_str):
         """
@@ -389,11 +389,12 @@ class Scraper(object):
         # select by visible text
         select.select_by_visible_text(option_str)
         self.path.append(("input_select_option", (tag,option_str,), {}))
-        node_meta = {
-            "action %s" % tag: "input_select_option",
-            "option %s" % tag: option_str,
+        action = {
+            "action": "input_select_option",
+            "option": option_str,
+            "tag": tag,
         }
-        self.graph.add_meta_to_current(**node_meta)
+        self.graph.add_action_to_current(action)
 
     def input_checkbox(self, tag, to_check):
         """
@@ -408,11 +409,12 @@ class Scraper(object):
             elem.click()
             self.driver_exec(elem.clear)
         self.path.append(("input_checkbox", (tag,to_check,), {}))
-        node_meta = {
-            "action %s" % tag: "input_checkbox",
-            "check %s" % tag: to_check,
+        action = {
+            "action": "input_checkbox",
+            "checked?": to_check,
+            "tag": tag,
         }
-        self.graph.add_meta_to_current(**node_meta)
+        self.graph.add_action_to_current(action)
 
     def click_at_position_over_element(self, elem):
         """
@@ -484,10 +486,11 @@ class Scraper(object):
 
         self.path.append(("submit", (tag,), {}))
         node = "Submit, tag: %s" % (tag)
-        self.graph.add_node(node, {
-            "action %s": "submit",
-            "natural_click %s" % tag: self.form_submit_natural_click,
-        })
+        node_meta = {
+            "submit": tag,
+            "submit_natural_click": self.form_submit_natural_click,
+        }
+        self.graph.add_node(node, **node_meta)
 
         # TODO: better way to wait for this, post-alert clicked
         if self.form_submit_wait:
@@ -519,7 +522,11 @@ class Scraper(object):
         logger.info("Fetching non-HTML page directly: %s" % url)
         response = urllib.request.urlopen(url)
         data = response.read()
-        self.graph.add_meta_to_current(action_download=url)
+        action = {
+            "action": "download_page",
+            "url": url,
+        }
+        self.graph.add_action_to_current(action)
         return data
 
     @property

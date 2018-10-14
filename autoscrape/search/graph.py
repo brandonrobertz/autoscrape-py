@@ -52,6 +52,15 @@ class Graph(object):
         self.dbg("Adding meta to current: %s, Meta: %s" % (self.current, meta))
         self.graph.nodes[self.current].update(**meta)
 
+    def add_action_to_current(self, action):
+        self.dbg("Adding action to current node: %s, Action: %s" % (
+            self.current, action))
+        current_meta = self.graph.nodes[self.current]
+        current_actions = current_meta.get("actions", [])
+        current_actions.append(action)
+        current_meta["actions"] = current_actions
+        nx.set_node_attributes(self.graph, current_meta, name=self.current)
+
     def move_to_node(self, node):
         self.dbg("Moving to node: %s" % node)
         self.current = node
