@@ -132,6 +132,10 @@ class Scraper(object):
 
             pipe_retries += 1
 
+    def __del__(self):
+        if self.driver:
+            self.driver.quit()
+
     def wait_check(self, driver):
         """
         This is the check that gets ran to determine whether
@@ -599,7 +603,4 @@ class Scraper(object):
             leave_host=self.leave_host,
         )
         return tagger.get_buttons()
-
-    def close(self):
-        self.driver_exec(self.driver.close)
 

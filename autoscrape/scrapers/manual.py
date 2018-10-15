@@ -250,8 +250,11 @@ class ManualControlScraper(BaseScraper):
         self.control.back()
 
     def run(self, *args, **kwargs):
-        self.scrape(*args, **kwargs)
-        if self.output_data_dir and self.save_graph:
-            self.save_scraper_graph()
-        self.control.scraper.close()
+        try:
+            self.scrape(*args, **kwargs)
+        except Exception as e:
+            self.control.scraper.driver.quit()
+            if self.output_data_dir and self.save_graph:
+                self.save_scraper_graph()
+            raise e
 
