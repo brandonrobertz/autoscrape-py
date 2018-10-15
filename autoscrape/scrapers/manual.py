@@ -218,7 +218,7 @@ class ManualControlScraper(BaseScraper):
 
             if scraped:
                 logger.debug("Scrape complete! Exiting.")
-                sys.exit(0)
+                return
 
         # TODO: this will be replaced by a ML algorith to sort links by those
         # most likely to be fruitful
