@@ -3,3 +3,4 @@ torchvision==0.2.1
 matplotlib==2.2.2
 scikit-learn==0.19.2
 scipy==1.1.0
+html2text==2018.1.9

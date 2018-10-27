@@ -231,14 +231,14 @@ and will click buttons containing "next page" until it's two layers
 deep. All training data derived from this crawl will be stored in the
 directory `./training_data/pages/html/`.
 
-Once we have all our embeddings, we need to take our example training web pages
-and vectorize them:
+Once we have all our embeddings, we need to take our example training web pages and vectorize them:
 
     ./vectorize_data.py --loglevel DEBUG \
-        --html_embeddings training_data/embeddings/webcode.300d.txt \
-        --word_embeddings  training_data/embeddings/glove.840B.300d.txt \
+        --html_embeddings training_data/webcode.300d.txt \
+        --word_embeddings training_data/glove.840B.300d.txt \
         --output_file training_data/page_data.pickle \
-        training_data/pages/html/
+        ./training_data/hand_gathered_page_data/html/
+
 
 The resulting `page_data.pickle` will have `X` and `y` attributes.
 

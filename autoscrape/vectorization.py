@@ -17,18 +17,37 @@ class Embedding(object):
 
 
 class Vectorizer(object):
-    def __init__(self, html_embeddings_file=None, word_embeddings_file=None):
+    def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
+                 loglevel=None):
         """
         Initialize our vectorizer with paths to the relevant word
         embedding files for our vectorization routines.
         """
+        self.setup_logging(loglevel=loglevel)
         self.html = None
         if html_embeddings_file:
+            logger.debug("Loading HTML embeddings")
             self.html = self.load_embedding(html_embeddings_file)
 
         self.word = None
         if word_embeddings_file:
+            logger.debug("Loading word embeddings")
             self.word = self.load_embedding(word_embeddings_file)
+
+    def setup_logging(self, loglevel=None):
+        level = logging.INFO
+        if loglevel == "DEBUG":
+            level = logging.DEBUG
+        elif loglevel == "INFO":
+            level = logging.INFO
+        elif loglevel == "WARN":
+            level = logging.WARN
+        elif loglevel == "ERROR":
+            level = logging.ERROR
+
+        logger.setLevel(level)
+        console_handler = logging.StreamHandler()
+        logger.addHandler(console_handler)
 
     def embeddings_length(self, path):
         N = 0

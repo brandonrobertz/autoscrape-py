@@ -568,9 +568,13 @@ class Scraper(object):
                 logger.error("Error getting text element: %s, Err: %s" % (
                     el, e))
 
-            placeholder = el.get_attribute("placeholder")
-            if placeholder:
-                text.append(placeholder.strip())
+            try:
+                placeholder = el.get_attribute("placeholder")
+                if placeholder:
+                    text.append(placeholder.strip())
+            except Exception as e:
+                logger.error("Error getting placeholder: %s, Error: %s" % (
+                el, e))
 
         logger.debug("Element texts: %s" % text)
         return " ".join(text)

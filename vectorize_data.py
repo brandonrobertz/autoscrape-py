@@ -6,6 +6,7 @@ import numpy as np
 import os
 import pickle
 import time
+import html2text
 
 from autoscrape.vectorization import Vectorizer
 from autoscrape import NullScraper
@@ -51,6 +52,11 @@ def parse_args():
         choices=["DEBUG", "INFO", "WARN", "ERROR"],
         help="Loglevel (default: INFO)"
     )
+    # parser.add_argument(
+    #     '--driver', type=str, default="Firefox",
+    #     choices=["Firefox", "Chrome", "remote"],
+    #     help="Which browser driver to use",
+    # )
     parser.add_argument(
         "dir", type=str,
         help=("""
@@ -62,9 +68,11 @@ Location of directory containing training HTML data. This directory needs to hav
     args = parser.parse_args()
     return args
 
+
 def load_file(filename):
     with open(filename, "r") as f:
         return f.read()
+
 
 if __name__ == "__main__":
     args = parse_args()
@@ -87,9 +95,11 @@ if __name__ == "__main__":
 
     print("Total records: %s" % total_records)
 
+    print("Loading vectorizer")
     vectorizer = Vectorizer(
         html_embeddings_file=args.html_embeddings,
         word_embeddings_file=args.word_embeddings,
+        loglevel=args.loglevel,
     )
 
     dim = vectorizer.html.dim + vectorizer.word.dim
@@ -98,10 +108,9 @@ if __name__ == "__main__":
     X = np.zeros(shape=(total_records, dim))
     y = np.zeros(shape=(total_records, 1))
 
+    html2text.config.BODY_WIDTH = 0
+
     base_dir = os.path.abspath(os.curdir)
-    ns = NullScraper(
-        loglevel=args.loglevel,
-    )
 
     keys = list(cls_data.keys())
     I = 0
@@ -111,12 +120,10 @@ if __name__ == "__main__":
             print("I=%s" % I, end="\r")
             abs_path = os.path.join(base_dir, file)
             print("File=%s, Absolute Path=%s" % (file, abs_path))
-            url = "file://%s" % abs_path.replace("#", "%23").replace("%25",
-                                                                     "%2525")
             html = load_file(abs_path)
-            ns.scraper.fetch(url)
-            time.sleep(2)
-            text = ns.scraper.element_text()
+            parser = html2text.HTML2Text()
+            parser.feed(html)
+            text = parser.close()
             x = vectorizer.vectorize(html, text)
             X[I, :] = x
             y[I, :] = [keys.index(cls)]
