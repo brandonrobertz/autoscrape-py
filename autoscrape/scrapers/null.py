@@ -12,15 +12,15 @@ logger = logging.getLogger('AUTOSCRAPE')
 class NullScraper(BaseScraper):
     """
     A test scraper that just provides direct access to scraper and
-    controller.
+    controller. For vectorizing documents.
     """
 
-    def __init__(self, maxdepth=1, loglevel=None, formdepth=0,
-                 html_embeddings=None, word_embeddings=None,
-                 scraper=True, controller=False, vectorizer=False):
+    def __init__(self, *args, html_embeddings=None, word_embeddings=None,
+                 loglevel="INFO", scraper=True, controller=False,
+                 driver="Chrome", vectorizer=False, **kwargs):
         super(NullScraper, self).setup_logging(loglevel=loglevel)
         if scraper:
-            self.scraper = Scraper()
+            self.scraper = Scraper(driver=driver)
         if controller:
             self.control = Controller(
                 html_embeddings_file=html_embeddings,

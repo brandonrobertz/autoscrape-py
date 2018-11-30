@@ -3,10 +3,11 @@
 import argparse
 import pickle
 
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report
 import numpy as np
+from sklearn.metrics import classification_report
+from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 
 from vectorize_data import Data
 
@@ -60,19 +61,22 @@ if __name__ == "__main__":
 
     if args.model == "kNN":
         model = KNeighborsClassifier(1)
-    elif args.model == "SVM":
+    elif args.model == "SVC":
         print("Fitting SVC model..")
         model = SVC()
     else:
         raise NotImplmentedError("Bad model selected: %s" % args.model)
 
-    model.fit(X, y)
+    # model.fit(X, y)
 
-    print("Predicting on training data...")
-    y_pred = model.predict(X)
+    scores = cross_val_score(model, X, y, cv=3)
+    print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 
-    print("Complete!")
-    print(classification_report(y, y_pred))
+    # print("Predicting on training data...")
+    # y_pred = model.predict(X)
+
+    # print("Complete!")
+    # print(classification_report(y, y_pred))
 
     print("Saving model...")
     with open(args.output, "wb") as f:

@@ -13,6 +13,7 @@ autoscrape-data/
 # Will be released once ready, minimized, over LFS
 deps/
 training_data/
+*.pickle
 
 # webdriver remote settings
 nodeConfig.json
