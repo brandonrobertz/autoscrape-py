@@ -47,6 +47,26 @@ class BaseScraper(object):
         if classname not in self.training_classes:
             raise ValueError("Base class speficied: %s" % classname)
 
+        # adjust the window size to the document size, this captures most
+        # web configurations except cases where a footer, for example, has
+        # been placed absolutely outside of the body and hangs beneath
+        # NOTE: this comes from here: https://stackoverflow.com/a/52572919
+        original_size = self.control.scraper.driver.get_window_size()
+        required_width = self.control.scraper.driver.execute_script(
+            'return document.body.parentNode.scrollWidth'
+        )
+        required_height = self.control.scraper.driver.execute_script(
+            'return document.body.parentNode.scrollHeight'
+        )
+        logger.debug(
+            "Required width=%s, height=%s, Original width=%s, height=%s" % (
+                required_width, required_height, original_size["width"],
+                original_size["height"]
+        ))
+        self.control.scraper.driver.set_window_size(
+            required_width, required_height
+        )
+
         screenshot_dir = os.path.join(self.output_data_dir, "screenshots")
         if not os.path.exists(screenshot_dir):
             os.makedirs(screenshot_dir)
@@ -54,10 +74,20 @@ class BaseScraper(object):
         filepath = os.path.join(screenshot_dir, "%s_%s.png" % (
             int(time.time()), classname
         ))
-        logger.debug("Saving screenshot to file: %s." % filepath);
-        with open(filepath, "wb") as f:
-            png = self.control.scraper.driver.get_screenshot_as_png()
-            f.write(png)
+
+        logger.debug("Saving screenshot to file: %s." % filepath)
+        # only FF has this capability, it removes the scrollbar
+        if self.control.scraper.driver == "Firefox":
+            self.control.scraper.driver.find_element_by_tag_name('html').screenshot(filepath)
+        else:
+            with open(filepath, "wb") as f:
+                png = self.control.scraper.driver.get_screenshot_as_png()
+                f.write(png)
+
+        # restore original window size to avoid side effects
+        self.control.scraper.driver.set_window_size(
+            original_size['width'], original_size['height']
+        )
 
     def get_filename_from_url(self, url):
         """
