@@ -14,7 +14,7 @@ You need to have geckodriver installed. You can do that here:
 
     https://github.com/mozilla/geckodriver/releases
 
-Version 0.20.1 is recommended as of July, 2018.
+Version 0.23.0 is recommended as of November, 2018.
 
 If you prefer to use Chrome, you will need the ChromeDriver (we've tested using v2.41). It can be found in your distribution's package manager or here:
 
