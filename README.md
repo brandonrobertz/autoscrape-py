@@ -8,6 +8,8 @@ This is an automated scraper of structured data from interactive web pages. You 
 
 *This is a work in progress.* The initial prototype version uses brute force with a set of configuration options. Machine learning and, finally, reinforcement learning models are being developed.
 
+This is an implementation of the web scraping framework described in the upcoming paper, _Robust Web Scraping in the Public Interest with AutoScrape_ in [Proceedings of Computation + Journalism Symposium 2019](http://cplusj.org/).
+
 ## Setup & Dependencies
 
 You need to have geckodriver installed. You can do that here:
