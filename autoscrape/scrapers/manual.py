@@ -37,6 +37,7 @@ class ManualControlScraper(BaseScraper):
     def __init__(self, baseurl, loglevel=None, maxdepth=0, formdepth=0,
                  next_match=None, form_match=None,
                  output_data_dir=None, keep_filename=False,
+                 disable_style_saving=False,
                  save_screenshots=False, save_graph=False,
                  input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
@@ -65,9 +66,11 @@ class ManualControlScraper(BaseScraper):
         self.output_data_dir = output_data_dir
         # If this is true, do not use a file hash for the filename
         self.keep_filename = keep_filename
+        # Disable saving of stylesheets for web content types
+        self.disable_style_saving = disable_style_saving
         # To save screenshots or not (they're large and expensive)
         self.save_screenshots = save_screenshots
-        # whether to save the graph
+        # Whether to save the crawl & interaction traversal graph
         self.save_graph = save_graph
         # string used to match link text in order to sort them higher
         self.link_priority = link_priority

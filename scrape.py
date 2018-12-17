@@ -138,6 +138,11 @@ Data Saving Options:
         of the entire scrape and will save it to the "graph"
         subdirectory under the output dir. The output file
         is a timestamped networkx pickled graph.
+
+    --disable-style-saving
+        By default, AutoScrape saves the stylesheets associated
+        with a scraped page. To save storage, you can disable this
+        functionality by using this option.
 """
 
 from docopt import docopt

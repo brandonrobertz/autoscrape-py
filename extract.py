@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
-Autoscrape Extractor - A simplified method for
-converting a source HTML record into a Hext
-extractor template and recursively extracting
-all structured data from HTML documents found
-in a given directory.
+Autoscrape Extractor - A wrapper around Hext for
+walking a directory and extracting all structured
+data using a provided Hext template.
+
+Hext templates can be created using the JavaScript
+UI found in ./hext_builder_ui.
 
 Usage:
-    extract.py build-template <example-html-record> [options]
-    extract.py extract <input-directory> <hext-template> [options]
+    extract.py <input-directory> <hext-template> [options]
 
 Options:
     --output-file FILENAME
@@ -17,6 +17,16 @@ Options:
         This option directs all output to a specified file.
 """
 from docopt import docopt
+import html5lib
+import hext
+
+
+def parse_html_file(filepath):
+    with open(filepath, "r") as f:
+        html = f.read()
+    return html5lib.parse(
+        html, treebuilder='lxml', namespaceHTMLElements=False
+    )
 
 
 if __name__ == "__main__":
@@ -41,9 +51,6 @@ if __name__ == "__main__":
             '-', '_'
         )] = docopt_args[option]
 
-    if option == "build-template":
-        # TODO: open input HTML record, get string
-        # TODO: build a hext template from a HTML record
     elif option == "extract":
         # TODO: walk directory, feed files to below:
         rule = hext.Rule(strhext)

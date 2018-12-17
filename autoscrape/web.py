@@ -60,6 +60,7 @@ class Scraper(object):
             chrome_options = webdriver.ChromeOptions()
             if not show_browser:
                 chrome_options.add_argument("--headless")
+                chrome_options.add_argument("--disable-web-security")
                 chrome_options.add_argument("--window-size=1920x1080")
             prefs = {
                 "profile.managed_default_content_settings.images":2
