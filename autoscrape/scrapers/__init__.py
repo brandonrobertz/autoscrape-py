@@ -35,7 +35,7 @@ class BaseScraper(object):
     def get_stylesheet(self):
         script = """
         return [].slice.call(document.styleSheets)
-          .reduce((prev, sheet) => {
+          .reduce((prev, styleSheet) => {
             try {
               if (styleSheet.cssRules) {
                 return prev +
