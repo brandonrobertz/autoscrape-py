@@ -49,8 +49,7 @@ class BaseScraper(object):
             } catch (e) {
               return prev + `@import url("${sheet.href}");`
             }
-          }, '');
-    """
+          }, '');"""
         return self.control.scraper.driver.execute_script(script)
 
     def save_screenshot(self, classname=None):
