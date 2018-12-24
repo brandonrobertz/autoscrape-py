@@ -47,7 +47,7 @@ class BaseScraper(object):
                   return prev;
               }
             } catch (e) {
-              return prev + `@import url("${sheet.href}");`
+              return prev + `@import url("${styleSheet.href}");`
             }
           }, '');"""
         return self.control.scraper.driver.execute_script(script)
