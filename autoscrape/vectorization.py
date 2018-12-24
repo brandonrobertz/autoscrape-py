@@ -23,7 +23,6 @@ class Vectorizer(object):
         Initialize our vectorizer with paths to the relevant word
         embedding files for our vectorization routines.
         """
-        self.setup_logging(loglevel=loglevel)
         self.html = None
         if html_embeddings_file:
             logger.debug("Loading HTML embeddings")
