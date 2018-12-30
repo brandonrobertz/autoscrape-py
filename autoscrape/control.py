@@ -21,6 +21,7 @@ class Controller(object):
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
                  leave_host=False, driver="Firefox",
                  remote_hub="http://localhost:4444/wd/hub",
+                 output_data_dir=None,
                  form_submit_natural_click=False, form_submit_wait=5,
                  load_images=False, show_browser=False):
         """
@@ -34,6 +35,7 @@ class Controller(object):
             leave_host=leave_host, driver=driver, remote_hub=remote_hub,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=form_submit_wait,
+            output_data_dir=output_data_dir,
             load_images=load_images, show_browser=show_browser
         )
         self.clickable = []

@@ -8,6 +8,7 @@ import time
 from urllib.parse import urlparse
 
 from ..filetypes import TEXT_EXTENSIONS
+from ..util import get_filename_from_url, get_extension_from_url
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -109,36 +110,6 @@ class BaseScraper(object):
             original_size['width'], original_size['height']
         )
 
-    def get_filename_from_url(self, url):
-        """
-        Take a fully-qualified URL and turn it into a filename. For
-        example, turn a url like this:
-
-            https://www.cia.gov/library/readingroom/docs/%5B15423241%5D.pdf
-
-        Using the parsed URL:
-
-            ParseResult(scheme='https', netloc='www.cia.gov',
-                path='/library/readingroom/docs/%5B15423241%5D.pdf
-
-        Returing this representation (a string):
-
-            _library_readingroom_docs_%5B15423241%5D.pdf
-
-        NOTE: If no extension is found on the page, .html is appended.
-        """
-        parsed = urlparse(url)
-        host = parsed.netloc
-        # split filename/path and extension
-        file_parts = os.path.splitext(parsed.path)
-        file_part = file_parts[0].replace("/", "_")
-        extension = file_parts[1] or ".html"
-        filename = "%s_%s" % (host, file_part)
-        if parsed.query:
-            query_part = "_".join(parsed.query.split("&"))
-            filename = "%s__%s" % (filename, query_part)
-        return "%s%s" % (filename, extension)
-
     def save_training_page(self, classname=None):
         """
         Writes the current page to the output data directory (if provided)
@@ -158,16 +129,9 @@ class BaseScraper(object):
         data = self.control.scraper.page_html
         url = self.control.scraper.page_url
 
-        # try and extract the extension from the URL
-        path = urlparse(url).path
-        ext = os.path.splitext(path)[1]
-        ext = ext if ext else "html"
-        if ext[0] == ".":
-            ext = ext[1:]
-
-        # try a dynamic ajax download via injected script
+        ext = get_extension_from_url(url)
         if ext not in TEXT_EXTENSIONS:
-            data = self.control.scraper.download_page(url)
+            data = self.control.scraper.download_file(url, return_data=True)
 
         # hash the contents of the file, so we don't *not* save dynamic
         # JS pages with the same URl and that we *don't* excessively save
@@ -185,7 +149,7 @@ class BaseScraper(object):
 
         # don't use the hash, use the filename from URL
         if self.keep_filename:
-            parsed_filename = self.get_filename_from_url(url)
+            parsed_filename = get_filename_from_url(url)
             logger.debug("Parsed output filename: %s" % parsed_filename)
             filepath = os.path.join(classdir, parsed_filename)
         # use the hash as the output filename

@@ -3,6 +3,8 @@ import time
 import logging
 import re
 import urllib.request
+import os
+import sys
 
 import selenium
 from selenium import webdriver
@@ -18,6 +20,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from .tags import Tagger
 from .search.graph import Graph
+from .filetypes import TEXT_EXTENSIONS
+from .util import get_filename_from_url, get_extension_from_url
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -27,6 +31,7 @@ class Scraper(object):
 
     def __init__(self, driver="Firefox", leave_host=False, load_images=False,
                  form_submit_natural_click=False, form_submit_wait=5,
+                 output_data_dir=None,
                  show_browser=False, remote_hub="http://localhost:4444/wd/hub"):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
@@ -102,6 +107,7 @@ class Scraper(object):
         self.css_escapables = ".:"
         self.form_submit_natural_click=form_submit_natural_click
         self.form_submit_wait=form_submit_wait
+        self.output_data_dir = output_data_dir
 
     def driver_exec(self, fn, *args, **kwargs):
         """
@@ -134,7 +140,7 @@ class Scraper(object):
             pipe_retries += 1
 
     def __del__(self):
-        if self.driver:
+        if self.driver and sys.meta_path is not None:
             self.driver.quit()
 
     def wait_check(self, driver):
@@ -287,7 +293,7 @@ class Scraper(object):
     def click(self, tag, iterating_form=False):
         """
         Click an element by a given tag. Returns True if the link
-        hasn't been visited and was actually clicked.
+        hasn't been visited and was actually clicked & navigated to.
         """
         logger.debug("Attempting to click tag %s" % tag)
 
@@ -309,6 +315,15 @@ class Scraper(object):
         self.disable_target(elem)
         self.scrolltoview(elem)
         self.elem_stats(elem)
+
+        # check to see if the filename is something we can
+        # actually navigate to (if it's a recognized HTML/web document).
+        # If it's not, we want to download it and return False (didn't nav).
+        # Else, we continue and attempt to nagivate.
+        ext = get_extension_from_url(href)
+        if ext not in TEXT_EXTENSIONS:
+            self.download_file(href)
+            return False
 
         try:
             self.loadwait(elem.click)
@@ -515,7 +530,7 @@ class Scraper(object):
         """
         return self.driver_exec(self.driver.page_source)
 
-    def download_page(self, url):
+    def download_file(self, url, return_data=False):
         """
         Fetch the given url, returning a byte stream of the page data. This
         really is only useful in situations where the scraper is on a binary
@@ -537,11 +552,23 @@ class Scraper(object):
         response = urllib.request.urlopen(request)
         data = response.read()
         action = {
-            "action": "download_page",
+            "action": "download_file",
             "url": url,
         }
         self.graph.add_action_to_current(action)
-        return data
+        if return_data:
+            return data
+
+        dl_dir = os.path.join(self.output_data_dir, "downloads")
+        if not os.path.exists(dl_dir):
+            os.makedirs(dl_dir)
+
+        # always keep filename for downloads, for now
+        parsed_filename = get_filename_from_url(url)
+        logger.debug("Parsed output filename: %s" % parsed_filename)
+        filepath = os.path.join(dl_dir, parsed_filename)
+        with open(filepath, "wb") as f:
+            f.write(data)
 
     @property
     def page_url(self):

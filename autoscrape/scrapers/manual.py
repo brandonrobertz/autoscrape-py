@@ -52,6 +52,7 @@ class ManualControlScraper(BaseScraper):
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=int(form_submit_wait),
             load_images=load_images, show_browser=show_browser,
+            output_data_dir=output_data_dir,
         )
         self.control.initialize(baseurl)
         # depth of DFS in search of form
@@ -244,10 +245,12 @@ class ManualControlScraper(BaseScraper):
                 logger.debug("At maximum depth: %s, skipping links." % depth)
                 break
 
-            logger.info("Clicking link text: %s" % text)
+            logger.debug("Attempting to click link text: %s" % text)
             if self.control.select_link(ix):
-                logger.debug("Clicked! Recursing ...")
+                logger.info("Link clicked: %s" % text)
                 self.scrape(depth=depth + 1)
+            else:
+                logger.debug("Link downloaded or click failed: %s" % text)
 
         logger.debug("Searching forms and links on page complete")
         self.control.back()
