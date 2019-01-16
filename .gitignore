@@ -15,6 +15,9 @@ deps/
 training_data/
 *.pickle
 
+# python virtual environment
+venv
+
 # webdriver remote settings
 nodeConfig.json
 

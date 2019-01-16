@@ -180,6 +180,7 @@ class BaseScraper(object):
         effect.
         """
         if not self.output_data_dir or not self.save_graph:
+            logger.debug("No output-data-dir or save-graph options. Not saving")
             return
 
         filename = "%s.gpickle" % int(time.time() * 1000)
