@@ -14,9 +14,6 @@ numpy = "==1.15.0"
 Flask = "==1.0.2"
 celery = "==4.2.1"
 
-[dev-packages]
-watchdog = "*"
-
 [requires]
 python_version = "3.6"
 

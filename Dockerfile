@@ -13,6 +13,8 @@ RUN apt-get update \
         xauth \
         xvfb \
         bzip2 \
+        build-essential \
+        cython \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install pipenv==2018.11.26
@@ -41,9 +43,9 @@ COPY autoscrape-server.py /app/
 
 FROM autoscrapedeps AS autoscrapebuild
 COPY Pipfile Pipfile.lock /app/
-RUN pipenv install --dev --system --deploy
+RUN pipenv install # --dev --system --deploy
 
 FROM autoscrapebuild AS autoscrapeserver
 EXPOSE 5000
-CMD [ "FLASK_APP=autoscrape-server.py", "flask", "run" ]
+CMD [ "FLASK_APP=/app/autoscrape-server.py", "flask", "run" ]
 

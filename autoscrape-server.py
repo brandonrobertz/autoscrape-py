@@ -36,3 +36,7 @@ def get_stop(id):
     result = stop(id)
     return jsonify({"status": "OK", "data": result.id})
 
+
+if __name__ == "__main__":
+    app.run()
+

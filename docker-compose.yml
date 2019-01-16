@@ -23,7 +23,8 @@ services:
     volumes:
       - ./:/app/:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
-    command: "python3 autoscrape-server.py"
+    #command: "python3 autoscrape-server.py"
+    command: "FLASK_APP=/app/autoscrape-server.py flask run"
     ports:
         - '5000:5000'
     links:
@@ -44,7 +45,7 @@ services:
     volumes:
       - ./:/app/:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
-    command: "celery -A autoscrape.celery worker --loglevel=info"
+    command: "celery -A autoscrape.tasks worker --loglevel=info"
     user: nobody
     links:
         - rabbitmq
