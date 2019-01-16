@@ -1,0 +1,88 @@
+# Bring up all the pieces necessary to run the workbench
+# Data persists in Docker volumes and in local dir
+
+# This file passes through all necessary env variables to requisite
+# Docker containers and makes them available when running commands via
+# `docker exec`.
+
+version: '3.4'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.7.8-management
+    ports: [ '15672' ] # open management port, for debugging
+    networks: [ 'dev' ]
+    environment:
+      # Use just one CPU
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: '+S 1:1 +stbt ts +A 12'
+
+  flask:
+    build:
+      context: .
+      target: autoscrapebuild
+    volumes:
+      - ./:/app/:rw
+      - virtualenvs:/root/.local/share/virtualenvs/:rw
+    command: "python3 autoscrape-server.py"
+    ports:
+        - '5000:5000'
+    links:
+        - rabbitmq
+        - celery
+    volumes:
+        - .:/app:ro
+    depends_on: [ 'rabbitmq' ]
+    networks: [ 'dev' ]
+    environment:
+      CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
+      CJW_SECRET_KEY: cjw-secret-key
+
+  celery:
+    build:
+      context: .
+      target: autoscrapebuild
+    volumes:
+      - ./:/app/:rw
+      - virtualenvs:/root/.local/share/virtualenvs/:rw
+    command: "celery -A autoscrape.celery worker --loglevel=info"
+    user: nobody
+    links:
+        - rabbitmq
+    volumes:
+        - .:/app:ro
+    depends_on: [ 'rabbitmq' ]
+    networks: [ 'dev' ]
+    environment:
+      CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
+      CJW_SECRET_KEY: cjw-secret-key
+
+  # worker:
+  #   # It'd be nice to use YAML anchors to copy these parameters ... but
+  #   # PyCharm's YAML parser seems to die when we use YAML anchors.
+  #   build:
+  #     context: .
+  #     target: autoscrape
+  #   volumes:
+  #     - ./:/app/:rw
+  #     - virtualenvs:/root/.local/share/virtualenvs/:rw
+  #   environment:
+  #     PYTHONUNBUFFERED: '1'
+  #     ASGI_THREADS: '5'
+  #     CJW_DB_HOST: database
+  #     CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
+  #     CJW_DB_PASSWORD: cjworkbench
+  #     CJW_SECRET_KEY: cjw-secret-key
+  #     MINIO_ACCESS_KEY: minio_access
+  #     MINIO_SECRET_KEY: minio_secret
+  #     MINIO_URL: http://minio:9000
+  #     MINIO_BUCKET_PREFIX: dev
+  #   depends_on: [ 'database', 'rabbitmq', 'minio' ]
+  #   networks: [ 'dev' ]
+  #   command: [ 'pipenv', 'run', 'python', './manage.py', 'worker' ]
+
+networks:
+  dev: {}
+
+volumes:
+  virtualenvs: {}
+

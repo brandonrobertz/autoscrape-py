@@ -160,6 +160,7 @@ if __name__ == "__main__":
     for option in docopt_args:
         args[option[2:].replace('-', '_')] = docopt_args[option]
 
+    print("args", args)
     scraper = autoscrape.ManualControlScraper(BASEURL, **args)
     scraper.run()
 
