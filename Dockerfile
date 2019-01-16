@@ -47,5 +47,11 @@ RUN pipenv install # --dev --system --deploy
 
 FROM autoscrapebuild AS autoscrapeserver
 EXPOSE 5000
-CMD [ "FLASK_APP=/app/autoscrape-server.py", "flask", "run" ]
+CMD [ 'pipenv', 'run', 'python', 'autoscrape-server.py' ]
+
+FROM autoscrapebuild AS autoscrapeworker
+CMD [ 'pipenv', 'run', 'celery', '-A', 'autoscrape.tasks', 'worker', '--loglevel=info' ]
+
+FROM rabbitmq:3.7.8-management as rabbitmq
+EXPOSE 15672
 

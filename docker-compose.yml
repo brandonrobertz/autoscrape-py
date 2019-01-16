@@ -24,7 +24,7 @@ services:
       - ./:/app/:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
     #command: "python3 autoscrape-server.py"
-    command: "FLASK_APP=/app/autoscrape-server.py flask run"
+    command: [ 'pipenv', 'run', 'python', 'autoscrape-server.py' ]
     ports:
         - '5000:5000'
     links:
@@ -45,7 +45,7 @@ services:
     volumes:
       - ./:/app/:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
-    command: "celery -A autoscrape.tasks worker --loglevel=info"
+    command: [ 'pipenv', 'run', 'celery', '-A', 'autoscrape.tasks', 'worker', '--loglevel=info' ]
     user: nobody
     links:
         - rabbitmq
