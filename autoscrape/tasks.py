@@ -11,7 +11,17 @@ from .scrapers.manual import ManualControlScraper
 app = Celery(
     'tasks',
     broker=os.environ["CJW_RABBITMQ_HOST"],
-    backend='rpc://' #os.environ["CJW_RABBITMQ_HOST"]
+    backend='rpc://'
+)
+
+app.conf.update(
+    #CELERYD_MAX_TASKS_PER_CHILD=1,
+    #CELERYD_PREFETCH_MULTIPLIER=1,
+    #CELERY_ACKS_LATE=True,
+    #CELERY_RESULT_PERSISTENT=True,
+    #CELERY_TASK_PUBLISH_RETRY=False,
+    #CELERY_TASK_RESULT_EXPIRES=None,
+    CELERY_TRACK_STARTED=True,
 )
 
 @app.task()
