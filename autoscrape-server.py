@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from flask import Flask, request, jsonify
 
-from autoscrape.tasks import start, stop, status
+import autoscrape.tasks as tasks
 
 
 app = Flask(__name__)
@@ -22,19 +22,19 @@ def post_start():
     print("Args", args)
     baseurl = args.pop("baseurl")
     print("Baseurl", baseurl)
-    result = start.apply_async((baseurl, args))
+    result = tasks.start.apply_async((baseurl, args))
     print("Result", result)
     return jsonify({"status": "OK", "data": result.id})
 
 @app.route("/status/<id>", methods=["GET"])
 def get_status(id):
-    result = status(id)
-    return jsonify({"status": "OK", "data": result.id})
+    result = tasks.app.AsyncResult(id)
+    return jsonify({"status": "OK", "data": result.state})
 
 @app.route("/stop/<id>", methods=["POST"])
 def get_stop(id):
-    result = stop(id)
-    return jsonify({"status": "OK", "data": result.id})
+    tasks.stop.delay(id)
+    return jsonify({"status": "OK"})
 
 
 if __name__ == "__main__":

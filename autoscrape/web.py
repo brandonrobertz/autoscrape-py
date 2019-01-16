@@ -57,6 +57,7 @@ class Scraper(object):
             self.driver = webdriver.Firefox(
                 firefox_options=firefox_options,
                 firefox_profile=firefox_profile,
+                log_path='/dev/null'
             )
 
         # this requires chromedriver to be on the PATH
