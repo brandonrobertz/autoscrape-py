@@ -263,4 +263,7 @@ class ManualControlScraper(BaseScraper):
             if self.output_data_dir and self.save_graph:
                 self.save_scraper_graph()
             raise e
+        else:
+            if self.output_data_dir and self.save_graph:
+                self.save_scraper_graph()
 
