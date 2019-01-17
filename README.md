@@ -12,23 +12,34 @@ This is an implementation of the web scraping framework described in the upcomin
 
 ## Setup & Dependencies
 
+### External Dependencies
+
 You need to have geckodriver installed. You can do that here:
 
     https://github.com/mozilla/geckodriver/releases
 
-Version 0.23.0 is recommended as of November, 2018.
+Version 0.23.0 is recommended as of November, 2018 along with Firefox version  >= 0.63.
 
 If you prefer to use Chrome, you will need the ChromeDriver (we've tested using v2.41). It can be found in your distribution's package manager or here:
 
     https://sites.google.com/a/chromium.org/chromedriver/downloads
 
+Installing the remaining Python dependencies can be done using pip or pipenv:
+
+### Pip Install Method
+
 Next you need to set up your python virtual environment (Python 3.6 required) and install the Python dependencies:
 
     pip install -r requirements.txt
-    # If you're developing on the scraper
-    pip install -r requirements.dev.txt
 
-## Running
+### Pipenv Method
+
+AutoScrape also supports pipenv. You can install required dependencies by
+running:
+
+    pipenv install
+
+## Running Local Scraper
 
 ### Environment Test Crawler
 
@@ -59,8 +70,8 @@ Usage:
 Crawl-Specific Options:
     --maxdepth DEPTH
         Maximum depth to crawl a site (in search of form
-        if the option "--form-match [string]" is specified,
-        see below). [default: 10]
+        if the option --form-match STRING is specified,
+        see below). Zero mean no limit. [default: 0]
 
     --leave-host
         By default, autoscrape will not leave the host given
@@ -167,6 +178,9 @@ Data Saving Options:
         currently exist.  This directory will have several
         sub-directories that contain the different types of pages
         found (i.e., search_pages, data_pages, screenshots).
+        This can also accept a URL (i.e., http://localhost:5000/files)
+        and AutoScrape will POST to that endpoint with each
+        file scraped.
         [default: autoscrape-data]
 
     --keep-filename
@@ -187,6 +201,11 @@ Data Saving Options:
         subdirectory under the output dir. The output file
         is a timestamped networkx pickled graph.
 
+    --disable-style-saving
+        By default, AutoScrape saves the stylesheets associated
+        with a scraped page. To save storage, you can disable this
+        functionality by using this option.
+
 EXAMPLES
 
 ./scrape.py \
@@ -204,6 +223,22 @@ to be completed/loaded and will continue clicking on buttons/links
 containing "next page" until there are no more. All data found during
 the scrape will be saved to the ./firstname_lastname_scrape directory.
 ```
+
+## Running Containerized API Version
+
+AutoScrape can also be ran as a containerized cluster environment, where
+scrapes can be triggered and stopped via API calls and data can
+be streamed to this server.
+
+To run this you need docker-ce and docker-compose. Once you have these
+dependencies installed, simply run:
+
+    docker-compose up -t0 --abort-on-container-exit
+
+This will launch a API server running on port 5000. More information
+about the API calls can be found in `autoscrape-server.py`.
+
+NOTE: This is a prototype and a work in progress.
 
 ## Fully Automated Scrapers, Data & ML Models
 

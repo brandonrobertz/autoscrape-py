@@ -119,6 +119,9 @@ Data Saving Options:
         currently exist.  This directory will have several
         sub-directories that contain the different types of pages
         found (i.e., search_pages, data_pages, screenshots).
+        This can also accept a URL (i.e., http://localhost:5000/files)
+        and AutoScrape will POST to that endpoint with each
+        file scraped.
         [default: autoscrape-data]
 
     --keep-filename
