@@ -230,8 +230,9 @@ AutoScrape can also be ran as a containerized cluster environment, where
 scrapes can be triggered and stopped via API calls and data can
 be streamed to this server.
 
-To run this you need docker-ce and docker-compose. Once you have these
-dependencies installed, simply run:
+To run this you need [docker-ce](https://docs.docker.com/install/#server)
+and [docker-compose](https://docs.docker.com/compose/install/). Once you
+have these dependencies installed, simply run:
 
     docker-compose up -t0 --abort-on-container-exit
 
