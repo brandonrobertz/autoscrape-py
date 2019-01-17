@@ -8,7 +8,9 @@ import time
 from urllib.parse import urlparse
 
 from ..filetypes import TEXT_EXTENSIONS
-from ..util import get_filename_from_url, get_extension_from_url
+from ..util import (
+    get_filename_from_url, get_extension_from_url, write_file
+)
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -89,8 +91,6 @@ class BaseScraper(object):
         )
 
         screenshot_dir = os.path.join(self.output_data_dir, "screenshots")
-        if not os.path.exists(screenshot_dir):
-            os.makedirs(screenshot_dir)
 
         filepath = os.path.join(screenshot_dir, "%s_%s.png" % (
             int(time.time()), classname
@@ -99,11 +99,14 @@ class BaseScraper(object):
         logger.debug("Saving screenshot to file: %s." % filepath)
         # only FF has this capability, it removes the scrollbar
         if self.control.scraper.driver == "Firefox":
-            self.control.scraper.driver.find_element_by_tag_name('html').screenshot(filepath)
+            self.control.scraper.driver.find_element_by_tag_name(
+                'html'
+            ).screenshot(filepath)
         else:
-            with open(filepath, "wb") as f:
-                png = self.control.scraper.driver.get_screenshot_as_png()
-                f.write(png)
+            write_file(
+                filepath, png, fileclass="screenshot",
+                writetype="wb", output_data_dir=self.output_data_dir
+            )
 
         # restore original window size to avoid side effects
         self.control.scraper.driver.set_window_size(
@@ -122,9 +125,11 @@ class BaseScraper(object):
         if classname not in self.training_classes:
             raise ValueError("Base class speficied: %s" % classname)
 
-        classdir = os.path.join(self.output_data_dir, classname)
-        if not os.path.exists(classdir):
-            os.makedirs(classdir)
+        # always keep filename for downloads, for now
+        if re.match("^https?://", self.output_data_dir):
+            classdir = classname
+        else:
+            classdir = os.path.join(self.output_data_dir, classname)
 
         data = self.control.scraper.page_html
         url = self.control.scraper.page_url
@@ -132,6 +137,7 @@ class BaseScraper(object):
         ext = get_extension_from_url(url)
         if ext not in TEXT_EXTENSIONS:
             data = self.control.scraper.download_file(url, return_data=True)
+            classname = "downloads"
 
         # hash the contents of the file, so we don't *not* save dynamic
         # JS pages with the same URl and that we *don't* excessively save
@@ -156,16 +162,20 @@ class BaseScraper(object):
         else:
             filepath = os.path.join(classdir, "%s.%s" % (h, ext))
 
-        with open(filepath, writetype) as f:
-            f.write(data)
+        write_file(
+            filepath, data, fileclass=classname,
+            writetype=writetype, output_data_dir=self.output_data_dir
+        )
 
         # only save stylesheets for web content types
         if not self.disable_style_saving and ext in TEXT_EXTENSIONS:
             logger.debug("Saving stylesheet")
             style_filepath = "%s.css" % filepath
             # this will save stylesheet as filepath.html.css
-            with open(style_filepath, "w") as f:
-                f.write(self.get_stylesheet())
+            write_file(
+                style_filepath, self.get_stylesheet(), fileclass=classname,
+                output_data_dir=self.output_data_dir
+            )
 
     def save_scraper_graph(self):
         """

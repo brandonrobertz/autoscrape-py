@@ -21,7 +21,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from .tags import Tagger
 from .search.graph import Graph
 from .filetypes import TEXT_EXTENSIONS
-from .util import get_filename_from_url, get_extension_from_url
+from .util import get_filename_from_url, get_extension_from_url, write_file
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -560,16 +560,19 @@ class Scraper(object):
         if return_data:
             return data
 
-        dl_dir = os.path.join(self.output_data_dir, "downloads")
-        if not os.path.exists(dl_dir):
-            os.makedirs(dl_dir)
-
         # always keep filename for downloads, for now
+        if re.match("^https?://", self.output_data_dir):
+            dl_dir = "downloads"
+        else:
+            dl_dir = os.path.join(self.output_data_dir, "downloads")
+
         parsed_filename = get_filename_from_url(url)
         logger.debug("Parsed output filename: %s" % parsed_filename)
         filepath = os.path.join(dl_dir, parsed_filename)
-        with open(filepath, "wb") as f:
-            f.write(data)
+        write_file(
+            filepath, data, fileclass="download", writetype="wb",
+            output_data_dir=self.output_data_dir
+        )
 
     @property
     def page_url(self):

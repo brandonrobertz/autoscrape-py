@@ -1,5 +1,8 @@
+import base64
+import json
 import os
-from urllib.parse import urlparse
+import re
+from urllib import request, parse
 
 
 def get_filename_from_url(url):
@@ -20,7 +23,7 @@ def get_filename_from_url(url):
 
     NOTE: If no extension is found on the page, .html is appended.
     """
-    parsed = urlparse(url)
+    parsed = parse.urlparse(url)
     host = parsed.netloc
     # split filename/path and extension
     file_parts = os.path.splitext(parsed.path)
@@ -35,10 +38,48 @@ def get_filename_from_url(url):
 
 def get_extension_from_url(url):
         # try and extract the extension from the URL
-        path = urlparse(url).path
+        path = parse.urlparse(url).path
         ext = os.path.splitext(path)[1]
         ext = ext if ext else "html"
         if ext[0] == ".":
             ext = ext[1:]
         return ext
+
+def write_file(filepath, data, fileclass=None, writetype="w", output_data_dir=None):
+    """
+    Write out a scraped data file to disk or a remote callback,
+    specified in output_data_dir parameter.
+    """
+    if not output_data_dir:
+        return
+
+    # Rest API callback mode
+    if re.match("^https?://", output_data_dir):
+        url = output_data_dir
+        # (b64encode) bytes -> (decode) str
+        if type(data) == bytes:
+            encoded = base64.b64encode(data).decode()
+        else:
+            encoded = base64.b64encode(bytes(data, "utf-8")).decode()
+        payload = {
+            "name": filepath,
+            "data": encoded
+        }
+        if fileclass:
+            payload["fileclass"] = fileclass
+            post_data = json.dumps(payload).encode("utf-8")
+            headers = {
+                "content-type": "application/json"
+            }
+            req = request.Request(url, data=post_data, headers=headers)
+            # this will make the method "POST"
+            resp = request.urlopen(req)
+
+    # filesystem mode
+    else:
+        dirpath = os.path.dirname(filepath)
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+        with open(filepath, writetype) as f:
+            f.write(data)
 
