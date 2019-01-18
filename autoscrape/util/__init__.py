@@ -1,8 +1,12 @@
 import base64
 import json
+import logging
 import os
 import re
 from urllib import request, parse
+
+
+logger = logging.getLogger('AUTOSCRAPE')
 
 
 def get_filename_from_url(url):
@@ -50,12 +54,12 @@ def write_file(filepath, data, fileclass=None, writetype="w", output_data_dir=No
     Write out a scraped data file to disk or a remote callback,
     specified in output_data_dir parameter.
     """
+    logger.debug("Writing file: %s to: %s" % (filepath, output_data_dir))
     if not output_data_dir:
         return
 
     # Rest API callback mode
     if re.match("^https?://", output_data_dir):
-        url = output_data_dir
         # (b64encode) bytes -> (decode) str
         if type(data) == bytes:
             encoded = base64.b64encode(data).decode()
@@ -71,7 +75,9 @@ def write_file(filepath, data, fileclass=None, writetype="w", output_data_dir=No
             headers = {
                 "content-type": "application/json"
             }
-            req = request.Request(url, data=post_data, headers=headers)
+            req = request.Request(
+                output_data_dir, data=post_data, headers=headers
+            )
             # this will make the method "POST"
             resp = request.urlopen(req)
 

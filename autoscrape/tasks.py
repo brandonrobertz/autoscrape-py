@@ -1,5 +1,6 @@
 import os
 import json
+import re
 
 from celery import Celery
 from celery.result import AsyncResult
@@ -24,9 +25,16 @@ app.conf.update(
     CELERY_TRACK_STARTED=True,
 )
 
-@app.task()
-def start(baseurl, args):
+@app.task(bind=True)
+def start(self, baseurl, args):
     print("Starting ManualControlScraper", baseurl, args)
+    # append task ID to receiver URI
+    output = args.get("output_data_dir")
+    if output and re.match("^https?://", output):
+        if output[-1] != "/":
+            output += "/"
+        output += str(self.request.id)
+        args["output_data_dir"] = output
     scraper = ManualControlScraper(baseurl, **args)
     scraper.run()
 

@@ -1,4 +1,22 @@
-
-# start docker containers
 start:
+	docker-compose build --pull
 	docker-compose up -t0 --abort-on-container-exit
+
+quickstart:
+	docker-compose up -t0 --abort-on-container-exit
+
+build:
+	docker-compose build --pull
+
+stop:
+	docker-compose down -t0
+	docker-compose rm -f -v # -v removes _anonymous_ volumes
+
+clean: stop
+	if docker ps -a -q; then \
+		docker rm $$(docker ps -a -q) || exit 0; \
+	fi
+	if docker images -q; then \
+		docker rmi $$(docker images -q) || exit 0; \
+	fi
+

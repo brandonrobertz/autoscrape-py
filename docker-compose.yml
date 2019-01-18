@@ -19,13 +19,13 @@ services:
   flask:
     build:
       context: .
-      target: autoscrapebuild
+      target: autoscrape-server-deps
     volumes:
       - ./:/app:ro
       - virtualenvs:/root/.local/share/virtualenvs/:rw
     command: [ 'pipenv', 'run', 'python', 'autoscrape-server.py' ]
     ports:
-      - '5000:5000'
+      - '5000:5001'
     links:
       - rabbitmq
     depends_on: [ 'rabbitmq' ]
@@ -36,7 +36,7 @@ services:
   celery:
     build:
       context: .
-      target: autoscrapebuild
+      target: autoscrape-worker-deps
     volumes:
       - ./:/app:ro
       - virtualenvs:/root/.local/share/virtualenvs/:rw
@@ -44,13 +44,14 @@ services:
     #user: nobody
     links:
       - rabbitmq
-    depends_on: [ 'rabbitmq' ]
+    depends_on: [ 'rabbitmq', 'flask' ]
     networks: [ 'dev' ]
     environment:
       CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
 
 networks:
-  dev: {}
+  dev:
+    driver: bridge
 
 volumes:
   virtualenvs: {}

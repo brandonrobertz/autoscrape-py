@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 import base64
-from flask import Flask, request, jsonify
+
+from flask import Flask, request, jsonify, send_from_directory
 
 import autoscrape.tasks as tasks
 
 
-app = Flask(__name__)
+app = Flask(__name__) #, static_url_path='')
 
 
-@app.route("/", methods=["GET"])
-def get_root():
-    return jsonify({"status": "OK", "message": "Welcome to AutoScrape"})
+# @app.route("/app/<path:path>", methods=["GET"])
+# def root(path):
+#     return send_from_directory('www', path)
 
 @app.route("/start", methods=["POST"])
 def post_start():
@@ -21,7 +22,7 @@ def post_start():
     to query status or stop the scrape.
 
     Curl Example:
-        curl http://localhost:5000/start -H 'content-type: application/json' --data '{"baseurl": "https://bxroberts.org", "form_submit_wait": "5", "input": null, "save_graph": false, "load_images": false, "maxdepth": "0", "next_match": "next page", "leave_host": false, "show_browser": false, "driver": "Firefox", "form_submit_natural_click": false, "formdepth": "0", "link_priority": null, "keep_filename": false, "ignore_links": null, "form_match": null, "save_screenshots": false, "remote_hub": "http://localhost:4444/wd/hub", "loglevel": "DEBUG", "output_data_dir": "http://localhost:5000/receive", "disable_style_saving": false}'
+        curl http://localhost:5000/start -H 'content-type: application/json' --data '{"baseurl": "https://bxroberts.org", "form_submit_wait": "5", "input": null, "save_graph": false, "load_images": false, "maxdepth": "0", "next_match": "next page", "leave_host": false, "show_browser": false, "driver": "Firefox", "form_submit_natural_click": false, "formdepth": "0", "link_priority": null, "keep_filename": false, "ignore_links": null, "form_match": null, "save_screenshots": false, "remote_hub": "http://localhost:4444/wd/hub", "loglevel": "DEBUG", "output_data_dir": "http://flask:5001/receive/<JOB-ID-HERE>", "disable_style_saving": false}'
 
     Success Returns:
         HTTP 200 OK
@@ -66,8 +67,8 @@ def get_stop(id):
     tasks.stop.delay(id)
     return jsonify({"status": "OK"})
 
-@app.route("/receive", methods=["POST"])
-def receive_data():
+@app.route("/receive/<id>", methods=["POST"])
+def receive_data(id):
     """
     This is a callback endpoint for receiving scrape data from
     a running AutoScrape instance, configured to send its data
@@ -80,6 +81,7 @@ def receive_data():
             "fileclass": "crawl_data|screenshots|downloads|..."
         }
     """
+    app.logger.debug("Task ID : %s" % id)
     try:
         args = request.get_json()
         app.logger.debug("Name: %s" % args["name"])
@@ -97,5 +99,5 @@ def receive_data():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
 
