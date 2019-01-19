@@ -51,15 +51,15 @@ RUN curl -L https://github.com/mozilla/geckodriver/releases/download/v0.23.0/gec
         | tar zx -C /usr/bin/ \
         && chmod +x /usr/bin/geckodriver
 
-# Install Chrome and chromedriver
-# Install Chrome for Selenium
-RUN curl https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /chrome.deb
-RUN dpkg -i /chrome.deb || apt-get install -yf
-RUN rm /chrome.deb
-
-# Install chromedriver for Selenium
-RUN curl https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip -o /usr/bin/chromedriver
-RUN chmod +x /usr/bin/chromedriver
+# NOTE: Chrome/chromedriver explodes when ran as root, disabling this
+# until/if we ever fix that issue
+# # Install Chrome
+# RUN curl https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /chrome.deb
+# RUN dpkg -i /chrome.deb || apt-get install -yf
+# RUN rm /chrome.deb
+# # Install chromedriver for Selenium
+# RUN curl https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip -o /usr/bin/chromedriver
+# RUN chmod +x /usr/bin/chromedriver
 
 COPY Pipfile Pipfile.lock /app/
 RUN pipenv install

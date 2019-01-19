@@ -98,12 +98,14 @@ def get_status(id):
         Data.timestamp.desc()
     ).first()
     app.logger.debug("Task state: %s" % result.state)
-    app.logger.debug("Data: %s" % data)
-    return jsonify({
+    response = {
         "status": "OK",
         "message": result.state,
-        "data": data.data
-    })
+    }
+    if data and data.data:
+        app.logger.debug("Data: %s" % data)
+        response["data"] = data.data
+    return jsonify(response)
 
 @app.route("/stop/<id>", methods=["POST"])
 def get_stop(id):

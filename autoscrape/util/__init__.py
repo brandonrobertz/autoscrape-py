@@ -67,8 +67,6 @@ def write_file(filepath, data, fileclass=None, writetype="w", output=None):
             encoded = base64.b64encode(data).decode()
         else:
             encoded = base64.b64encode(bytes(data, "utf-8")).decode()
-            logger.debug("Encoded file: %s" % encoded)
-            logger.debug("Encoded type: %s" % type(encoded))
         payload = {
             "name": filepath,
             "data": encoded
