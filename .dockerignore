@@ -1,0 +1,32 @@
+.git/
+*.py[cod]
+*$py.class
+.cache/
+*.pickle
+.idea/
+*.log
+.DS_Store
+__pycache__
+
+*.pyc
+*.swp
+*.swo
+*.7z
+*.log
+
+# default output directory
+autoscrape-data/
+
+# Algorithmic/Training Data-Related Files
+# Currently stored in a separate git repo (private, currently)
+# Will be released once ready, minimized, over LFS
+deps/
+training_data/
+*.pickle
+
+# python virtual environment
+venv
+
+# webdriver remote settings
+nodeConfig.json
+
