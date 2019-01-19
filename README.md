@@ -4,13 +4,17 @@
 
 A project of [Artificial Informer Labs](https://artificialinformer.com).
 
-This is an automated scraper of structured data from interactive web pages. You point this scraper at a site and it will be crawled, searched for forms and structured data will be extracted. No brittle, site-specific programming necessary.
+AutoScrape is an automated scraper of structured data from interactive web pages. You point this scraper at a site and it will be crawled, searched for forms and structured data can then be extracted. No brittle, site-specific programming necessary.
 
-*This is a work in progress.* The initial prototype version uses brute force with a set of configuration options. Machine learning and, finally, reinforcement learning models are being developed.
+This is an implementation of the web scraping framework described in the paper, _Robust Web Scraping in the Public Interest with AutoScrape_ in [Proceedings of Computation + Journalism Symposium 2019](http://cplusj.org/).
 
-This is an implementation of the web scraping framework described in the upcoming paper, _Robust Web Scraping in the Public Interest with AutoScrape_ in [Proceedings of Computation + Journalism Symposium 2019](http://cplusj.org/).
+Currently there are two methods of running AutoScrape:
+- as a local CLI python script
+- as a containerized system via the API
 
-## Setup & Dependencies
+Installation and running instructions are provided for both below.
+
+## Setup for Standalone Local CLI
 
 ### External Dependencies
 
@@ -39,7 +43,7 @@ running:
 
     pipenv install
 
-## Running Local Scraper
+## Running Standalone Scraper
 
 ### Environment Test Crawler
 
@@ -172,7 +176,7 @@ Webdriver-Specific and General Options:
         [default: INFO]
 
 Data Saving Options:
-    --output-data-dir OUTPUT_DATA_DIR
+    --output DIRECTORY_OR_URL
         If specified, this indicates where to save pages during a
         crawl. This directory will be created if it does not
         currently exist.  This directory will have several
@@ -212,7 +216,7 @@ EXAMPLES
   --form-match "first name" \
   --input "i:0:firstname,i:1:lastname" \
   --next-match "next page" \
-  --output-data-dir "firstname_lastname_scrape" \
+  --output "firstname_lastname_scrape" \
   [BASEURL]
 
 In the above example, the scraper will crawl until it finds a form
@@ -224,7 +228,7 @@ containing "next page" until there are no more. All data found during
 the scrape will be saved to the ./firstname_lastname_scrape directory.
 ```
 
-## Running Containerized API Version
+## Setup Containerized API Version
 
 AutoScrape can also be ran as a containerized cluster environment, where
 scrapes can be triggered and stopped via API calls and data can
@@ -234,62 +238,16 @@ To run this you need [docker-ce](https://docs.docker.com/install/#server)
 and [docker-compose](https://docs.docker.com/compose/install/). Once you
 have these dependencies installed, simply run:
 
+    docker-compose build --pull
     docker-compose up -t0 --abort-on-container-exit
 
-This will launch a API server running on port 5000. More information
-about the API calls can be found in `autoscrape-server.py`.
+This will build the containers and launch a API server
+running on local port 5000. More information about the API calls
+can be found in `autoscrape-server.py`.
 
-NOTE: This is a prototype and a work in progress.
+If you have make installed, you can simply run `make start`.
 
-## Fully Automated Scrapers, Data & ML Models
-
-![Web code embeddings](https://github.com/brandonrobertz/autoscrape-py/blob/master/images/code_embeddings.png)
-
-NOTE: This is extremely experimental and is very much under active development.
-
-`autoscrape-ml` requires two separate embedding models: a HTML/JS character embeddings and plain word embeddings. (You can check `training_data/embeddings/` for more information about the specifics.)
-
-We trained our HTML & JavaScript code character-level language model from 61G of StackOverflow comment data. We will make the embeddings public in the near future. Until then, you need to train them yourself using something like word2vec on pre-split character data.
-
-For a generic language model, we're using the GloVe [300D, 840B token Common Crawl embeddings](https://github.com/stanfordnlp/GloVe#download-pre-trained-word-vectors), which is freely available online.
-
-We can gather training data with the `manual-control` scraper, using this
-configuration optionset:
-
-    ./scrape.py --loglevel DEBUG --maxdepth 2 \
-        --output-data_dir ./training_data/pages/html/ \
-        --form-match "first name" \
-        --input "i:0:a;i:0:b;i:0:c" --formdepth 2 \
-        --next-match "next page" \
-        [SITE_URL]
-
-The above will find, from [SITE_URL], interactive forms containing the
-text "first name", will input the characters a, b, then c, into the form,
-and will click buttons containing "next page" until it's two layers
-deep. All training data derived from this crawl will be stored in the
-directory `./training_data/pages/html/`.
-
-Once we have all our embeddings, we need to take our example training web pages and vectorize them:
-
-    ./vectorize_data.py --loglevel DEBUG \
-        --html_embeddings training_data/webcode.300d.txt \
-        --word_embeddings training_data/glove.840B.300d.txt \
-        --output_file training_data/page_data.pickle \
-        ./training_data/hand_gathered_page_data/html/
-
-
-The resulting `page_data.pickle` will have `X` and `y` attributes.
-
-Once you have training data vectorized, you can train a supervised
-classification model using the `train.py` script:
-
-    ./train.py --data training_data/page_data.pickle \
-        --output training_data/page_data_kNN.model.pickle \
-        --model kNN
-
-The resulting model will be saved, in the above example, to
-`training_data/page_data_kNN.model.pickle` which can be loaded and ran by
-`autoscraper-ml`.
-
-
+NOTE: This is a work in progress prototype that will likely
+be removed once AutoScrape is integrated into
+[CJ Workbench](http://workbenchdata.com).
 

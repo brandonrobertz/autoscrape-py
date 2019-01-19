@@ -113,7 +113,7 @@ Webdriver-Specific and General Options:
         [default: INFO]
 
 Data Saving Options:
-    --output-data-dir OUTPUT_DATA_DIR
+    --output DIRECTORY_OR_URL
         If specified, this indicates where to save pages during a
         crawl. This directory will be created if it does not
         currently exist.  This directory will have several

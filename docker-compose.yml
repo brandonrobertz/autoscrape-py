@@ -8,6 +8,17 @@
 version: '3.4'
 
 services:
+  database:
+    image: postgres:10.4
+    environment:
+      POSTGRES_USER: cjworkbench
+      POSTGRES_PASSWORD: cjworkbench
+      POSTGRES_DB: cjworkbench
+      PGDATA: /var/lib/postgresql/data/10.4
+    networks: [ 'dev' ]
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
   rabbitmq:
     image: rabbitmq:3.7.8-management
     ports: [ '15672' ] # open management port, for debugging
@@ -28,10 +39,12 @@ services:
       - '5000:5001'
     links:
       - rabbitmq
-    depends_on: [ 'rabbitmq' ]
+    depends_on: [ 'rabbitmq', 'database' ]
     networks: [ 'dev' ]
     environment:
       CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
+      CJW_DB_HOST: database
+      CJW_DB_PASSWORD: cjworkbench
 
   celery:
     build:
@@ -55,4 +68,5 @@ networks:
 
 volumes:
   virtualenvs: {}
+  dbdata: {}
 

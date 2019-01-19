@@ -7,3 +7,5 @@ networkx==2.2
 numpy==1.15.0
 Flask==1.0.2
 celery==4.2.1
+psycopg2==2.7.6.1
+flask-sqlalchemy==2.3.2
