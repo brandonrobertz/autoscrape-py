@@ -11,7 +11,7 @@ from .scrapers.manual import ManualControlScraper
 
 app = Celery(
     'tasks',
-    broker=os.environ["CJW_RABBITMQ_HOST"],
+    broker=os.environ.get("CJW_RABBITMQ_HOST"),
     backend='rpc://'
 )
 
@@ -25,16 +25,17 @@ app.conf.update(
     CELERY_TRACK_STARTED=True,
 )
 
+
 @app.task(bind=True)
 def start(self, baseurl, args):
     print("Starting ManualControlScraper", baseurl, args)
     # append task ID to receiver URI
-    output = args.get("output_data_dir")
+    output = args.get("output")
     if output and re.match("^https?://", output):
         if output[-1] != "/":
             output += "/"
         output += str(self.request.id)
-        args["output_data_dir"] = output
+        args["output"] = output
     scraper = ManualControlScraper(baseurl, **args)
     scraper.run()
 

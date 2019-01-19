@@ -36,7 +36,7 @@ class ManualControlScraper(BaseScraper):
 
     def __init__(self, baseurl, loglevel=None, maxdepth=0, formdepth=0,
                  next_match=None, form_match=None,
-                 output_data_dir=None, keep_filename=False,
+                 output=None, keep_filename=False,
                  disable_style_saving=False,
                  save_screenshots=False, save_graph=False,
                  input=None, leave_host=False,
@@ -52,7 +52,7 @@ class ManualControlScraper(BaseScraper):
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=int(form_submit_wait),
             load_images=load_images, show_browser=show_browser,
-            output_data_dir=output_data_dir,
+            output=output,
         )
         self.control.initialize(baseurl)
         # depth of DFS in search of form
@@ -64,7 +64,7 @@ class ManualControlScraper(BaseScraper):
         # string to match a form (by element text) we want to scrape
         self.form_match = form_match
         # Where to write training data from crawl
-        self.output_data_dir = output_data_dir
+        self.output = output
         # If this is true, do not use a file hash for the filename
         self.keep_filename = keep_filename
         # Disable saving of stylesheets for web content types
@@ -260,10 +260,10 @@ class ManualControlScraper(BaseScraper):
             self.scrape(*args, **kwargs)
         except Exception as e:
             self.control.scraper.driver.quit()
-            if self.output_data_dir and self.save_graph:
+            if self.output and self.save_graph:
                 self.save_scraper_graph()
             raise e
         else:
-            if self.output_data_dir and self.save_graph:
+            if self.output and self.save_graph:
                 self.save_scraper_graph()
 

@@ -1,6 +1,7 @@
 start:
-	docker-compose build --pull
-	docker-compose up -t0 --abort-on-container-exit
+	docker-compose down
+	#docker-compose build --pull
+	docker-compose up --build -t0 --abort-on-container-exit --renew-anon-volumes
 
 quickstart:
 	docker-compose up -t0 --abort-on-container-exit
@@ -14,9 +15,11 @@ stop:
 
 clean: stop
 	if docker ps -a -q; then \
-		docker rm $$(docker ps -a -q) || exit 0; \
+		docker rm -f $$(docker ps -a -q) || exit 0; \
 	fi
 	if docker images -q; then \
-		docker rmi $$(docker images -q) || exit 0; \
+		docker rmi -f $$(docker images -q) || exit 0; \
 	fi
+	docker volume rm -f $(docker volume ls | awk '{ print $2 }')
+
 

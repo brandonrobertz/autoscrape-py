@@ -30,11 +30,11 @@ services:
   flask:
     build:
       context: .
-      target: autoscrape-server-deps
+      target: base
     volumes:
-      - ./:/app:ro
+      - ./:/app:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
-    command: [ 'pipenv', 'run', 'python', 'autoscrape-server.py' ]
+    command: [ 'pipenv', 'run', 'python3', 'autoscrape-server.py' ]
     ports:
       - '5000:5001'
     links:
@@ -44,14 +44,15 @@ services:
     environment:
       CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
       CJW_DB_HOST: database
+      CJW_DB_USER: cjworkbench
       CJW_DB_PASSWORD: cjworkbench
 
   celery:
     build:
       context: .
-      target: autoscrape-worker-deps
+      target: base
     volumes:
-      - ./:/app:ro
+      - ./:/app:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
     command: [ 'pipenv', 'run', 'celery', '-A', 'autoscrape.tasks', 'worker', '--loglevel=info' ]
     #user: nobody

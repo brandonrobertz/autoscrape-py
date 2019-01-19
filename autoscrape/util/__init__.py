@@ -49,22 +49,26 @@ def get_extension_from_url(url):
             ext = ext[1:]
         return ext
 
-def write_file(filepath, data, fileclass=None, writetype="w", output_data_dir=None):
+def write_file(filepath, data, fileclass=None, writetype="w", output=None):
     """
     Write out a scraped data file to disk or a remote callback,
-    specified in output_data_dir parameter.
+    specified in output parameter.
     """
-    logger.debug("Writing file: %s to: %s" % (filepath, output_data_dir))
-    if not output_data_dir:
+    logger.debug("Writing file: %s to: %s" % (filepath, output))
+    if not output:
         return
 
+    logger.debug("Data type: %s" % type(data))
+
     # Rest API callback mode
-    if re.match("^https?://", output_data_dir):
+    if re.match("^https?://", output):
         # (b64encode) bytes -> (decode) str
         if type(data) == bytes:
             encoded = base64.b64encode(data).decode()
         else:
             encoded = base64.b64encode(bytes(data, "utf-8")).decode()
+            logger.debug("Encoded file: %s" % encoded)
+            logger.debug("Encoded type: %s" % type(encoded))
         payload = {
             "name": filepath,
             "data": encoded
@@ -76,7 +80,7 @@ def write_file(filepath, data, fileclass=None, writetype="w", output_data_dir=No
                 "content-type": "application/json"
             }
             req = request.Request(
-                output_data_dir, data=post_data, headers=headers
+                output, data=post_data, headers=headers
             )
             # this will make the method "POST"
             resp = request.urlopen(req)

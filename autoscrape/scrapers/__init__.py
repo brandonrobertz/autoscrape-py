@@ -64,7 +64,7 @@ class BaseScraper(object):
         Screenshots are saved by the timestamp and the "class"
         of the page currently visited (data_page, etc).
         """
-        if not self.output_data_dir or not self.save_screenshots:
+        if not self.output or not self.save_screenshots:
             return
 
         if classname not in self.training_classes:
@@ -90,7 +90,10 @@ class BaseScraper(object):
             required_width, required_height
         )
 
-        screenshot_dir = os.path.join(self.output_data_dir, "screenshots")
+        if re.match("^https?://", self.output):
+            screenshot_dir = "screenshots"
+        else:
+            screenshot_dir = os.path.join(self.output, "screenshots")
 
         filepath = os.path.join(screenshot_dir, "%s_%s.png" % (
             int(time.time()), classname
@@ -98,15 +101,20 @@ class BaseScraper(object):
 
         logger.debug("Saving screenshot to file: %s." % filepath)
         # only FF has this capability, it removes the scrollbar
-        if self.control.scraper.driver == "Firefox":
-            self.control.scraper.driver.find_element_by_tag_name(
-                'html'
-            ).screenshot(filepath)
-        else:
-            write_file(
-                filepath, png, fileclass="screenshot",
-                writetype="wb", output_data_dir=self.output_data_dir
+        if self.control.scraper.driver_name == "Firefox":
+            html_el = self.control.scraper.driver.find_element_by_tag_name(
+                "html"
             )
+            logger.debug("HTML root for screenshot: %s" % html_el)
+            logger.debug("DIR: %s" % dir(html_el))
+            png = html_el.screenshot_as_png
+        else:
+            png = self.control.scraper.driver.get_screenshot_as_png()
+
+        write_file(
+            filepath, png, fileclass="screenshot",
+            writetype="wb", output=self.output
+        )
 
         # restore original window size to avoid side effects
         self.control.scraper.driver.set_window_size(
@@ -118,7 +126,7 @@ class BaseScraper(object):
         Writes the current page to the output data directory (if provided)
         to the given class folder.
         """
-        if not self.output_data_dir:
+        if not self.output:
             return
 
         logger.debug("Saving training page for class: %s" % classname)
@@ -126,10 +134,10 @@ class BaseScraper(object):
             raise ValueError("Base class speficied: %s" % classname)
 
         # always keep filename for downloads, for now
-        if re.match("^https?://", self.output_data_dir):
+        if re.match("^https?://", self.output):
             classdir = classname
         else:
-            classdir = os.path.join(self.output_data_dir, classname)
+            classdir = os.path.join(self.output, classname)
 
         data = self.control.scraper.page_html
         url = self.control.scraper.page_url
@@ -164,7 +172,7 @@ class BaseScraper(object):
 
         write_file(
             filepath, data, fileclass=classname,
-            writetype=writetype, output_data_dir=self.output_data_dir
+            writetype=writetype, output=self.output
         )
 
         # only save stylesheets for web content types
@@ -174,7 +182,7 @@ class BaseScraper(object):
             # this will save stylesheet as filepath.html.css
             write_file(
                 style_filepath, self.get_stylesheet(), fileclass=classname,
-                output_data_dir=self.output_data_dir
+                output=self.output
             )
 
     def save_scraper_graph(self):
@@ -182,19 +190,19 @@ class BaseScraper(object):
         Saves our graph that was built throughout the scrape. This can
         be used to visualize the scrape, debug it, and replicate it.
 
-        Graph is saved to the graph subdirectory of the output_data_dir
+        Graph is saved to the graph subdirectory of the output
         path, with the filename a microscond timestamp with the .gpickle
         extension.
 
-        If output_data_dir is not set, then calling this function has no
+        If output is not set, then calling this function has no
         effect.
         """
-        if not self.output_data_dir or not self.save_graph:
-            logger.debug("No output-data-dir or save-graph options. Not saving")
+        if not self.output or not self.save_graph:
+            logger.debug("No output or save-graph options. Not saving")
             return
 
         filename = "%s.gpickle" % int(time.time() * 1000)
-        basedir = os.path.join(self.output_data_dir, "graph")
+        basedir = os.path.join(self.output, "graph")
         if not os.path.exists(basedir):
             logger.debug("Creating graph subdir: %s" % basedir)
             os.makedirs(basedir)

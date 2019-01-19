@@ -31,8 +31,11 @@ class Scraper(object):
 
     def __init__(self, driver="Firefox", leave_host=False, load_images=False,
                  form_submit_natural_click=False, form_submit_wait=5,
-                 output_data_dir=None,
+                 output=None,
                  show_browser=False, remote_hub="http://localhost:4444/wd/hub"):
+        # store this for browser-specific checks
+        self.driver_name = driver
+
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
@@ -108,7 +111,7 @@ class Scraper(object):
         self.css_escapables = ".:"
         self.form_submit_natural_click=form_submit_natural_click
         self.form_submit_wait=form_submit_wait
-        self.output_data_dir = output_data_dir
+        self.output = output
 
     def driver_exec(self, fn, *args, **kwargs):
         """
@@ -561,17 +564,17 @@ class Scraper(object):
             return data
 
         # always keep filename for downloads, for now
-        if re.match("^https?://", self.output_data_dir):
+        if re.match("^https?://", self.output):
             dl_dir = "downloads"
         else:
-            dl_dir = os.path.join(self.output_data_dir, "downloads")
+            dl_dir = os.path.join(self.output, "downloads")
 
         parsed_filename = get_filename_from_url(url)
         logger.debug("Parsed output filename: %s" % parsed_filename)
         filepath = os.path.join(dl_dir, parsed_filename)
         write_file(
             filepath, data, fileclass="download", writetype="wb",
-            output_data_dir=self.output_data_dir
+            output=self.output
         )
 
     @property
