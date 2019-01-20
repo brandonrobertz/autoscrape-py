@@ -1,0 +1,63 @@
+#main-controls {
+    text-align: center;
+    font-size: 16px;
+}
+#main-controls input {
+    width: 50%;
+    font-size: 16px;
+}
+#main-controls button {
+    font-size: 16px;
+}
+
+#controls .pending {
+    color: #a2a610;
+}
+#controls .failure {
+    color: red;
+}
+#controls .complete {
+    color: green;
+}
+
+#status #screenshot-img {
+    width: 800px;
+}
+#status #screenshot {
+    display: inline-block;
+    max-width: 60%;
+}
+#status #files {
+    display: inline-block;
+    max-width: 30%;
+}
+
+#toggle-wrapper {
+    display: inline-block;
+}
+#toggle-wrapper span {
+    font-size: 20px;
+    cursor: pointer;
+    color: #888888;
+    width: 40px;
+    display: inline-block;
+}
+
+#sub-controls-menu span {
+    padding: 2px 5px;
+    display: inline-block;
+    width: 30%;
+}
+#sub-controls-menu {
+    font-size: 11px;
+}
+#sub-controls-menu .small input {
+    width: 25px;
+}
+#sub-controls-menu .medium input {
+    width: 75px;
+}
+#sub-controls-menu .large input {
+    width: 250px;
+}
+

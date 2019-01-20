@@ -10,14 +10,72 @@
     <meta name="theme-color" content="#000000" />
     <link rel="manifest" href="/manifest.json" />
     <title>AutoScrape</title>
+    <link rel="stylesheet" type="text/css" href="/app/style.css">
   </head>
   <body>
 
     <div id="main">
       <div id="controls">
-        <input type="text" placeholder="Base URL to scrape..." />
-        <button id="start-scrape">Start</button>
-        <button id="stop-scrape" style="display: none">Stop</button>
+        <div id="main-controls">
+          <input type="text" placeholder="Base URL to scrape..." />
+          <div id="toggle-wrapper">
+            <span id="toggle-button-open">🔧</span>
+            <span id="toggle-button-close" style="display: none">✖</span>
+          </div>
+          <button id="start-scrape">Start</button>
+          <button id="stop-scrape" style="display: none">Stop</button>
+          <div>
+            <span id="scrape-status"></span>
+          </div>
+        </div>
+        <div id="sub-controls">
+          <div id="sub-controls-menu" style="display: none">
+            <span class="small">
+              form_submit_wait:
+              <input id="sub-controls-form_submit_wait" type="text" value="5" />
+            </span>
+            <span class="large">
+              input:
+              <input id="sub-controls-input" type="text" value="" />
+            </span>
+            <span>
+              load_images:
+              <input id="sub-controls-load_images" type="checkbox" />
+            </span>
+            <span class="small">
+              maxdepth:
+              <input id="sub-controls-maxdepth" type="text" value="0" />
+            </span>
+            <span class="medium">
+              next_match:
+              <input id="sub-controls-next_match" type="text" value="next page" />
+            </span>
+            <span>
+              leave_host:
+              <input id="sub-controls-leave_host" type="checkbox" />
+            </span>
+            <span>
+              form_submit_natural_click:
+              <input id="sub-controls-form_submit_natural_click" type="checkbox" />
+            </span>
+            <span class="small">
+              formdepth:
+              <input id="sub-controls-formdepth" type="text" value="0" />
+            </span>
+            <span>
+              link_priority:
+              <input id="sub-controls-link_priority" type="text" value="" />
+            </span>
+            <span>
+              ignore_links:
+              <input id="sub-controls-ignore_links" type="text" value="" />
+            </span>
+            <span>
+              form_match:
+              <input id="sub-controls-form_match" type="text" value="" />
+            </span>
+          </div>
+        </div>
       </div>
       <div id="status" style="display: none">
         <div id="screenshot">
@@ -25,7 +83,8 @@
         </div>
       </div>
       <div id="complete" style="display: none">
-        Scrape complete.
+        <div id="files-list">
+        </div>
       </div>
     </div>
 
@@ -33,6 +92,15 @@
       src="https://code.jquery.com/jquery-3.3.1.min.js"
       integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
       crossorigin="anonymous"></script>
+    <script
+      src="/app/jquery.loadTemplate.min.js"></script>
+    <script type="text/html" id="file-list-item">
+      <div class="file-row">
+        <span data-content="name"></span>
+        <span data-content="fileclass"></span>
+        <span data-content="timestamp"></span>
+      </div>
+    </script>
     <script
       src="/app/index.js"></script>
   </body>

@@ -42,5 +42,5 @@ def start(self, baseurl, args):
 @app.task(bind=True)
 def stop(self, id):
     print("Stopping AutoScrape job: %s" % id)
-    revoke(id, terminate=True, signal='SIGKILL')
+    revoke(id, terminate=True) #, signal='SIGKILL')
 

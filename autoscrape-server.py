@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import base64
+import decimal
+import datetime
 import os
 
 from flask import Flask, request, jsonify, send_from_directory
@@ -9,7 +11,6 @@ import autoscrape.tasks as tasks
 
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
-
 
 connect_str = 'postgresql://%s:%s@%s/autoscrape' % (
     os.environ["CJW_DB_USER"],
@@ -51,6 +52,15 @@ class Data(db.Model):
 
     def __repr__(self):
         return '<Data %r, %r>' % (self.name, self.fileclass)
+
+    @property
+    def serialize(self):
+        return {
+            "id": self.id,
+            "timestamp": self.timestamp.isoformat(),
+            "name": self.name,
+            "fileclass": self.fileclass,
+        }
 
 @app.route("/app/<path:path>", methods=["GET"])
 def root(path):
@@ -163,8 +173,56 @@ def receive_data(id):
     # TODO: store/dispatch this data somewhere
     return jsonify({"status": "OK"})
 
+@app.route("/files/list/<id>", methods=["GET"])
+def list_files(id):
+    """
+    Get a directory listing for a scrape's data, with
+    an optional fileclass query param (only look at downloads,
+    crawl_data, data_files, etc). Defaults to *all* data
+    scraped, ordered by date.
+    """
+    filter_params = {
+        "task_id": id,
+    }
+
+    fileclass = request.args.get("fileclass")
+    if fileclass:
+        filter_params["fileclass"] = fileclass
+
+    data = Data.query.filter_by(
+        **filter_params
+    ).order_by(
+        Data.timestamp.desc()
+    ).all()
+
+    return jsonify({
+        "status": "OK",
+        "data": [d.serialize for d in data]
+    })
+
+@app.route("/files/data/<id>/<name>", methods=["GET"])
+def get_file_data(id, name):
+    """
+    Get the raw data for an individual file.
+    """
+    data = Data.query.filter_by(
+        task_id=id,
+        name=name
+    ).order_by(
+        Data.timestamp.desc()
+    ).first()
+
+    return jsonify({
+        "status": "OK",
+        "data": {
+            "id": id,
+            "name": name,
+            "data": data.data
+        }
+    })
+
 
 if __name__ == "__main__":
     db.create_all()
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5001)
 
