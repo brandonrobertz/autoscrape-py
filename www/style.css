@@ -20,8 +20,12 @@
     color: green;
 }
 
+#scrape-status-wrapper {
+    text-align: center;
+    padding: 20px;
+}
 #status #screenshot-img {
-    width: 800px;
+    width: 100%;
 }
 #status #screenshot {
     display: inline-block;
@@ -62,5 +66,5 @@
 }
 
 #files-list {
-    font-size: 10px;
+    font-size: 12px;
 }

@@ -1,6 +1,7 @@
 const controlsId = "#controls";
 const startButtonId = "#start-scrape";
 const stopButtonId = "#stop-scrape";
+const resetButtonId = "#reset-scrape";
 const statusId = "#status";
 const statusTextId = "#scrape-status"
 const screenshotId = "#screenshot-img";
@@ -9,6 +10,10 @@ const subControls = {
   menu: "#sub-controls-menu",
   openBtn: "#toggle-button-open",
   closeBtn: "#toggle-button-close",
+};
+const pgControls = {
+  next: "#next-page",
+  prev: "#prev-page"
 };
 
 const baseUrl = "http://localhost:5000";
@@ -25,15 +30,42 @@ function changeStatusText (text, status) {
       $(statusTextId).text(text);
 }
 
-function renderFilesList (data) {
-  console.log("renderFilesList", data);
-  const templateEl = $("#file-list-item");
+function renderPage(data, page) {
+  console.log("Rendering page", page, "Data", data.data);
+  $(".file-row").remove();
+  const pageSize = 20;
+  const maxPages = Math.ceil(data.data.length / pageSize);
+  $(pgControls.next).prop("disabled", false);
+  $(pgControls.prev).prop("disabled", false);
+  if (page == maxPages) {
+    page = maxPages;
+    $(pgControls.next).prop("disabled", true);
+  } else if (page == 1) {
+    page = 1;
+    $(pgControls.prev).prop("disabled", true);
+  }
   const options = {
     paged: true,
+    pageNo: page,
     append: true,
-    elemPerPage: 20
+    elemPerPage: pageSize
   };
+  const templateEl = $("#file-list-item");
   $("#files-list").loadTemplate(templateEl, data.data, options);
+}
+
+function renderFilesList (data) {
+  console.log("renderFilesList", data);
+  let page = 1;
+  renderPage(data, page);
+  $(pgControls.next).off();
+  $(pgControls.next).on("click", () => {
+    renderPage(data, ++page);
+  });
+  $(pgControls.prev).off();
+  $(pgControls.prev).on("click", () => {
+    renderPage(data, --page);
+  });
 }
 
 function fetchFilesList (id) {
@@ -53,6 +85,8 @@ function updateStatus (data) {
   else if (data.message === "SUCCESS") {
     $(screenshotId).hide();
     $(completeId).show();
+    $(stopButtonId).hide();
+    $(resetButtonId).show();
     changeStatusText("Scrape complete", "complete");
   }
   else if (data.message === "FAILURE") {
@@ -93,6 +127,8 @@ function startScrape () {
   console.log("Scraping from URL", url);
   // clear any old screenshot
   $(screenshotId).attr("src", "");
+  $(resetButtonId).hide();
+  $(startButtonId).hide();
   menuClose();
   const data = {
     baseurl: url,
@@ -140,6 +176,9 @@ function startScrape () {
 
 function stopScrape (id) {
   console.log("Stopping scrape", id);
+  $(startButtonId).hide();
+  $(stopButtonId).hide();
+  $(resetButtonId).show();
   const data = {};
   $.ajax({
     type: "POST",
@@ -171,8 +210,20 @@ function menuClose() {
   $(subControls.closeBtn).hide();
 }
 
+function reset() {
+  menuClose();
+  changeStatusText();
+  $(statusId).hide();
+  $(completeId).hide();
+  $(".file-row").remove();
+  $(startButtonId).show();
+  $(stopButtonId).hide();
+  $(resetButtonId).hide();
+}
+
 function start () {
   $(startButtonId).on("click", startScrape);
+  $(resetButtonId).on("click", reset);
   $(subControls.openBtn).on("click", menuOpen);
   $(subControls.closeBtn).on("click", menuClose);
 }
