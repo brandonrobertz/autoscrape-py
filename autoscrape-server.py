@@ -21,8 +21,6 @@ engine = create_engine(connect_str)
 if not database_exists(engine.url):
     create_database(engine.url)
 
-print(database_exists(engine.url))
-
 app = Flask("autoscrape-server", static_url_path="")
 app.config['SQLALCHEMY_DATABASE_URI'] = connect_str
 db = SQLAlchemy(app)
@@ -53,6 +51,10 @@ class Data(db.Model):
 
     def __repr__(self):
         return '<Data %r, %r>' % (self.name, self.fileclass)
+
+@app.route("/app/<path:path>", methods=["GET"])
+def root(path):
+    return send_from_directory('www', path)
 
 @app.route("/start", methods=["POST"])
 def post_start():

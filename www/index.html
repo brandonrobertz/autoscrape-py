@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>AutoScrape</title>
+  </head>
+  <body>
+
+    <div id="main">
+      <div id="controls">
+        <input type="text" placeholder="Base URL to scrape..." />
+        <button id="start-scrape">Start</button>
+        <button id="stop-scrape" style="display: none">Stop</button>
+      </div>
+      <div id="status" style="display: none">
+        <div id="screenshot">
+          <img id="screenshot-img" src="" style="display: none" />
+        </div>
+      </div>
+      <div id="complete" style="display: none">
+        Scrape complete.
+      </div>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous"></script>
+    <script
+      src="/app/index.js"></script>
+  </body>
+</html>
