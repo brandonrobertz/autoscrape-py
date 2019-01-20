@@ -30,7 +30,8 @@ function renderFilesList (data) {
   const templateEl = $("#file-list-item");
   const options = {
     paged: true,
-    append: true, elemPerPage: 20
+    append: true,
+    elemPerPage: 20
   };
   $("#files-list").loadTemplate(templateEl, data.data, options);
 }

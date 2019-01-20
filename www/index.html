@@ -83,8 +83,13 @@
         </div>
       </div>
       <div id="complete" style="display: none">
-        <div id="files-list">
-        </div>
+        <table id="files-list">
+          <tr>
+            <th>Filename</th>
+            <th>Class</th>
+            <th>Date</th>
+          </tr>
+        </table>
       </div>
     </div>
 
@@ -95,11 +100,11 @@
     <script
       src="/app/jquery.loadTemplate.min.js"></script>
     <script type="text/html" id="file-list-item">
-      <div class="file-row">
-        <span data-content="name"></span>
-        <span data-content="fileclass"></span>
-        <span data-content="timestamp"></span>
-      </div>
+      <tr class="file-row">
+        <td data-content="name"></td>
+        <td data-content="fileclass"></td>
+        <td data-content="timestamp"></td>
+      </tr>
     </script>
     <script
       src="/app/index.js"></script>

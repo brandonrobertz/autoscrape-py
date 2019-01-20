@@ -20,6 +20,6 @@ clean: stop
 	if docker images -q; then \
 		docker rmi -f $$(docker images -q) || exit 0; \
 	fi
-	docker volume rm -f $(docker volume ls | awk '{ print $2 }')
+	docker volume rm -f $$(docker volume ls | awk '{ print $$2 }')
 
 
