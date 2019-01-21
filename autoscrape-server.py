@@ -44,6 +44,8 @@ class Data(db.Model):
     fileclass = db.Column(db.String, nullable=False)
     data = db.Column(db.String, nullable=False)
 
+    db.UniqueConstraint('task_id', 'name', name='unique_name_per_task_1')
+
     def __init__(self, task_id, name, fileclass, data):
         self.task_id = task_id
         self.name = name

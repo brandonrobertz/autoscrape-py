@@ -37,8 +37,8 @@ function fetchFile(id, file_id) {
 }
 
 function saveZip(id, data) {
-  // TODO: fix this
   if (!id || !data) {
+    console.error("saveZip called without args");
     return;
   }
   const file_ids = data.map(data => data.id);
@@ -58,35 +58,52 @@ function saveZip(id, data) {
       return new Promise((res, rej) => {
         zip.createWriter(writer, function(writer) {
           res({files: files, writer: writer});
-        });
+        }, (err) => { console.error("createWriter err", err) });
       })
     })
     .then((data) => {
       const files = data.files;
       const writer = data.writer;
+      const seenFileNames = [];
       const promises = files.map((file) => {
         const blob = decodeB64(file.data);
         const filename = `autoscrape-data/${file.name}`;
+        if (seenFileNames.indexOf(filename) !== -1) {
+          console.warn("Skipping already included filename", filename);
+          return;
+        }
+        seenFileNames.push(filename);
+        const reader = new zip.BlobReader(blob);
         return new Promise((res, rej) => {
           writer.add(
             filename,
-            new zip.BlobReader(blob),
+            reader,
             function onend(err, val) {
+              if (err) {
+                console.error("writer.add error", err);
+              }
               res();
             },
-            function onprogress(bytes) {
-              // TODO: write a ZIP progress updater
-              console.log("ZIP bytes written", bytes);
+            function onprogress(b) {
+              console.info("ZIP bytes written", b);
             }
           );
         })
-      });
-      return Promise.all(promises).then(() => writer);
+      }).filter((p) => p);
+      return Promise.all(promises)
+        .then(() => writer)
+        .catch((err) => {
+          console.error("Error finishing zip promises", err);
+        });
     })
     .then((writer) => {
       writer.close(function(blob) {
-        saveAs(blob, "autoscrape-data-akjslkajlks.zip");
+        const now = (new Date()).getTime();
+        saveAs(blob, `autoscrape-data-${now}.zip`);
       });
+    })
+    .catch((err) => {
+      console.error("Overall zip error", err);
     });
 }
 
@@ -102,7 +119,6 @@ function changeStatusText (text, status) {
 }
 
 function renderPage(data, page) {
-  window.DATA = data;
   $(".file-row").remove();
   const pageSize = 20;
   const maxPages = Math.ceil(data.data.length / pageSize);
