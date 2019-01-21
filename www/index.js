@@ -13,11 +13,82 @@ const subControls = {
 };
 const pgControls = {
   next: "#next-page",
-  prev: "#prev-page"
+  prev: "#prev-page",
+  download: "#download-all",
 };
 
 const baseUrl = "http://localhost:5000";
 
+function decodeB64(base64str) {
+  const decoded = atob(base64str);
+  const arr = new Uint8Array(decoded.length);
+  for (let i = 0; i < decoded.length; ++i) {
+    arr[i] = decoded.charCodeAt(i);
+  }
+  // TODO: get file type, add as second arg { type: ...}
+  return new Blob([arr]);
+}
+
+function fetchFile(id, file_id) {
+  const url = `${baseUrl}/files/data/${id}/${file_id}`
+  return fetch(url).then((response) => {
+    return response.json();
+  });
+}
+
+function saveZip(id, data) {
+  // TODO: fix this
+  if (!id || !data) {
+    return;
+  }
+  const file_ids = data.map(data => data.id);
+  Promise.all(file_ids.map((fid) => {
+    return fetchFile(id, fid);
+  }))
+    .then((responses) => {
+      return responses.map((r) => {
+        return {
+          "name": r.data.name,
+          "data": r.data.data
+        };
+      });
+    })
+    .then((files) => {
+      const writer = new zip.BlobWriter();
+      return new Promise((res, rej) => {
+        zip.createWriter(writer, function(writer) {
+          res({files: files, writer: writer});
+        });
+      })
+    })
+    .then((data) => {
+      const files = data.files;
+      const writer = data.writer;
+      const promises = files.map((file) => {
+        const blob = decodeB64(file.data);
+        const filename = `autoscrape-data/${file.name}`;
+        return new Promise((res, rej) => {
+          writer.add(
+            filename,
+            new zip.BlobReader(blob),
+            function onend(err, val) {
+              res();
+            },
+            function onprogress(bytes) {
+              // TODO: write a ZIP progress updater
+              console.log("ZIP bytes written", bytes);
+            }
+          );
+        })
+      });
+      return Promise.all(promises).then(() => writer);
+    })
+    .then((writer) => {
+      writer.close(function(blob) {
+        saveAs(blob, "autoscrape-data-akjslkajlks.zip");
+      });
+    });
+}
 
 function changeStatusText (text, status) {
     $(statusTextId).removeClass("pending");
@@ -31,7 +102,7 @@ function changeStatusText (text, status) {
 }
 
 function renderPage(data, page) {
-  console.log("Rendering page", page, "Data", data.data);
+  window.DATA = data;
   $(".file-row").remove();
   const pageSize = 20;
   const maxPages = Math.ceil(data.data.length / pageSize);
@@ -55,7 +126,6 @@ function renderPage(data, page) {
 }
 
 function renderFilesList (data) {
-  console.log("renderFilesList", data);
   let page = 1;
   renderPage(data, page);
   $(pgControls.next).off();
@@ -68,16 +138,21 @@ function renderFilesList (data) {
   });
 }
 
+function scrapeComplete(id, data) {
+  renderFilesList(data);
+  if (data && data.data) {
+    $(pgControls.download).on("click", saveZip.bind(this, id, data.data));
+  }
+}
+
 function fetchFilesList (id) {
-  console.log("fetchFilesList", id);
   const url = `${baseUrl}/files/list/${id}`;
   fetch(url).then((response) => {
-    console.log("response", response);
-    response.json().then(renderFilesList);
+    response.json().then(scrapeComplete.bind(this, id));
   });
 }
 
-function updateStatus (data) {
+function updateStatus (id, data) {
   if (data.message === "STARTED") {
     $(screenshotId).attr("src", `data:image/png;base64,${data.data}`);
     changeStatusText("Scrape running...", "pending");
@@ -99,7 +174,7 @@ function updateProgress (progressUrl, id) {
   fetch(progressUrl).then(function(response) {
     response.json().then(function(data) {
       // update the appropriate UI components
-      updateStatus(data);
+      updateStatus(id, data);
       // re-run this, if we aren't failed
       if (data.message === "STARTED" || data.message === "PENDING") {
         setTimeout(
@@ -124,7 +199,6 @@ function pollProgress (id) {
 
 function startScrape () {
   const url = $(`${controlsId} input`).val();
-  console.log("Scraping from URL", url);
   // clear any old screenshot
   $(screenshotId).attr("src", "");
   $(resetButtonId).hide();
@@ -153,7 +227,6 @@ function startScrape () {
     output: "http://flask:5001/receive",
     disable_style_saving: false
   };
-  console.log("data", data);
   $.ajax({
     type: "POST",
     url: `${baseUrl}/start`,
@@ -175,7 +248,6 @@ function startScrape () {
 }
 
 function stopScrape (id) {
-  console.log("Stopping scrape", id);
   $(startButtonId).hide();
   $(stopButtonId).hide();
   $(resetButtonId).show();

@@ -200,23 +200,29 @@ def list_files(id):
         "data": [d.serialize for d in data]
     })
 
-@app.route("/files/data/<id>/<name>", methods=["GET"])
-def get_file_data(id, name):
+@app.route("/files/data/<task_id>/<file_id>", methods=["GET"])
+def get_file_data(task_id, file_id):
     """
     Get the raw data for an individual file.
     """
+    app.logger.debug("Fetching task_id: %s, file_id: %s" % (
+        task_id, file_id))
+
     data = Data.query.filter_by(
-        task_id=id,
-        name=name
+        task_id=task_id,
+        id=file_id
     ).order_by(
         Data.timestamp.desc()
     ).first()
 
+    app.logger.debug("Data: %s" % data);
+
     return jsonify({
         "status": "OK",
         "data": {
-            "id": id,
-            "name": name,
+            "task_id": task_id,
+            "id": file_id,
+            "name": data.name,
             "data": data.data
         }
     })
