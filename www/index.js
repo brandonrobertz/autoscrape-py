@@ -43,6 +43,7 @@ function saveZip(id, data) {
   }
   const file_ids = data.map(data => data.id);
   Promise.all(file_ids.map((fid) => {
+    changeStatusText(`Fetching file ID ${fid}`, "pending");
     return fetchFile(id, fid);
   }))
     .then((responses) => {
@@ -54,6 +55,7 @@ function saveZip(id, data) {
       });
     })
     .then((files) => {
+      changeStatusText(`${files.length} files downloaded`, "pending");
       const writer = new zip.BlobWriter();
       return new Promise((res, rej) => {
         zip.createWriter(writer, function(writer) {
@@ -75,6 +77,7 @@ function saveZip(id, data) {
         seenFileNames.push(filename);
         const reader = new zip.BlobReader(blob);
         return new Promise((res, rej) => {
+          changeStatusText(`Zipping ${filename}`, "pending");
           writer.add(
             filename,
             reader,
@@ -97,8 +100,10 @@ function saveZip(id, data) {
         });
     })
     .then((writer) => {
+      changeStatusText(`Completing ZIP`, "pending");
       writer.close(function(blob) {
         const now = (new Date()).getTime();
+        changeStatusText(`Zipping complete!`, "complete");
         saveAs(blob, `autoscrape-data-${now}.zip`);
       });
     })
