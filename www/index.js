@@ -19,16 +19,6 @@ const pgControls = {
 
 const baseUrl = "http://localhost:5000";
 
-function decodeB64(base64str) {
-  const decoded = atob(base64str);
-  const arr = new Uint8Array(decoded.length);
-  for (let i = 0; i < decoded.length; ++i) {
-    arr[i] = decoded.charCodeAt(i);
-  }
-  // TODO: get file type, add as second arg { type: ...}
-  return new Blob([arr]);
-}
-
 function fetchFile(id, file_id) {
   const url = `${baseUrl}/files/data/${id}/${file_id}`
   return fetch(url).then((response) => {
@@ -56,56 +46,25 @@ function saveZip(id, data) {
     })
     .then((files) => {
       changeStatusText(`${files.length} files downloaded`, "pending");
-      const writer = new zip.BlobWriter();
-      return new Promise((res, rej) => {
-        zip.createWriter(writer, function(writer) {
-          res({files: files, writer: writer});
-        }, (err) => { console.error("createWriter err", err) });
-      })
-    })
-    .then((data) => {
-      const files = data.files;
-      const writer = data.writer;
-      const seenFileNames = [];
-      const promises = files.map((file) => {
-        const blob = decodeB64(file.data);
+      const zip = new JSZip();
+      // const seenFileNames = [];
+      files.forEach((file) => {
         const filename = `autoscrape-data/${file.name}`;
-        if (seenFileNames.indexOf(filename) !== -1) {
-          console.warn("Skipping already included filename", filename);
-          return;
-        }
-        seenFileNames.push(filename);
-        const reader = new zip.BlobReader(blob);
-        return new Promise((res, rej) => {
-          changeStatusText(`Zipping ${filename}`, "pending");
-          writer.add(
-            filename,
-            reader,
-            function onend(err, val) {
-              if (err) {
-                console.error("writer.add error", err);
-              }
-              res();
-            },
-            function onprogress(b) {
-              console.info("ZIP bytes written", b);
-            }
-          );
-        })
-      }).filter((p) => p);
-      return Promise.all(promises)
-        .then(() => writer)
-        .catch((err) => {
-          console.error("Error finishing zip promises", err);
-        });
-    })
-    .then((writer) => {
-      changeStatusText(`Completing ZIP`, "pending");
-      writer.close(function(blob) {
-        const now = (new Date()).getTime();
-        changeStatusText(`Zipping complete!`, "complete");
-        saveAs(blob, `autoscrape-data-${now}.zip`);
+        // if (seenFileNames.indexOf(filename) !== -1) {
+        //   console.warn("Skipping already included filename", filename);
+        //   return;
+        // }
+        // seenFileNames.push(filename);
+        changeStatusText(`Zipping ${filename}`, "pending");
+        zip.file(filename, atob(file.data), {binary: true});
       });
+      return zip.generateAsync({type:"blob"});
+    })
+    .then((blob) => {
+      changeStatusText(`Completing ZIP`, "pending");
+      const now = (new Date()).getTime();
+      changeStatusText(`Zipping complete!`, "complete");
+      saveAs(blob, `autoscrape-data-${now}.zip`);
     })
     .catch((err) => {
       console.error("Overall zip error", err);
@@ -218,8 +177,25 @@ function pollProgress (id) {
   updateProgress(progressUrl, id);
 }
 
+function checkUrl(url) {
+  if (!url) {
+    changeStatusText("Enter a scrape URL", "failure");
+    return false;
+  }
+  if (!url.match(/^https?:\/\//)){
+    changeStatusText("Bad scrape URL", "failure");
+    return false;
+  }
+  return true;
+}
+
 function startScrape () {
   const url = $(`${controlsId} input`).val();
+  if (!checkUrl(url)) {
+    console.error("Bad scrape URL");
+    return;
+  }
+
   // clear any old screenshot
   $(screenshotId).attr("src", "");
   $(resetButtonId).hide();
@@ -315,9 +291,14 @@ function reset() {
 }
 
 function start () {
-  // NOTE: this is locked to the flask URL scheme
-  zip.workerScriptsPath  = "/app/";
   $(startButtonId).on("click", startScrape);
+  $(`${controlsId} input`).keyup(function(e){
+    const code = e.which;
+    if(code==13)
+      e.preventDefault();
+    if(code==32||code==13||code==188||code==186)
+      startScrape();
+  });
   $(resetButtonId).on("click", reset);
   $(subControls.openBtn).on("click", menuOpen);
   $(subControls.closeBtn).on("click", menuClose);
