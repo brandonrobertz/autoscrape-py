@@ -315,6 +315,8 @@ function reset() {
 }
 
 function start () {
+  // NOTE: this is locked to the flask URL scheme
+  zip.workerScriptsPath  = "/app/";
   $(startButtonId).on("click", startScrape);
   $(resetButtonId).on("click", reset);
   $(subControls.openBtn).on("click", menuOpen);
