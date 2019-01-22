@@ -64,9 +64,13 @@ class Data(db.Model):
             "fileclass": self.fileclass,
         }
 
+@app.route("/app", methods=["GET"])
+def get_index():
+    return send_from_directory("www", "index.html")
+
 @app.route("/app/<path:path>", methods=["GET"])
-def root(path):
-    return send_from_directory('www', path)
+def get_path(path):
+    return send_from_directory("www", path)
 
 @app.route("/start", methods=["POST"])
 def post_start():
