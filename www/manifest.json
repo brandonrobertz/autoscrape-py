@@ -1,14 +1,14 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "AutoScrape",
+  "name": "AutoScrape web prototype",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "/app/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     }
   ],
-  "start_url": ".",
+  "start_url": "/app",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"
