@@ -62,7 +62,7 @@ RUN curl -L https://github.com/mozilla/geckodriver/releases/download/v0.23.0/gec
 # RUN chmod +x /usr/bin/chromedriver
 
 COPY Pipfile Pipfile.lock /app/
-RUN pipenv install
+RUN PIPENV_TIMEOUT=3600 pipenv install
 
 FROM autoscrape-worker-deps AS autoscrape-worker
 CMD [ "pipenv", "run", "celery", "-A", "autoscrape.tasks", "worker", "--loglevel=info" ]

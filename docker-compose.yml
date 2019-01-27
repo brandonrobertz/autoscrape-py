@@ -8,26 +8,26 @@
 version: '3.4'
 
 services:
-  database:
+  autoscrape_database:
     image: postgres:10.4
     environment:
       POSTGRES_USER: cjworkbench
       POSTGRES_PASSWORD: cjworkbench
       POSTGRES_DB: cjworkbench
       PGDATA: /var/lib/postgresql/data/10.4
-    networks: [ 'dev' ]
+    networks: [ 'cjworkbench_dev' ]
     volumes:
       - dbdata:/var/lib/postgresql/data
 
-  rabbitmq:
+  autoscrape_rabbitmq:
     image: rabbitmq:3.7.8-management
     ports: [ '15672' ] # open management port, for debugging
-    networks: [ 'dev' ]
+    networks: [ 'cjworkbench_dev' ]
     environment:
       # Use just one CPU
       RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: '+S 1:1 +stbt ts +A 12'
 
-  flask:
+  autoscrape_flask:
     build:
       context: .
       target: base
@@ -38,16 +38,16 @@ services:
     ports:
       - '5000:5001'
     links:
-      - rabbitmq
-    depends_on: [ 'rabbitmq', 'database' ]
-    networks: [ 'dev' ]
+      - autoscrape_rabbitmq
+    depends_on: [ 'autoscrape_rabbitmq', 'autoscrape_database' ]
+    networks: [ 'cjworkbench_dev' ]
     environment:
-      CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
-      CJW_DB_HOST: database
+      CJW_RABBITMQ_HOST: amqp://guest:guest@autoscrape_rabbitmq/
+      CJW_DB_HOST: autoscrape_database
       CJW_DB_USER: cjworkbench
       CJW_DB_PASSWORD: cjworkbench
 
-  celery:
+  autoscrape_celery:
     build:
       context: .
       target: base
@@ -57,15 +57,16 @@ services:
     command: [ 'pipenv', 'run', 'celery', '-A', 'autoscrape.tasks', 'worker', '--loglevel=info' ]
     #user: nobody
     links:
-      - rabbitmq
-    depends_on: [ 'rabbitmq', 'flask' ]
-    networks: [ 'dev' ]
+      - autoscrape_rabbitmq
+    depends_on: [ 'autoscrape_rabbitmq', 'autoscrape_flask' ]
+    networks: [ 'cjworkbench_dev' ]
     environment:
-      CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
+      CJW_RABBITMQ_HOST: amqp://guest:guest@autoscrape_rabbitmq/
 
 networks:
-  dev:
+  cjworkbench_dev:
     driver: bridge
+    external: true
 
 volumes:
   virtualenvs: {}

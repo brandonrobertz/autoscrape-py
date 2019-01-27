@@ -1,3 +1,7 @@
+body {
+  margin: 0;
+}
+
 #main-controls {
     text-align: center;
     font-size: 16px;
@@ -74,3 +78,31 @@
     text-align: center;
 }
 
+#header {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  height: 40px;
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
+  font-family: monospace;
+  margin-bottom: 25px;
+}
+#header a {
+  color: #333;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  padding: 10px 10px;
+  flex-grow: 1;
+}
+
+#header a:hover {
+  font-weight: bold;
+  background-color: #eee;
+}
+
+#selector {
+  text-align: center;
+}

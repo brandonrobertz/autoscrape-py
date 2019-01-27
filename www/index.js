@@ -63,7 +63,7 @@ function saveZip(id, data) {
     .then((blob) => {
       changeStatusText(`Completing ZIP`, "pending");
       const now = (new Date()).getTime();
-      changeStatusText(`Zipping complete!`, "complete");
+      changeStatusText(`Zipping complete! You may now use the Template Builder or Extractor`, "complete");
       saveAs(blob, `autoscrape-data-${now}.zip`);
     })
     .catch((err) => {
@@ -221,7 +221,7 @@ function startScrape () {
     save_screenshots: true,
     remote_hub: "http://localhost:4444/wd/hub",
     loglevel: "DEBUG",
-    output: "http://flask:5001/receive",
+    output: "http://autoscrape_flask:5001/receive",
     disable_style_saving: false
   };
   $.ajax({
