@@ -293,11 +293,11 @@ function reset() {
 function start () {
   $(startButtonId).on("click", startScrape);
   $(`${controlsId} input`).keyup(function(e){
-    const code = e.which;
-    if(code==13)
+    // start scrape on enter
+    if(e.which == 13) {
       e.preventDefault();
-    if(code==32||code==13||code==188||code==186)
       startScrape();
+    }
   });
   $(resetButtonId).on("click", reset);
   $(subControls.openBtn).on("click", menuOpen);

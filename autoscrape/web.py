@@ -362,6 +362,7 @@ class Scraper(object):
             "[:down:]": Keys.ARROW_DOWN,
             "[:up:]": Keys.ARROW_UP,
             "[:enter:]": Keys.ENTER,
+            "[:tab:]": Keys.TAB,
         }
         split_replacements = re.split(
             "(\[:left:\]|\[:right:\]|\[:down:\]|\[:up:\]|\[:enter:\])",

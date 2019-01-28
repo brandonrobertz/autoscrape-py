@@ -40,12 +40,12 @@ Interactive Form Search Options:
         interact with a matched form. The inputs are
         described in the following format:
 
-        "c:0:True,i:0:atext,s:1:France:d:0:01-20-1991"
+        "c:0:True,i:0:atext,s:1:France:d:0:1991-01-20"
 
         A single-input type can be one of three types:
         checkbox ("c"), input box ("i"), option select
         ("s"), and date inputs ("d", with inputs in the
-        "MM-DD-YYYY" format). The type is separated by a
+        "YYYY-MM-DD" format). The type is separated by a
         colon, and the input index position is next. (Each
         input type has its own list, so a form with one
         input, one checkbox, and one option select, will all

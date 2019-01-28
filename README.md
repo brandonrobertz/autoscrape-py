@@ -103,7 +103,7 @@ Interactive Form Search Options:
         interact with a matched form. The inputs are
         described in the following format:
 
-        "c:0:True,i:0:atext,s:1:France:d:0:01-20-1991"
+        "c:0:True,i:0:atext,s:1:France:d:0:1991-01-20"
 
         A single-input type can be one of three types:
         checkbox ("c"), input box ("i"), option select
