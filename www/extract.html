@@ -10,16 +10,30 @@
     <meta name="theme-color" content="#000000" />
     <link rel="manifest" href="/manifest.json" />
     <title>AutoScrape</title>
-    <link rel="stylesheet" type="text/css" href="/app/style.css">
+    <style>
+    .loader {
+      padding-top: 10%;
+      padding-bottom: 25px;
+      font-size: 26px;
+      text-align: center;
+    }
+    #json-wrapper {
+      margin: 0 auto;
+      display: table;
+    }
+    pre {
+      font-size: 12px;
+    }
+    </style>
   </head>
   <body>
 
-    <div id="zip-loader">
+    <div id="zip-loader" class="loader">
       <p>Select an AutoScrape ZIP file.</p>
       <input id="zip-selector" type="file" />
     </div>
 
-    <div id="hext-loader">
+    <div id="hext-loader" class="loader" style="display: none">
       <p>Select a Hext template.</p>
       <input id="hext-selector" type="file" />
     </div>

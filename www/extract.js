@@ -152,6 +152,7 @@ const start = () => {
   document.querySelector(areas.zip).addEventListener("change", (e) => {
     const zip = e.target.files[0];
     $(wrappers.zip).hide();
+    $(wrappers.hext).show();
     document.querySelector(areas.hext).addEventListener("change", (e) => {
     $(wrappers.hext).hide();
       const file = e.target.files[0];
