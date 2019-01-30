@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="/app/favicon.ico" />
+    <meta
+                              name="viewport"
+                              content="width=device-width, initial-scale=1, shrink-to-fit=no"
+                              />
+    <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>AutoScrape</title>
+    <link rel="stylesheet" type="text/css" href="/app/style.css">
+  </head>
+  <body>
+
+    <div id="zip-loader">
+      <p>Select an AutoScrape ZIP file.</p>
+      <input id="zip-selector" type="file" />
+    </div>
+
+    <div id="hext-loader">
+      <p>Select a Hext template.</p>
+      <input id="hext-selector" type="file" />
+    </div>
+
+    <div id="json-wrapper">
+      <pre id="json-box"></pre>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous"></script>
+    <script
+      type="text/javascript"
+      src="/app/jszip.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/gh/brandonrobertz/hext-emscripten/hext_wrapper.js">
+    </script>
+    <script type="text/javascript"
+            src="/app/extract.js"></script>
+  </body>
+</html>
