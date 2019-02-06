@@ -92,6 +92,10 @@ Crawl-Specific Options:
         MATCH_STRING (can be a regex or just a string match)
         from consideration for clicking.
 
+    --only-links MATCH_STRING
+        This option whitelists links which ought to be clicked.
+        All other links will be ignored.
+
 Interactive Form Search Options:
     --form-match SEARCH_STRING
         The crawler will identify a form to search/scrape if it

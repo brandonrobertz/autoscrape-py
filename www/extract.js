@@ -63,8 +63,10 @@ const checkWebExtension = (name) => {
 const fromZipSelect = (file) => {
   return JSZip.loadAsync(file)
     .then(function(zip) {
+      console.log("Unzipping");
       const promises =  [];
       zip.forEach((name, zipEntry) => {
+        console.log("name", name);
         if (zipEntry.dir || !checkWebExtension(name))
           return;
 
@@ -114,6 +116,7 @@ const extractJSON = (hext, html) => {
     ["string", "string"],
     [hext, html]
   );
+  console.log("Module ccall response", json);
   try {
     return JSON.parse(json);
   }
@@ -124,8 +127,10 @@ const extractJSON = (hext, html) => {
 }
 
 const startExtraction = (zip, hext) => {
+  console.log("startExtraction", zip);
   fromZipSelect(zip)
     .then((files) => {
+      console.log("Done unzipping!");
       return files.map(f => {
         return f.data;
       }).map((html) => {
@@ -136,6 +141,7 @@ const startExtraction = (zip, hext) => {
       return jsons.filter(x => x);
     })
     .then((jsons) => {
+      console.log("JSONS", jsons);
       if (!jsons) {
         $(areas.json).append("No results found.");
       } else {

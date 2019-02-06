@@ -41,7 +41,7 @@ class ManualControlScraper(BaseScraper):
                  save_screenshots=False, save_graph=False,
                  input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
-                 link_priority=None, ignore_links=None,
+                 link_priority=None, ignore_links=None, only_links=None,
                  form_submit_natural_click=False,
                  form_submit_wait=5, load_images=False, show_browser=False):
         # setup logging, etc
@@ -77,6 +77,7 @@ class ManualControlScraper(BaseScraper):
         self.link_priority = link_priority
         # string or regex to be used to omit links from clickable
         self.ignore_links = ignore_links
+        self.only_links = only_links
         # attempt a position-based "natural click" over the element
         self.form_submit_natural_click = form_submit_natural_click
         # a period of seconds to force a wait after a submit
@@ -111,6 +112,20 @@ class ManualControlScraper(BaseScraper):
             # save the initial landing data page
             self.save_training_page(classname="data_pages")
             self.save_screenshot(classname="data_pages")
+
+            if self.only_links:
+                link_vectors = self.control.link_vectors()
+                link_zip = list(zip(range(len(link_vectors)),link_vectors))
+                link_zip = filter(
+                    lambda x: re.findall(self.only_links, x[1]),
+                    link_zip
+                )
+                for ix, text in link_zip:
+                    if self.control.select_link(ix):
+                        self.save_training_page(classname="data_pages")
+                        self.save_screenshot(classname="data_pages")
+                        logger.info("Link clicked: %s" % text)
+                    self.control.back()
 
             for ix in range(n_buttons):
                 button = button_data[ix]
@@ -229,17 +244,24 @@ class ManualControlScraper(BaseScraper):
         links = self.control.clickable
         link_vectors = self.control.link_vectors()
         link_zip = list(zip(range(len(link_vectors)),link_vectors))
-        if self.link_priority:
+        if self.link_priority and not self.only_links:
             logger.debug("Sorting by link priority: %s" % self.link_priority)
             link_zip.sort(
                 key=lambda x: not re.findall(self.link_priority, x[1])
             )
-        if self.ignore_links:
+        if self.ignore_links and not self.only_links:
             logger.debug("Ignoring links matching: %s" % self.ignore_links)
             link_zip = filter(
                 lambda x: not re.findall(self.ignore_links, x[1]),
                 link_zip
             )
+        if self.only_links:
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!! ONLY LINKS", self.only_links)
+            link_zip = filter(
+                lambda x: re.findall(self.only_links, x[1]),
+                link_zip
+            )
+
         for ix, text in link_zip:
             if self.maxdepth and depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
@@ -266,4 +288,8 @@ class ManualControlScraper(BaseScraper):
         else:
             if self.output and self.save_graph:
                 self.save_scraper_graph()
+        try:
+            self.control.scraper.driver.quit()
+        except Exception:
+            pass
 

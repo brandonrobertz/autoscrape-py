@@ -11,6 +11,10 @@
     <link rel="manifest" href="/manifest.json" />
     <title>AutoScrape</title>
     <style>
+    body {
+      margin-top: 0;
+      padding-top: 0;
+    }
     .loader {
       padding-top: 10%;
       padding-bottom: 25px;
@@ -24,10 +28,31 @@
     pre {
       font-size: 12px;
     }
+    #header {
+      display: flex;
+      z-index: 999999;
+      font-family: monospace;
+    }
+    #header .header-link {
+      flex-grow: 2;
+      text-align: center;
+      text-decoration: none;
+      color: black;
+      height: 25px;
+      padding-top: 12px;
+    }
+    #header .header-link:hover {
+      background-color: #eee;
+    }
     </style>
   </head>
   <body>
 
+    <div id="header">
+      <a href="/app" class="header-link">Scraper</a>
+      <a href="/app/hext.html" class="header-link">Hext Template</a>
+      <a href="/app/extract.html" class="header-link">Extractor</a>
+    </div>
     <div id="zip-loader" class="loader">
       <p>Select an AutoScrape ZIP file.</p>
       <input id="zip-selector" type="file" />
