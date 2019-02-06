@@ -57,6 +57,9 @@ class Scraper(object):
             firefox_profile.set_preference(
                 'security.fileuri.strict_origin_policy', 'false'
             )
+            firefox_profile.set_preference(
+                "general.useragent.override", "AutoScrape/Firefox"
+            )
             self.driver = webdriver.Firefox(
                 firefox_options=firefox_options,
                 firefox_profile=firefox_profile,
@@ -71,6 +74,7 @@ class Scraper(object):
                 chrome_options.add_argument("--headless")
                 chrome_options.add_argument("--disable-web-security")
                 chrome_options.add_argument("--window-size=1920x1080")
+                chrome_options.add_argument("--user-agent=AutoScrape/Chrome")
             prefs = {
                 "profile.managed_default_content_settings.images":2
             }
