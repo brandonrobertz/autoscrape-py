@@ -14,6 +14,8 @@ Currently there are two methods of running AutoScrape:
 
 Installation and running instructions are provided for both below.
 
+[![Quickstart Video](https://github.com/brandonrobertz/autoscrape-py/blob/master/images/quickstart-video.png)](https://www.youtube.com/watch?v=D0Mchcf6THE)
+
 ## Setup for Standalone Local CLI
 
 ### External Dependencies
