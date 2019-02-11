@@ -33,6 +33,12 @@ Crawl-Specific Options:
         This option whitelists links which ought to be clicked.
         All other links will be ignored.
 
+    --do-post-submit-clicks
+        By default, AutoScrape will not click on any links
+        except for the "next" button (if specified) after the
+        submit button is clicked. This makes AutoScrape click
+        on links on results pages.
+
 Interactive Form Search Options:
     --form-match SEARCH_STRING
         The crawler will identify a form to search/scrape if it

@@ -77,7 +77,10 @@ class ManualControlScraper(BaseScraper):
         self.link_priority = link_priority
         # string or regex to be used to omit links from clickable
         self.ignore_links = ignore_links
+        # Whitelisted links to click
         self.only_links = only_links
+        # Apply any link clicking rules to the results pages
+        self.do_post_submit_clicks = do_post_submit_clicks
         # attempt a position-based "natural click" over the element
         self.form_submit_natural_click = form_submit_natural_click
         # a period of seconds to force a wait after a submit
@@ -113,7 +116,7 @@ class ManualControlScraper(BaseScraper):
             self.save_training_page(classname="data_pages")
             self.save_screenshot(classname="data_pages")
 
-            if self.only_links:
+            if self.only_links and self.do_post_submit_clicks:
                 link_vectors = self.control.link_vectors()
                 link_zip = list(zip(range(len(link_vectors)),link_vectors))
                 link_zip = filter(
@@ -256,7 +259,6 @@ class ManualControlScraper(BaseScraper):
                 link_zip
             )
         if self.only_links:
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!! ONLY LINKS", self.only_links)
             link_zip = filter(
                 lambda x: re.findall(self.only_links, x[1]),
                 link_zip

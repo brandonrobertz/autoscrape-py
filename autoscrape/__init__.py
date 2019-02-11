@@ -1,4 +1,9 @@
 # -*- coding: UTF-8 -*-
+__title__ = 'autoscrape-py'
+__author__ = 'Brandon Roberts (brandon@bxroberts.org)'
+__license__ = 'AGPLv3'
+__version__ = '0.2.1'
+
 import logging
 
 from .scrapers.manual import ManualControlScraper
