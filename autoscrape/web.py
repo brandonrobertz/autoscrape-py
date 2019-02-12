@@ -60,6 +60,29 @@ class Scraper(object):
             firefox_profile.set_preference(
                 "general.useragent.override", "AutoScrape/Firefox"
             )
+
+            # Download and PDF options (download don't view)
+            firefox_profile.set_preference("browser.download.folderList", 2)
+            if not re.match("^https?://", output):
+                logger.debug("Setting download directory: %s" % output)
+                # needs to exist and should be full path
+                dl_path = os.path.abspath(os.path.join(
+                    output, "downloads"
+                ))
+                firefox_profile.set_preference(
+                    "browser.download.dir", dl_path
+                )
+            firefox_profile.set_preference(
+                "browser.helperApps.neverAsk.saveToDisk", "application/pdf"
+            )
+
+            # disable Firefox's built-in PDF viewer
+            firefox_profile.set_preference("pdfjs.disabled", True)
+
+            # disable Adobe Acrobat PDF preview plugin
+            firefox_profile.set_preference("plugin.scan.plid.all", False)
+            firefox_profile.set_preference("plugin.scan.Acrobat", "99.0")
+
             self.driver = webdriver.Firefox(
                 firefox_options=firefox_options,
                 firefox_profile=firefox_profile,

@@ -233,8 +233,10 @@ class Controller(object):
                 t = self.clickable[i]
                 elem = self.scraper.lookup_by_tag(t)
                 text = ""
-                if elem:
+                if elem and elem.tag_name != "input":
                     text = elem.text.replace("\n", " ")
+                elif elem and elem.tag_name == "input":
+                    text = elem.get_property("value").replace("\n", " ")
                 else:
                     logger.warn("Link element couldn't be found: %s" % t)
                 buttons_data.append(text)

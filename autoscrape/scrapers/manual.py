@@ -42,7 +42,7 @@ class ManualControlScraper(BaseScraper):
                  input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
                  link_priority=None, ignore_links=None, only_links=None,
-                 form_submit_natural_click=False,
+                 result_page_links=None, form_submit_natural_click=False,
                  form_submit_wait=5, load_images=False, show_browser=False):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
@@ -80,7 +80,7 @@ class ManualControlScraper(BaseScraper):
         # Whitelisted links to click
         self.only_links = only_links
         # Apply any link clicking rules to the results pages
-        self.do_post_submit_clicks = do_post_submit_clicks
+        self.result_page_links = result_page_links
         # attempt a position-based "natural click" over the element
         self.form_submit_natural_click = form_submit_natural_click
         # a period of seconds to force a wait after a submit
@@ -91,6 +91,24 @@ class ManualControlScraper(BaseScraper):
         # if not specified, do nothing with forms
         else:
             self.input_gen = []
+
+    def click_until_no_links(self, links):
+        link_vectors = self.control.link_vectors()
+        # import IPython; IPython.embed(); import time; time.sleep(2)
+        link_zip = list(zip(range(len(link_vectors)),link_vectors))
+        link_zip = filter(
+            lambda x: re.findall(self.result_page_links, x[1]),
+            link_zip
+        )
+        # Click until we get no more matches
+        for ix, text in link_zip:
+            logger.debug("Trying to click ix: %s, text: %s" % (ix, text))
+            if self.control.select_link(ix):
+                self.click_until_no_links(links)
+                self.save_training_page(classname="data_pages")
+                self.save_screenshot(classname="data_pages")
+                # # TODO: we need to know if the page URL changed
+                # self.control.back()
 
     def keep_clicking_next_btns(self, maxdepth=0):
         """
@@ -116,19 +134,8 @@ class ManualControlScraper(BaseScraper):
             self.save_training_page(classname="data_pages")
             self.save_screenshot(classname="data_pages")
 
-            if self.only_links and self.do_post_submit_clicks:
-                link_vectors = self.control.link_vectors()
-                link_zip = list(zip(range(len(link_vectors)),link_vectors))
-                link_zip = filter(
-                    lambda x: re.findall(self.only_links, x[1]),
-                    link_zip
-                )
-                for ix, text in link_zip:
-                    if self.control.select_link(ix):
-                        self.save_training_page(classname="data_pages")
-                        self.save_screenshot(classname="data_pages")
-                        logger.info("Link clicked: %s" % text)
-                    self.control.back()
+            if self.result_page_links:
+                self.click_until_no_links(self.result_page_links)
 
             for ix in range(n_buttons):
                 button = button_data[ix]

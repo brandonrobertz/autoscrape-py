@@ -78,13 +78,21 @@ class Tagger(object):
         """
         tags = []
 
-        x_path_types = "//a|//button"
-        a_elems = self.driver.find_elements_by_xpath(x_path_types)
+        x_path_types = "//a|//button|//input[@type='submit']" \
+                "|//input[@type='button']"
+        elems = self.driver.find_elements_by_xpath(x_path_types)
         base_host = urlparse(self.driver.current_url).netloc
+
+        a_elems = []; i_elems = []
+        for e in elems:
+            if e.tag_name == "input":
+                i_elems.append(e)
+            else:
+                a_elems.append(e)
 
         for elem in a_elems:
             href = elem.get_attribute("href")
-            # logger.debug("Elem text=%s, href=%s" % (elem.text, href))
+            logger.debug("Elem text=%s, href=%s" % (elem.text, href))
 
             # avoid hidden or disabled links, these can be traps or lead
             # to strange errors
@@ -126,6 +134,13 @@ class Tagger(object):
                 continue
 
             # logger.debug("Adding href=%s as tag=%s" % (href, tag))
+            tags.append(tag)
+
+        for elem in i_elems:
+            tag = self.csspath_from_element(elem)
+            logger.debug("Adding text=%s as tag=%s..." % (
+                elem.get_property("value"), tag[:20]
+            ))
             tags.append(tag)
 
         return tags

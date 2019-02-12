@@ -29,15 +29,9 @@ Crawl-Specific Options:
         MATCH_STRING (can be a regex or just a string match)
         from consideration for clicking.
 
-    --only-links MATCH_STRING
-        This option whitelists links which ought to be clicked.
-        All other links will be ignored.
-
-    --do-post-submit-clicks
-        By default, AutoScrape will not click on any links
-        except for the "next" button (if specified) after the
-        submit button is clicked. This makes AutoScrape click
-        on links on results pages.
+    --result-page-links MATCH_STRINGS_LIST
+        If specified, AutoScrape will click on any links matching
+        this string when it arrives on a search result page.
 
 Interactive Form Search Options:
     --form-match SEARCH_STRING
