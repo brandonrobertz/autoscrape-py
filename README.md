@@ -94,9 +94,9 @@ Crawl-Specific Options:
         MATCH_STRING (can be a regex or just a string match)
         from consideration for clicking.
 
-    --only-links MATCH_STRING
-        This option whitelists links which ought to be clicked.
-        All other links will be ignored.
+    --result-page-links MATCH_STRINGS_LIST
+        If specified, AutoScrape will click on any links matching
+        this string when it arrives on a search result page.
 
 Interactive Form Search Options:
     --form-match SEARCH_STRING
@@ -114,7 +114,7 @@ Interactive Form Search Options:
         A single-input type can be one of three types:
         checkbox ("c"), input box ("i"), option select
         ("s"), and date inputs ("d", with inputs in the
-        "MM-DD-YYYY" format). The type is separated by a
+        "YYYY-MM-DD" format). The type is separated by a
         colon, and the input index position is next. (Each
         input type has its own list, so a form with one
         input, one checkbox, and one option select, will all
