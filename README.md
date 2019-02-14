@@ -6,7 +6,7 @@ A project of [Artificial Informer Labs](https://artificialinformer.com).
 
 AutoScrape is an automated scraper of structured data from interactive web pages. You point this scraper at a site and it will be crawled, searched for forms and structured data can then be extracted. No brittle, site-specific programming necessary.
 
-This is an implementation of the web scraping framework described in the paper, _Robust Web Scraping in the Public Interest with AutoScrape_ in [Proceedings of Computation + Journalism Symposium 2019](http://cplusj.org/).
+This is an implementation of the web scraping framework described in the paper, [_Robust Web Scraping in the Public Interest with AutoScrape_](https://bxroberts.org/files/autoscrape.pdf) in [Proceedings of Computation + Journalism Symposium 2019](http://cplusj.org/).
 
 Currently there are two methods of running AutoScrape:
 - as a local CLI python script
