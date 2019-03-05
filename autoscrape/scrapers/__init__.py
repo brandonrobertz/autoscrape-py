@@ -70,25 +70,26 @@ class BaseScraper(object):
         if classname not in self.training_classes:
             raise ValueError("Base class speficied: %s" % classname)
 
-        # # adjust the window size to the document size, this captures most
-        # # web configurations except cases where a footer, for example, has
-        # # been placed absolutely outside of the body and hangs beneath
-        # # NOTE: this comes from here: https://stackoverflow.com/a/52572919
-        # original_size = self.control.scraper.driver.get_window_size()
-        # required_width = self.control.scraper.driver.execute_script(
-        #     'return document.body.parentNode.scrollWidth'
-        # )
-        # required_height = self.control.scraper.driver.execute_script(
-        #     'return document.body.parentNode.scrollHeight'
-        # )
-        # logger.debug(
-        #     "Required width=%s, height=%s, Original width=%s, height=%s" % (
-        #         required_width, required_height, original_size["width"],
-        #         original_size["height"]
-        # ))
-        # self.control.scraper.driver.set_window_size(
-        #     required_width, required_height
-        # )
+        if self.full_page_screenshots:
+            # adjust the window size to the document size, this captures most
+            # web configurations except cases where a footer, for example, has
+            # been placed absolutely outside of the body and hangs beneath
+            # NOTE: this comes from here: https://stackoverflow.com/a/52572919
+            original_size = self.control.scraper.driver.get_window_size()
+            required_width = self.control.scraper.driver.execute_script(
+                'return document.body.parentNode.scrollWidth'
+            )
+            required_height = self.control.scraper.driver.execute_script(
+                'return document.body.parentNode.scrollHeight'
+            )
+            logger.debug(
+                "Required width=%s, height=%s, Original width=%s, height=%s" % (
+                    required_width, required_height, original_size["width"],
+                    original_size["height"]
+            ))
+            self.control.scraper.driver.set_window_size(
+                required_width, required_height
+            )
 
         if re.match("^https?://", self.output):
             screenshot_dir = "screenshots"
@@ -127,10 +128,11 @@ class BaseScraper(object):
                 writetype="wb", output=self.output
             )
 
-        # # restore original window size to avoid side effects
-        # self.control.scraper.driver.set_window_size(
-        #     original_size['width'], original_size['height']
-        # )
+        if self.full_page_screenshots:
+            # restore original window size to avoid side effects
+            self.control.scraper.driver.set_window_size(
+                original_size['width'], original_size['height']
+            )
 
     def save_training_page(self, classname=None):
         """

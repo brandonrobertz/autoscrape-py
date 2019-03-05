@@ -39,6 +39,7 @@ class ManualControlScraper(BaseScraper):
                  output=None, keep_filename=False,
                  disable_style_saving=False,
                  save_screenshots=False, save_graph=False,
+                 full_page_screenshots=False,
                  input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
                  link_priority=None, ignore_links=None, only_links=None,
@@ -71,6 +72,9 @@ class ManualControlScraper(BaseScraper):
         self.disable_style_saving = disable_style_saving
         # To save screenshots or not (they're large and expensive)
         self.save_screenshots = save_screenshots
+        # To save the whole, scrolled down page screenshot, this can
+        # fail in certain circumstances
+        self.full_page_screenshots = full_page_screenshots
         # Whether to save the crawl & interaction traversal graph
         self.save_graph = save_graph
         # string used to match link text in order to sort them higher

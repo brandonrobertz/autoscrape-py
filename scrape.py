@@ -140,6 +140,14 @@ Data Saving Options:
         page, interaction, and search. Screenshots will be
         saved to the screenshots folder of the output dir.
 
+    --full-page-screenshots
+        By default, we only save the first displayed part of the
+        webpage. The remaining portion that you can only see
+        by scrolling down isn't captured. Setting this option
+        forces AutoScrape to scroll down and capture the entire
+        web content. This can fail in certain circumstances, like
+        in API output mode and should be used with care.
+
     --save-graph
         This option allows the scraper to build a directed graph
         of the entire scrape and will save it to the "graph"
