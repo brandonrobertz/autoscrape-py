@@ -16,6 +16,41 @@ Installation and running instructions are provided for both below.
 
 [![Quickstart Video](https://github.com/brandonrobertz/autoscrape-py/blob/master/images/quickstart-video.png)](https://www.youtube.com/watch?v=D0Mchcf6THE)
 
+## Quick Usage Examples
+
+Here are some straightforward use cases for AutoScrape and how you'd use the CLI tool to execute them. These, of course, assume you have the dependencies installed.
+
+### Crawl
+
+Crawl an entire website, saving all HTML and stylesheets (no screenshots):
+
+    ./scrape.py \
+      --maxdepth -1 \
+      --output crawled_site \
+      'https://some.page/to-crawl'
+
+### Archive Page (Screenshot & Code)
+
+Archive a single webpage, both code and full-content screenshot (PNG), for future reference:
+
+    ./scrape.py \
+      --full-page-screenshots \
+      --load-images --maxdepth 0 \
+      --save-screenshots --driver Firefox \
+      --output archived_webpage \
+      'https://some.page/to-archive'
+
+### Search Queries and Result Pages
+
+Query a web form, identified by containing the text "I'm a search form", entering "NAME" into the first (0th) text input field and select January 20th, 1992 in the second (1st) date field. Then click all buttons with the text "Next ->" to get all results pages:
+
+    ./scrape.py \
+      --output search_query_data \
+      --form-match "I'm a search form" \
+      --input "i:0:NAME,d:1:1992-01-20" \
+      --next-match "Next ->" \
+      'https://some.page/search?s=newquery'
+
 ## Setup for Standalone Local CLI
 
 ### External Dependencies
@@ -77,7 +112,10 @@ Crawl-Specific Options:
     --maxdepth DEPTH
         Maximum depth to crawl a site (in search of form
         if the option --form-match STRING is specified,
-        see below). Zero mean no limit. [default: 0]
+        see below). Setting to 0 means don't crawl at all,
+        all operations are limited to the BASEURL page.
+        Setting to -1 means unlimited maximum crawl depth.
+        [default: 10]
 
     --leave-host
         By default, autoscrape will not leave the host given
@@ -205,6 +243,14 @@ Data Saving Options:
         page, interaction, and search. Screenshots will be
         saved to the screenshots folder of the output dir.
 
+    --full-page-screenshots
+        By default, we only save the first displayed part of the
+        webpage. The remaining portion that you can only see
+        by scrolling down isn't captured. Setting this option
+        forces AutoScrape to scroll down and capture the entire
+        web content. This can fail in certain circumstances, like
+        in API output mode and should be used with care.
+
     --save-graph
         This option allows the scraper to build a directed graph
         of the entire scrape and will save it to the "graph"
@@ -215,23 +261,6 @@ Data Saving Options:
         By default, AutoScrape saves the stylesheets associated
         with a scraped page. To save storage, you can disable this
         functionality by using this option.
-
-EXAMPLES
-
-./scrape.py \
-  --form-match "first name" \
-  --input "i:0:firstname,i:1:lastname" \
-  --next-match "next page" \
-  --output "firstname_lastname_scrape" \
-  [BASEURL]
-
-In the above example, the scraper will crawl until it finds a form
-that contains the text "first name". At that point, it will type
-"firstname" in the first text input box and "lastname" into the second
-input box, then submits the form. Then it will wait for the submission
-to be completed/loaded and will continue clicking on buttons/links
-containing "next page" until there are no more. All data found during
-the scrape will be saved to the ./firstname_lastname_scrape directory.
 ```
 
 ## Setup Containerized API Version
