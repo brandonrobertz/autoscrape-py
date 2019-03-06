@@ -12,7 +12,10 @@ Crawl-Specific Options:
     --maxdepth DEPTH
         Maximum depth to crawl a site (in search of form
         if the option --form-match STRING is specified,
-        see below). Zero mean no limit. [default: 0]
+        see below). Setting to 0 means don't crawl at all,
+        all operations are limited to the BASEURL page.
+        Setting to -1 means unlimited maximum crawl depth.
+        [default: 10]
 
     --leave-host
         By default, autoscrape will not leave the host given

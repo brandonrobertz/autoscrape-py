@@ -34,7 +34,7 @@ class ManualControlScraper(BaseScraper):
     # so users can get familiar with the concepts of self-exploration
     # and self-learning but without having to get the ML concepts.
 
-    def __init__(self, baseurl, loglevel=None, maxdepth=0, formdepth=0,
+    def __init__(self, baseurl, loglevel=None, maxdepth=10, formdepth=0,
                  next_match=None, form_match=None,
                  output=None, keep_filename=False,
                  disable_style_saving=False,
@@ -114,7 +114,7 @@ class ManualControlScraper(BaseScraper):
                 # # TODO: we need to know if the page URL changed
                 # self.control.back()
 
-    def keep_clicking_next_btns(self, maxdepth=0):
+    def keep_clicking_next_btns(self):
         """
         This looks for "next" buttons, or (in the future) page number
         links, and clicks them until one is not found. This saves the
@@ -168,7 +168,7 @@ class ManualControlScraper(BaseScraper):
 
     def scrape(self, depth=0):
         logger.info("Crawl depth %s" % depth)
-        if self.maxdepth and depth > self.maxdepth:
+        if self.maxdepth != -1 and depth > self.maxdepth:
             logger.info("Maximum depth %s reached, returning..." % depth)
             self.control.back()
             return
@@ -276,7 +276,7 @@ class ManualControlScraper(BaseScraper):
             )
 
         for ix, text in link_zip:
-            if self.maxdepth and depth == self.maxdepth:
+            if self.maxdepth != -1 and depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
                 break
 
