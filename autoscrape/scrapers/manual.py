@@ -241,7 +241,7 @@ class ManualControlScraper(BaseScraper):
                 self.control.submit(ix)
                 logger.debug("Beginning iteration of data pages")
                 self.save_screenshot(classname="interaction_pages")
-                self.keep_clicking_next_btns(maxdepth=self.formdepth)
+                self.keep_clicking_next_btns()
                 scraped = True
                 self.control.back()
 
