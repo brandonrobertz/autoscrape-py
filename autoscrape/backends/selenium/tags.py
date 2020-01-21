@@ -149,7 +149,10 @@ class Tagger(TaggerBase):
         return tags
 
     def get_buttons(self, in_form=False):
-        x_path = "//form//a|//button|//input[@type='button']|//input[@type='submit']"
+        x_path = "|".join([
+            "//form//a", "//button", "//input[@type='button']",
+            "//input[@type='submit']"
+        ])
         btns = self.elements_by_path(x_path)
 
         tags = []
