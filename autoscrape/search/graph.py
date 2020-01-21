@@ -17,7 +17,8 @@ class Graph(object):
         self.dbg("Initializing graph")
 
     def dbg(self, msg):
-        logger.debug("[GRAPH]%s", msg)
+        # logger.debug("[GRAPH]%s", msg)
+        pass
 
     def add_root_node(self, node, **kwargs):
         """

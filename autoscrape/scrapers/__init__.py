@@ -139,7 +139,7 @@ class BaseScraper(object):
             filename = "%s__%s" % (filename, query_part)
         return "%s%s" % (filename, extension)
 
-    def save_training_page(self, classname=None):
+    def save_training_page(self, classname=None, url=None):
         """
         Writes the current page to the output data directory (if provided)
         to the given class folder.
@@ -155,8 +155,12 @@ class BaseScraper(object):
         if not os.path.exists(classdir):
             os.makedirs(classdir)
 
-        data = self.control.scraper.page_html
-        url = self.control.scraper.page_url
+        data = None
+        if url is None:
+            data = self.control.scraper.page_html
+            url = self.control.scraper.page_url
+        else:
+            data = self.control.scraper.download_page(url)
 
         # try and extract the extension from the URL
         path = urlparse(url).path
@@ -165,8 +169,7 @@ class BaseScraper(object):
         if ext[0] == ".":
             ext = ext[1:]
 
-        # try a dynamic ajax download via injected script
-        if ext not in TEXT_EXTENSIONS:
+        if ext not in TEXT_EXTENSIONS and data is None:
             data = self.control.scraper.download_page(url)
 
         # hash the contents of the file, so we don't *not* save dynamic
