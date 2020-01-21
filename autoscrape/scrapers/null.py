@@ -3,7 +3,7 @@ import logging
 
 from . import BaseScraper
 from ..control import Controller
-from ..web import Scraper
+from autoscrape.backends.selenium.web import Scraper
 
 
 logger = logging.getLogger('AUTOSCRAPE')

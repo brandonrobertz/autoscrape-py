@@ -2,23 +2,23 @@
 import logging
 from urllib.parse import urlparse
 
+from autoscrape.backends.base.tags import TaggerBase
+
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Tagger(object):
+class Tagger(TaggerBase):
     """
     Generates tags from a given page that can be used, in a stateless manner,
     to refer to unique elements on a web page.
     """
 
     def __init__(self, driver=None, current_url=None, leave_host=False):
+        super().__init__(current_url=current_url, leave_host=leave_host)
         self.driver = driver
-        self.current_url = current_url
-        # controls whether or not to include non-base host urls
-        self.leave_host = leave_host
 
-    def csspath_from_element(self, element):
+    def path_from_element(self, element):
         """
         Takes a WebDriver element and returns an CSSPath for finding it
         in the future. As far as I know, this is only really feasible
@@ -69,6 +69,18 @@ class Tagger(object):
         """
         return self.driver.execute_script(script, element)
 
+    def elements_by_path(self, xpath):
+        return self.driver.find_elements_by_xpath(xpath)
+
+    def element_attr(self, element, name):
+        return element.get_attribute("href")
+
+    def clickable_sanity_check(self, element):
+       if not element.is_displayed() and not element.is_enabled():
+           logger.debug("Skipping non-displayed: %s" % (element))
+           return False
+       return super().clickable_sanity_check(element)
+
     def get_clickable(self):
         """
         Get all clickable element tags on the current page.
@@ -76,74 +88,11 @@ class Tagger(object):
         TODO: In the future we may need to recurse the page to find
         other clickable types like JS-enabled divs, etc.
         """
-        tags = []
-
-        x_path_types = "//a|//button|//input[@type='submit']" \
-                "|//input[@type='button']"
-        elems = self.driver.find_elements_by_xpath(x_path_types)
-        base_host = urlparse(self.driver.current_url).netloc
-
-        a_elems = []; i_elems = []
-        for e in elems:
-            if e.tag_name == "input":
-                i_elems.append(e)
-            else:
-                a_elems.append(e)
-
-        for elem in a_elems:
-            href = elem.get_attribute("href")
-            logger.debug("Elem text=%s, href=%s" % (elem.text, href))
-
-            # avoid hidden or disabled links, these can be traps or lead
-            # to strange errors
-            # vis = elem.get_attribute("visibility")
-            # or vis == "None":
-            if not elem.is_displayed() and not elem.is_enabled():
-                logger.debug("Skipping non-displayed: %s" % href)
-                continue
-
-            href = elem.get_attribute("href")
-            if not href:
-                continue
-
-            if href.split("#")[0] == self.current_url:
-                logger.debug("Skipping current url (%s) href %s" % (
-                    self.current_url, href
-                ))
-                continue
-
-            # skip any weird protos ... we whitelist notrmal HTTP,
-            # anchor tags and blank tags (to support JavaScript & btns)
-            if href and \
-               not href.startswith("https:") and \
-               not href.startswith("http:") and \
-               not href.startswith("javascript"):
-                logger.debug("Skipping element w/ href %s" % href)
-                continue
-
-            tag = self.csspath_from_element(elem)
-            # No way to get back to here, so we can't use it
-            if not tag:
-                logger.warn("No tag for element %s" % elem)
-                continue
-
-            # Don't leave base host ... configurable?
-            elem_host = urlparse(href).netloc
-            if not self.leave_host and elem_host != base_host:
-                logger.debug("Skipping external host link %s" % href)
-                continue
-
-            # logger.debug("Adding href=%s as tag=%s" % (href, tag))
-            tags.append(tag)
-
-        for elem in i_elems:
-            tag = self.csspath_from_element(elem)
-            logger.debug("Adding text=%s as tag=%s..." % (
-                elem.get_property("value"), tag[:20]
-            ))
-            tags.append(tag)
-
-        return tags
+        path = [
+            "//a", "//button", "//input[@type='submit']",
+            "//input[@type='button']"
+        ]
+        return super().get_clickable(path=path)
 
     def get_inputs(self, form=None, itype=None):
         """
@@ -163,9 +112,9 @@ class Tagger(object):
             elem = form
             x_path = ".%s" % x_path
 
-        elems = elem.find_elements_by_xpath(x_path)
+        elems = self.elements_by_path(x_path)
         for input in elems:
-            input_tag = self.csspath_from_element(input)
+            input_tag = self.path_from_element(input)
             if not input_tag:
                 logger.warn("No tag for input %s" % input)
                 continue
@@ -182,14 +131,14 @@ class Tagger(object):
         under the form.
         """
         x_path = "//form"
-        forms = self.driver.find_elements_by_xpath(x_path)
+        forms = self.elements_by_path(x_path)
 
         tags = {}
         for elem in forms:
             if not elem.is_displayed() or not elem.is_enabled():
                 continue
 
-            tag = self.csspath_from_element(elem)
+            tag = self.path_from_element(elem)
             if not tag:
                 logger.warn("No tag for element %s" % elem)
                 continue
@@ -204,15 +153,18 @@ class Tagger(object):
         return tags
 
     def get_buttons(self, in_form=False):
-        x_path = "//form//a|//button|//input[@type='button']|//input[@type='submit']|//table//a"
-        btns = self.driver.find_elements_by_xpath(x_path)
+        x_path = [
+            "//form//a", "//button", "//input[@type='button']",
+            "//input[@type='submit']", "//table//a",
+        ]
+        btns = self.elements_by_path(x_path)
 
         tags = []
         for elem in btns:
             if not elem.is_displayed() or not elem.is_enabled():
                 continue
 
-            tag = self.csspath_from_element(elem)
+            tag = self.path_from_element(elem)
             if not tag:
                 logger.warn("No tag for element %s" % elem)
                 continue

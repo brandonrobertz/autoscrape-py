@@ -18,10 +18,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
-from .tags import Tagger
-from .search.graph import Graph
-from .filetypes import TEXT_EXTENSIONS
-from .util import get_filename_from_url, get_extension_from_url, write_file
+from autoscrape.backends.selenium.tags import Tagger
+from autoscrape.filetypes import TEXT_EXTENSIONS
+from autoscrape.search.graph import Graph
+from autoscrape.util import get_filename_from_url, get_extension_from_url, write_file
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -140,7 +140,7 @@ class Scraper(object):
         self.form_submit_wait=form_submit_wait
         self.output = output
 
-    def driver_exec(self, fn, *args, **kwargs):
+    def _driver_exec(self, fn, *args, **kwargs):
         """
         Wrap all driver function calls with broken pipe handling. This
         is a workaround for geckodriver's problem of killing connections
@@ -161,7 +161,7 @@ class Scraper(object):
                     raise e
             except TypeError as e:
                 if "not callable" in str(e):
-                    return self.driver_exec(lambda: fn)
+                    return self._driver_exec(lambda: fn)
                     # don't increment pipe_retries here. we just need to
                     # convert our property into a callable for the next
                     # iteration
@@ -174,17 +174,17 @@ class Scraper(object):
         if self.driver and sys.meta_path is not None:
             self.driver.quit()
 
-    def wait_check(self, driver):
+    def _wait_check(self, driver):
         """
         This is the check that gets ran to determine whether
         the page is loaded or not.
         """
         logger.debug("Waiting for page to load...")
         script = "return document.readyState;"
-        result = self.driver_exec(driver.execute_script, script)
+        result = self._driver_exec(driver.execute_script, script)
         return result == "complete"
 
-    def loadwait(self, fn, *args, **kwargs):
+    def _loadwait(self, fn, *args, **kwargs):
         """
         Run a driver interaction function, wait for the page to
         become ready, and handle any broken pipe errors
@@ -199,7 +199,7 @@ class Scraper(object):
         # get any element as a reference for staleness check
         elem = self.driver.find_element_by_xpath("//*")
 
-        self.driver_exec(fn, *args, **kwargs)
+        self._driver_exec(fn, *args, **kwargs)
         time.sleep(1)
 
         if check_alerts:
@@ -228,7 +228,7 @@ class Scraper(object):
 
         # wait for the page to become ready, up to 30s, checks every 0.5s
         wait = WebDriverWait(self.driver, 30)
-        wait.until(self.wait_check)
+        wait.until(self._wait_check)
         t = time.time() - start
         logger.debug("Page wait for load check succeeded in %s" % t)
 
@@ -238,7 +238,7 @@ class Scraper(object):
         """
         script = "arguments[0].scrollIntoView();"
         try:
-            self.driver_exec(self.driver.execute_script, script, elem)
+            self._driver_exec(self.driver.execute_script, script, elem)
         except ElementNotInteractableException as e:
             pass
 
@@ -249,14 +249,14 @@ class Scraper(object):
         webdriver.
         """
         logger.info("Fetching %s" % url)
-        self.loadwait(self.driver.get, url)
+        self._loadwait(self.driver.get, url)
         self.path.append(("fetch", (url,), {}))
         node = "Fetch, url: %s" % url
         self.graph.add_root_node(node, url=url, action="fetch")
 
     def back(self):
         logger.debug("Going back...")
-        self.loadwait(self.driver.back)
+        self._loadwait(self.driver.back)
         self.path.pop()
         self.graph.move_to_parent()
 
@@ -270,9 +270,12 @@ class Scraper(object):
             return
 
         script = "arguments[0].target='_self';"
-        self.driver_exec(self.driver.execute_script, script, elem)
+        self._driver_exec(self.driver.execute_script, script, elem)
 
     def lookup_by_tag(self, tag):
+        """
+        Take a tag and return the corresponding live element in the DOM.
+        """
         inside_id = False
         # escaping logic
         newtag = ""
@@ -297,7 +300,7 @@ class Scraper(object):
             tag = newtag
 
         try:
-            return self.driver_exec(
+            return self._driver_exec(
                 self.driver.find_element_by_css_selector, tag
             )
         except Exception as e:
@@ -305,13 +308,13 @@ class Scraper(object):
             logger.error(msg % (tag, e))
 
     def elem_stats(self, elem):
-        # position  = self.driver_exec(elem.location)
-        # css_vis   = self.driver_exec(elem.value_of_css_property, "visibility")
-        # css_dis   = self.driver_exec(elem.value_of_css_property, "display")
-        # displayed = self.driver_exec(elem.is_displayed)
-        # enabled   = self.driver_exec(elem.is_enabled)
-        # size      = self.driver_exec(elem.size)
-        # text      = self.driver_exec(elem.text)
+        # position  = self._driver_exec(elem.location)
+        # css_vis   = self._driver_exec(elem.value_of_css_property, "visibility")
+        # css_dis   = self._driver_exec(elem.value_of_css_property, "display")
+        # displayed = self._driver_exec(elem.is_displayed)
+        # enabled   = self._driver_exec(elem.is_enabled)
+        # size      = self._driver_exec(elem.size)
+        # text      = self._driver_exec(elem.text)
         # logger.debug("  element position %s" % position)
         # logger.debug("  displayed: %s" % displayed)
         # logger.debug("  enabled: %s" % enabled)
@@ -333,11 +336,11 @@ class Scraper(object):
             logger.warn("Element by tag not found. Tag: %s" % tag)
             return False
 
-        name = self.driver_exec(elem.tag_name)
-        onclick = self.driver_exec(elem.get_attribute, "onclick")
-        href = self.driver_exec(elem.get_attribute, "href")
+        name = self._driver_exec(elem.tag_name)
+        onclick = self._driver_exec(elem.get_attribute, "onclick")
+        href = self._driver_exec(elem.get_attribute, "href")
         hash = "%s|%s|%s" % (href, onclick, name)
-        text = self.driver_exec(elem.text)
+        text = self._driver_exec(elem.text)
         if hash in self.visited and not iterating_form:
             logger.debug("Hash visited: %s" % hash)
             return False
@@ -357,7 +360,7 @@ class Scraper(object):
             return False
 
         try:
-            self.loadwait(elem.click)
+            self._loadwait(elem.click)
         except Exception as e:
             logger.error("Error clicking %s: %s" % (href, e))
             return False
@@ -410,10 +413,10 @@ class Scraper(object):
         """
         logger.info("Injecting text \"%s\" to input" % (input))
         elem = self.lookup_by_tag(tag)
-        self.driver_exec(self.scrolltoview, elem)
+        self._driver_exec(self.scrolltoview, elem)
         self.elem_stats(elem)
         try:
-            self.driver_exec(elem.clear)
+            self._driver_exec(elem.clear)
         except ElementNotInteractableException as e:
             pass
         # this handles date fields which aren't clearable
@@ -435,8 +438,8 @@ class Scraper(object):
         """
         logger.info("Selecting option %s" % (option_str))
         elem = self.lookup_by_tag(tag)
-        self.driver_exec(self.scrolltoview, elem)
-        # TODO: wrap in driver_exec after testing
+        self._driver_exec(self.scrolltoview, elem)
+        # TODO: wrap in _driver_exec after testing
         select = Select(elem)
         # select by visible text
         select.select_by_visible_text(option_str)
@@ -455,11 +458,11 @@ class Scraper(object):
         """
         logger.info("Checking to checkbox selected=%s" % (to_check))
         elem = self.lookup_by_tag(tag)
-        self.driver_exec(self.scrolltoview, elem)
-        # TODO: wrap in driver_exec after testing
+        self._driver_exec(self.scrolltoview, elem)
+        # TODO: wrap in _driver_exec after testing
         if elem.is_selected() != to_check:
             elem.click()
-            self.driver_exec(elem.clear)
+            self._driver_exec(elem.clear)
         self.path.append(("input_checkbox", (tag,to_check,), {}))
         action = {
             "action": "input_checkbox",
@@ -487,12 +490,12 @@ class Scraper(object):
         logger.info("Submitting form by tag: %s" % tag)
         form = self.lookup_by_tag(tag)
         self.elem_stats(form)
-        self.driver_exec(self.scrolltoview, form)
+        self._driver_exec(self.scrolltoview, form)
 
         # try to find a Submit input button
         sub = None
         try:
-            sub = self.driver_exec(
+            sub = self._driver_exec(
                 form.find_element_by_xpath,
                 "//input[@type='submit']"
             )
@@ -507,7 +510,7 @@ class Scraper(object):
         #   xpath = //a[matches(., 'submit')
         if not sub:
             try:
-                possible_subs = self.driver_exec(
+                possible_subs = self._driver_exec(
                     form.find_elements_by_xpath,
                     "//a"
                 )
@@ -526,7 +529,7 @@ class Scraper(object):
                 if self.form_submit_natural_click:
                     self.click_at_position_over_element(sub)
                 else:
-                    self.loadwait(sub.click)
+                    self._loadwait(sub.click)
             except Exception as e:
                 sub_failure = True
                 logger.warn("Failure to click on submit button/link: %s" % e)
@@ -534,7 +537,7 @@ class Scraper(object):
         # otherwise, try to submit the form itself
         if not sub or sub_failure:
             logger.debug("Using form.submit selenium shim")
-            self.loadwait(form.submit, check_alerts=True)
+            self._loadwait(form.submit, check_alerts=True)
 
         self.path.append(("submit", (tag,), {}))
         node = "Submit, tag: %s" % (tag)
@@ -560,7 +563,7 @@ class Scraper(object):
         """
         Get the current DOM HTML of the page.
         """
-        return self.driver_exec(self.driver.page_source)
+        return self._driver_exec(self.driver.page_source)
 
     def download_file(self, url, return_data=False):
         """
@@ -607,7 +610,7 @@ class Scraper(object):
 
     @property
     def page_url(self):
-        return self.driver_exec(self.driver.current_url)
+        return self._driver_exec(self.driver.current_url)
 
     def element_text(self, element=None):
         """
@@ -646,7 +649,7 @@ class Scraper(object):
         """
         Get tags, by type (optional), for the currently loaded page.
         """
-        current_url = self.driver_exec(self.page_url)
+        current_url = self._driver_exec(self.page_url)
         tagger = Tagger(
             driver=self.driver, current_url=current_url,
             leave_host=self.leave_host,
@@ -654,7 +657,7 @@ class Scraper(object):
         return tagger.get_clickable()
 
     def get_forms(self):
-        current_url = self.driver_exec(self.page_url)
+        current_url = self._driver_exec(self.page_url)
         tagger = Tagger(
             driver=self.driver, current_url=current_url,
             leave_host=self.leave_host,
@@ -664,7 +667,7 @@ class Scraper(object):
         return forms_dict
 
     def get_buttons(self):
-        current_url = self.driver_exec(self.page_url)
+        current_url = self._driver_exec(self.page_url)
         tagger = Tagger(
             driver=self.driver, current_url=current_url,
             leave_host=self.leave_host,

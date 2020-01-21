@@ -134,7 +134,7 @@ class BaseScraper(object):
                 original_size['width'], original_size['height']
             )
 
-    def save_training_page(self, classname=None):
+    def save_training_page(self, classname=None, url=None):
         """
         Writes the current page to the output data directory (if provided)
         to the given class folder.
@@ -152,8 +152,12 @@ class BaseScraper(object):
         else:
             classdir = os.path.join(self.output, classname)
 
-        data = self.control.scraper.page_html
-        url = self.control.scraper.page_url
+        data = None
+        if url is None:
+            data = self.control.scraper.page_html
+            url = self.control.scraper.page_url
+        else:
+            data = self.control.scraper.download_page(url)
 
         ext = get_extension_from_url(url)
         if ext not in TEXT_EXTENSIONS:

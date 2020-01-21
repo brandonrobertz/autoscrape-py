@@ -2,7 +2,7 @@
 import time
 import logging
 
-from .web import Scraper
+from .backends.selenium.web import Scraper
 from .vectorization import Vectorizer
 
 
