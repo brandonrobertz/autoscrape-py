@@ -37,11 +37,14 @@ class Web(WebBase):
           }, '');"""
         return self.driver.execute_script(script)
 
-    def element_text(self, element=None):
+    def element_text(self, element, block=False):
         """
         Get the text for all elements either under a given element
         or for a whole page (if element == None)
         """
+        if not block and element is not None:
+            return element.text
+
         if element is None:
             element = self.driver
         # TODO: this is a major bottleneck. find a way

@@ -2,8 +2,8 @@
 import time
 import logging
 
-from autoscrape.backends.requests.scraper import Scraper
-# from autoscrape.backends.selenium.scraper import Scraper
+# from autoscrape.backends.requests.scraper import Scraper
+from autoscrape.backends.selenium.scraper import Scraper
 from autoscrape.vectorization import Vectorizer
 
 
@@ -180,7 +180,7 @@ class Controller(object):
         """
         if type == "embeddings":
             html = self.scraper.page_html
-            text = self.scraper.element_text()
+            text = self.scraper.element_text(None, block=True)
             # this means use the root of the page
             element = None
             return self.vectorizer.vectorize(html, text, element)

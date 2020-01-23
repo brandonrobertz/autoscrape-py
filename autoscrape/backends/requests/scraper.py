@@ -10,6 +10,20 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 
 class Scraper(Tagger):
+    """
+    A simple HTTP-requests based scraper, currently capable of only
+    doing crawls, but is 3.5x faster.
+
+        bxroberts.org full crawl - requests backend
+        real    0m34.066s
+        user    0m23.062s
+        sys     0m0.640s
+
+        bxroberts.org full crawl - selenium backend
+        real    2m5.373s
+        user    1m0.872s
+        sys     0m10.976s
+    """
     def __init__(self, leave_host=False, **kwargs):
         # requests Session
         self.s = requests.Session()
