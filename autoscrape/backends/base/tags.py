@@ -3,28 +3,28 @@ import logging
 
 from urllib.parse import urlparse
 
+from autoscrape.backends.base.web import WebBase
+
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class TaggerBase:
+class TaggerBase(WebBase):
     """
     Generates tags from a given page that can be used, in a stateless manner,
     to refer to unique elements on a web page.
     """
 
-    def __init__(self, current_url=None, leave_host=False, **kwargs):
-        self.current_url = current_url
-        self.base_host = urlparse(current_url).netloc
-        # controls whether or not to include non-base host urls
-        self.leave_host = leave_host
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.base_host = urlparse(self.current_url).netloc
 
-    def path_from_element(self, element):
+    def tag_from_element(self, element):
         """
         For a given element, return a path (a.k.a. a "tag") leading
         to it. Path can be CSS, XPath, or whatever the backend supports.
         """
-        raise NotImplementedError("Tagger.path_from_element not implemented")
+        raise NotImplementedError("Tagger.tag_from_element not implemented")
 
     def clickable_sanity_check(self, element):
         """
@@ -33,9 +33,14 @@ class TaggerBase:
         check determines which nodes will end up as clickable options for
         the scraper on this page.
         """
-        href = self.element_attr(element, "href")
-        if not href:
+        raw_href = self.element_attr(element, "href")
+        if not raw_href:
             return False
+
+        if hasattr(self, "normalize"):
+            href = self.normalize(raw_href).split("#")[0]
+        else:
+            href = raw_href
 
         if href.split("#")[0] == self.current_url:
             logger.debug("Skipping current url (%s) href %s" % (
@@ -46,16 +51,17 @@ class TaggerBase:
         # skip any weird protos ... we whitelist notrmal HTTP,
         # anchor tags and blank tags (to support JavaScript & btns)
         if href and \
+           not href.startswith("//") and \
            not href.startswith("https:") and \
            not href.startswith("http:") and \
            not href.startswith("javascript"):
-            logger.debug("Skipping element w/ href %s" % href)
+            # logger.debug("Skipping element w/ href %s" % href)
             return False
 
         # Don't leave base host ... configurable?
         elem_host = urlparse(href).netloc
         if not self.leave_host and elem_host != self.base_host:
-            logger.debug("Skipping external host link %s" % href)
+            # logger.debug("Skipping external host link %s" % href)
             return False
 
         return True
@@ -72,14 +78,10 @@ class TaggerBase:
             if not self.clickable_sanity_check(element):
                 continue
 
-            tag = self.path_from_element(element)
+            tag = self.tag_from_element(element)
             # No way to get back to here, so we can't use it
             if not tag:
                 logger.warn("No tag for element %s" % element)
-                return False
-
-            if not element.is_displayed() and not element.is_enabled():
-                logger.debug("Skipping non-displayed: %s" % href)
                 return False
 
             tags.append(tag)
@@ -108,18 +110,4 @@ class TaggerBase:
         clickable things related to forms.
         """
         raise NotImplementedError("Tagger.get_buttons not implemented")
-
-    def elements_by_path(self, path):
-        """
-        Return element nodes matching a path where path could be xpath,
-        css, etc, depending on the backend)
-        """
-        raise NotImplementedError("Tagger.elements_by_path not implemented")
-
-    def element_attr(self, element, name):
-        """
-        For a given element and attribute name, return the value if it
-        exists.
-        """
-        raise NotImplementedError("Tagger.element_attr not implemented")
 

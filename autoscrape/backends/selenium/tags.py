@@ -3,12 +3,13 @@ import logging
 from urllib.parse import urlparse
 
 from autoscrape.backends.base.tags import TaggerBase
+from autoscrape.backends.selenium.web import Web
 
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Tagger(TaggerBase):
+class Tagger(TaggerBase, Web):
     """
     Generates tags from a given page that can be used, in a stateless manner,
     to refer to unique elements on a web page.
@@ -18,7 +19,7 @@ class Tagger(TaggerBase):
         super().__init__(current_url=current_url, leave_host=leave_host)
         self.driver = driver
 
-    def path_from_element(self, element):
+    def tag_from_element(self, element):
         """
         Takes a WebDriver element and returns an CSSPath for finding it
         in the future. As far as I know, this is only really feasible
@@ -69,12 +70,6 @@ class Tagger(TaggerBase):
         """
         return self.driver.execute_script(script, element)
 
-    def elements_by_path(self, xpath):
-        return self.driver.find_elements_by_xpath(xpath)
-
-    def element_attr(self, element, name):
-        return element.get_attribute("href")
-
     def clickable_sanity_check(self, element):
        if not element.is_displayed() and not element.is_enabled():
            logger.debug("Skipping non-displayed: %s" % (element))
@@ -110,7 +105,7 @@ class Tagger(TaggerBase):
 
         elems = self.elements_by_path(x_path)
         for input in elems:
-            input_tag = self.path_from_element(input)
+            input_tag = self.tag_from_element(input)
             if not input_tag:
                 logger.warn("No tag for input %s" % input)
                 continue
@@ -134,7 +129,7 @@ class Tagger(TaggerBase):
             if not elem.is_displayed() or not elem.is_enabled():
                 continue
 
-            tag = self.path_from_element(elem)
+            tag = self.tag_from_element(elem)
             if not tag:
                 logger.warn("No tag for element %s" % elem)
                 continue
@@ -160,7 +155,7 @@ class Tagger(TaggerBase):
             if not elem.is_displayed() or not elem.is_enabled():
                 continue
 
-            tag = self.path_from_element(elem)
+            tag = self.tag_from_element(elem)
             if not tag:
                 logger.warn("No tag for element %s" % elem)
                 continue

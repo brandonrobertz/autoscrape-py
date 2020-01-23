@@ -32,26 +32,6 @@ class BaseScraper(object):
         console_handler = logging.StreamHandler()
         logger.addHandler(console_handler)
 
-    def get_stylesheet(self):
-        script = """
-        return [].slice.call(document.styleSheets)
-          .reduce((prev, styleSheet) => {
-            try {
-              if (styleSheet.cssRules) {
-                return prev +
-                  [].slice.call(styleSheet.cssRules)
-                    .reduce(function (prev, cssRule) {
-                      return prev + cssRule.cssText;
-                    }, '');
-              } else {
-                  return prev;
-              }
-            } catch (e) {
-              return prev + `@import url("${styleSheet.href}");`
-            }
-          }, '');"""
-        return self.control.scraper.driver.execute_script(script)
-
     def save_screenshot(self, classname=None):
         """
         Save a screenshot of the current page window. The files
@@ -157,6 +137,7 @@ class BaseScraper(object):
 
         data = None
         if url is None:
+            # TODO: migrate over
             data = self.control.scraper.page_html
             url = self.control.scraper.page_url
         else:
@@ -170,6 +151,7 @@ class BaseScraper(object):
             ext = ext[1:]
 
         if ext not in TEXT_EXTENSIONS and data is None:
+            # TODO: migrate over
             data = self.control.scraper.download_page(url)
 
         # hash the contents of the file, so we don't *not* save dynamic
@@ -204,7 +186,8 @@ class BaseScraper(object):
             style_filepath = "%s.css" % filepath
             # this will save stylesheet as filepath.html.css
             with open(style_filepath, "w") as f:
-                f.write(self.get_stylesheet())
+                # TODO: migrate over
+                f.write(self.control.scraper.get_stylesheet())
 
     def save_scraper_graph(self):
         """
