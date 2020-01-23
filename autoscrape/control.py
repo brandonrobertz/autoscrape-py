@@ -2,8 +2,9 @@
 import time
 import logging
 
-from .backends.selenium.web import Scraper
-from .vectorization import Vectorizer
+from autoscrape.backends.requests.scraper import Scraper
+# from autoscrape.backends.selenium.scraper import Scraper
+from autoscrape.vectorization import Vectorizer
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -64,7 +65,7 @@ class Controller(object):
         # logger.debug("Clickable links: %s" % (len(self.clickable)))
         # for i in range(len(self.clickable)):
         #     t = self.clickable[i]
-        #     elem = self.scraper.lookup_by_tag(t)
+        #     elem = self.scraper.element_by_tag(t)
         #     text = ""
         #     if elem:
         #         text = elem.text.replace("\n", " ")
@@ -74,7 +75,7 @@ class Controller(object):
         # for i in range(len(self.forms)):
         #     t = self.forms[i]
         #     text = ""
-        #     elem = self.scraper.lookup_by_tag(t)
+        #     elem = self.scraper.element_by_tag(t)
         #     if elem:
         #         text = elem.text.replace("\n", " ")
         #     logger.debug("  %s - ...%s, %s" % (i, t[-25:], text))
@@ -84,7 +85,7 @@ class Controller(object):
         #     input_group = self.inputs[i]
         #     for itype_ix in range(len(input_group)):
         #         for t in input_group[itype_ix]:
-        #             elem = self.scraper.lookup_by_tag(t)
+        #             elem = self.scraper.element_by_tag(t)
         #             text = ""
         #             placeholder = ""
         #             if elem:
@@ -96,7 +97,7 @@ class Controller(object):
         # logger.debug("Buttons: %s" % (len(self.buttons)))
         # for i in range(len(self.buttons)):
         #     t = self.buttons[i]
-        #     elem = self.scraper.lookup_by_tag(t)
+        #     elem = self.scraper.element_by_tag(t)
         #     text = ""
         #     value = ""
         #     if elem:
@@ -109,10 +110,13 @@ class Controller(object):
         Instantiate a web scraper, given a starting point URL. Also
         gets the links for the current page and sets its tag array.
         """
-        self.scraper.fetch(url)
+        self.scraper.fetch(url, initial=True)
         self.load_indices()
 
     def select_link(self, index):
+        print("Select link, clickable n=%s" % (
+            len(self.clickable)
+        ))
         tag = self.clickable[index]
         clicked = self.scraper.click(tag)
         if clicked:
@@ -194,7 +198,7 @@ class Controller(object):
         form_data = []
         if type == "text":
             for tag in self.forms:
-                form = self.scraper.lookup_by_tag(tag)
+                form = self.scraper.element_by_tag(tag)
                 txt = self.scraper.element_text(form)
                 if txt:
                     form_data.append(txt)
@@ -206,7 +210,7 @@ class Controller(object):
         buttons_data = []
         if type == "text":
             for tag in self.buttons:
-                btn = self.scraper.lookup_by_tag(tag)
+                btn = self.scraper.element_by_tag(tag)
                 value = ""
                 if btn:
                     value = btn.get_attribute("value")
@@ -231,12 +235,13 @@ class Controller(object):
         if type == "text":
             for i in range(len(self.clickable)):
                 t = self.clickable[i]
-                elem = self.scraper.lookup_by_tag(t)
+                elem = self.scraper.element_by_tag(t)
                 text = ""
-                if elem and elem.tag_name != "input":
-                    text = elem.text.replace("\n", " ")
-                elif elem and elem.tag_name == "input":
-                    text = elem.get_property("value").replace("\n", " ")
+                if elem is not None and elem.tag_name != "input":
+                    text = self.scraper.element_text(elem).replace("\n", " ")
+                elif elem is not None and elem.tag_name == "input":
+                    value = self.scraper.element_attr(elem, "value")
+                    text = value.replace("\n", " ")
                 else:
                     logger.warn("Link element couldn't be found: %s" % t)
                 buttons_data.append(text)

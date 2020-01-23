@@ -6,7 +6,7 @@ __pycache__
 *.log
 
 # default output directory
-autoscrape-data/
+autoscrape-data*/
 
 # Algorithmic/Training Data-Related Files
 # Currently stored in a separate git repo (private, currently)

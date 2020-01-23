@@ -9,3 +9,5 @@ Flask==1.0.2
 celery==4.1.1
 psycopg2==2.7.6.1
 flask-sqlalchemy==2.3.2
+cssselect==1.1.0
+requests==2.22.0

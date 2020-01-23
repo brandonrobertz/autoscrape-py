@@ -275,14 +275,16 @@ class ManualControlScraper(BaseScraper):
                 link_zip
             )
 
+        print("Links: %s" % (link_zip))
         for ix, text in link_zip:
+            print("Link index: %s text: %s" % (ix, text))
             if self.maxdepth != -1 and depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
                 break
 
             logger.debug("Attempting to click link text: %s" % text)
             if self.control.select_link(ix):
-                logger.info("Link clicked: %s" % text)
+                logger.debug("Link clicked. Going a level deeper...")
                 self.scrape(depth=depth + 1)
             else:
                 logger.debug("Link downloaded or click failed: %s" % text)
@@ -294,7 +296,8 @@ class ManualControlScraper(BaseScraper):
         try:
             self.scrape(*args, **kwargs)
         except Exception as e:
-            self.control.scraper.driver.quit()
+            if hasattr(self.control.scraper, "driver"):
+                self.control.scraper.driver.quit()
             if self.output and self.save_graph:
                 self.save_scraper_graph()
             raise e
