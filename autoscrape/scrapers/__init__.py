@@ -138,7 +138,7 @@ class BaseScraper(object):
             data = self.control.scraper.page_html
             url = self.control.scraper.page_url
         else:
-            data = self.control.scraper.download_page(url)
+            data = self.control.scraper.download_file(url)
 
         ext = get_extension_from_url(url)
         if ext not in TEXT_EXTENSIONS:

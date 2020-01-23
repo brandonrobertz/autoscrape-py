@@ -118,15 +118,6 @@ class Scraper(Tagger):
             self.graph.move_to_parent()
             self.fetch(prev[2]["url"])
 
-    def download_page(self, url):
-        response = self.s.get(url)
-        action = {
-            "action": "download_page",
-            "url": url,
-        }
-        self.graph.add_action_to_current(action)
-        return response.text
-
     @property
     def page_html(self):
         return self.current_html
@@ -148,3 +139,13 @@ class Scraper(Tagger):
         print(" n=%s, path=%s" % (len(self.path), self._no_tags(self.path)))
         print(" --")
         return clickable
+
+    # def download_file(self, url):
+    #     response = self.s.get(url)
+    #     action = {
+    #         "action": "download_page",
+    #         "url": url,
+    #     }
+    #     self.graph.add_action_to_current(action)
+    #     return response.text
+

@@ -2,7 +2,6 @@
 import time
 import logging
 import re
-import urllib.request
 
 import selenium
 from selenium import webdriver
@@ -26,9 +25,10 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 class Scraper(Web):
 
-    def __init__(self, driver="Firefox", leave_host=False, load_images=False,
-                 form_submit_natural_click=False, form_submit_wait=5,
-                 show_browser=False, remote_hub="http://localhost:4444/wd/hub"):
+    def __init__(self, driver="Firefox", leave_host=False,
+                 load_images=False, form_submit_natural_click=False,
+                 form_submit_wait=5, output=None, show_browser=False,
+                 remote_hub="http://localhost:4444/wd/hub"):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
@@ -136,7 +136,10 @@ class Scraper(Web):
 
     def __del__(self):
         if self.driver:
-            self.driver.quit()
+            try:
+                self.driver.quit()
+            except Exception:
+                pass
 
     def _wait_check(self, driver):
         """

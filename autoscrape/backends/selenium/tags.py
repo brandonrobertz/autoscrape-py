@@ -83,10 +83,10 @@ class Tagger(TaggerBase, Web):
         TODO: In the future we may need to recurse the page to find
         other clickable types like JS-enabled divs, etc.
         """
-        path = [
+        path = "|".join([
             "//a", "//button", "//input[@type='submit']",
             "//input[@type='button']"
-        ]
+        ])
         return super().get_clickable(path=path)
 
     def get_inputs(self, form=None, itype=None):
@@ -148,10 +148,10 @@ class Tagger(TaggerBase, Web):
         return tags
 
     def get_buttons(self, in_form=False):
-        x_path = [
+        x_path = "|".join([
             "//form//a", "//button", "//input[@type='button']",
             "//input[@type='submit']", "//table//a",
-        ]
+        ])
         btns = self.elements_by_path(x_path)
 
         tags = []

@@ -4,7 +4,7 @@ class Scraper():
       def fetch(self, url):
       def click(self, tag, iterating_form=False):
       def back(self):
-      def download_page(self, url):
+      def download_file(self, url):
       @property: def page_html(self):
       @property: def page_url(self):
       def element_text(self, element=None):

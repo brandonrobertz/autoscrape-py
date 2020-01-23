@@ -236,14 +236,15 @@ class Controller(object):
             for i in range(len(self.clickable)):
                 t = self.clickable[i]
                 elem = self.scraper.element_by_tag(t)
+                tag_name = self.scraper.element_tag_name(elem)
                 text = ""
-                if elem is not None and elem.tag_name != "input":
+                if elem is None:
+                    logger.warn("Link element couldn't be found: %s" % t)
+                elif tag_name != "input":
                     text = self.scraper.element_text(elem).replace("\n", " ")
-                elif elem is not None and elem.tag_name == "input":
+                elif elem_tag == "input":
                     value = self.scraper.element_attr(elem, "value")
                     text = value.replace("\n", " ")
-                else:
-                    logger.warn("Link element couldn't be found: %s" % t)
                 buttons_data.append(text)
         return buttons_data
 

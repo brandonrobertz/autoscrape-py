@@ -19,15 +19,6 @@ class Web(WebBase):
             return None
         return element.attrib.get("href")
 
-    def element_text(self, element):
-        t = element.text_content()
-        if t:
-            return t
-        t = element.text
-        if t:
-            return t
-        return ''
-
     def element_by_tag(self, tag):
         return self.dom.cssselect(tag)[0]
 
@@ -64,4 +55,17 @@ class Web(WebBase):
         normalized = pr.geturl()
         return normalized
 
+    def element_text(self, element):
+        t = element.text_content()
+        if t:
+            return t
+        t = element.text
+        if t:
+            return t
+        return ''
+
+    def element_tag_name(self, element):
+        if element is None:
+            return ""
+        return element.tag
 

@@ -70,3 +70,8 @@ class Web(WebBase):
         logger.debug("Element texts: %s" % text)
         return " ".join(text)
 
+    def element_tag_name(self, element):
+        if element is None:
+            return ""
+        return element.tag_name
+
