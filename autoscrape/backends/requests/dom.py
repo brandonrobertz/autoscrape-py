@@ -26,6 +26,7 @@ class Dom(DomBase):
         return self.dom.xpath(path)
 
     def get_stylesheet(self):
+        # TODO: parallelize this
         css = ""
         for link in self.dom.xpath("//link"):
             if not link.attrib:
@@ -35,7 +36,10 @@ class Dom(DomBase):
             l_href = link.attrib.get("href")
             if l_type != "text/css" and l_rel != "stylesheet":
                 continue
-            css += '@import url("%s");' % (l_href)
+            css_url = self.normalize(l_href)
+            stylesheet = self.download_file(css_url, return_data=True)
+            css += stylesheet.decode("utf-8")
+            # css += '@import url("%s");' % (l_href)
         for style in self.dom.xpath("style"):
             css += style.text_content()
         return css
