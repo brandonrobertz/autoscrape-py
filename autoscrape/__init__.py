@@ -8,6 +8,7 @@ __version__ = '1.0.0'
 from autoscrape.scrapers.test import TestScraper
 from autoscrape.scrapers.ml import MLAutoScraper
 from autoscrape.scrapers.null import NullScraper
+from autoscrape.scrapers.manual import ManualControlScraper
 
 
 """
