@@ -9,10 +9,10 @@ Usage:
     scrape.py [options] BASEURL
 
 General Options:
-    --browser-type BROWSER_TYPE
-        The Browser backend to use. Currently one of "selenium" or
-        "requests". The requests browser is only capable of crawling,
-        but is approximately 3.5x faster.
+    --backenda BACKEND
+        The backend to use. Currently one of "selenium" or "requests".
+        The requests browser is only capable of crawling, but is
+        approximately 2-3.5x faster.
         [default: "selenium"]
 
 Crawl-Specific Options:

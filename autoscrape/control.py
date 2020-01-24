@@ -24,7 +24,7 @@ class Controller(object):
                  remote_hub="http://localhost:4444/wd/hub",
                  output=None, form_submit_natural_click=False,
                  form_submit_wait=5, load_images=False,
-                 show_browser=False, browser_type="selenium"):
+                 show_browser=False, backend="selenium"):
         """
         Set up our WebDriver and misc utilities.
         """
@@ -33,9 +33,9 @@ class Controller(object):
             word_embeddings_file=word_embeddings_file,
         )
         Browser = None
-        if browser_type == "selenium":
+        if backend == "selenium":
             Browser = SeleniumBrowser
-        elif browser_type == "requests":
+        elif backend == "requests":
             Browser = RequestsBrowser
         else:
             raise NotImplementedError(
