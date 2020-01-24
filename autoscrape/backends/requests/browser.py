@@ -2,14 +2,13 @@ import logging
 
 import requests
 from autoscrape.backends.requests.tags import Tagger
-from autoscrape.backends.requests.web import Web
 from autoscrape.search.graph import Graph
 
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Scraper(Tagger):
+class Browser(Tagger):
     def __init__(self, leave_host=False, **kwargs):
         # requests Session
         self.s = requests.Session()

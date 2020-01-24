@@ -1,13 +1,13 @@
 # -*- coding: UTF-8 -*-
 import logging
 
-from autoscrape.backends.base.web import WebBase
+from autoscrape.backends.base.dom import DomBase
 
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Web(WebBase):
+class Dom(DomBase):
     def element_attr(self, element, name):
         return element.get_attribute(name)
 

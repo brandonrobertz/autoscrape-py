@@ -3,7 +3,7 @@ import logging
 
 from . import BaseScraper
 from ..control import Controller
-from autoscrape.backends.selenium.scraper import Scraper
+from autoscrape.backends.selenium.browser import Browser
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -20,7 +20,7 @@ class NullScraper(BaseScraper):
                  driver="Chrome", vectorizer=False, **kwargs):
         super(NullScraper, self).setup_logging(loglevel=loglevel)
         if scraper:
-            self.scraper = Scraper(driver=driver)
+            self.scraper = Browser(driver=driver)
         if controller:
             self.control = Controller(
                 html_embeddings_file=html_embeddings,

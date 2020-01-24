@@ -3,10 +3,10 @@ import lxml.html
 
 from urllib.parse import urlparse, ParseResult
 
-from autoscrape.backends.base.web import WebBase
+from autoscrape.backends.base.dom import DomBase
 
 
-class Web(WebBase):
+class Dom(DomBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.dom = self._get_dom()

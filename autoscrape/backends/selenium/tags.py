@@ -3,13 +3,13 @@ import logging
 from urllib.parse import urlparse
 
 from autoscrape.backends.base.tags import TaggerBase
-from autoscrape.backends.selenium.web import Web
+from autoscrape.backends.selenium.dom import Dom
 
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Tagger(TaggerBase, Web):
+class Tagger(TaggerBase, Dom):
     """
     Generates tags from a given page that can be used, in a stateless manner,
     to refer to unique elements on a web page.

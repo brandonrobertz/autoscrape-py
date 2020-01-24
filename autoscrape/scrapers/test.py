@@ -13,7 +13,7 @@ class TestScraper(BaseScraper):
         Initialize our scraper and get the first page.
         """
         super(TestScraper, self).setup_logging(loglevel=loglevel)
-        self.scraper = Scraper()
+        self.scraper = Browser()
         self.scraper.fetch(baseurl)
         self.maxdepth = maxdepth
 

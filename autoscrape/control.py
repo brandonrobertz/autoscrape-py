@@ -2,8 +2,8 @@
 import time
 import logging
 
-from autoscrape.backends.requests.scraper import Scraper
-# from autoscrape.backends.selenium.scraper import Scraper
+# from autoscrape.backends.requests.browser import Browser
+from autoscrape.backends.selenium.browser import Browser
 from autoscrape.vectorization import Vectorizer
 
 
@@ -22,9 +22,9 @@ class Controller(object):
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
                  leave_host=False, driver="Firefox",
                  remote_hub="http://localhost:4444/wd/hub",
-                 output=None,
-                 form_submit_natural_click=False, form_submit_wait=5,
-                 load_images=False, show_browser=False):
+                 output=None, form_submit_natural_click=False,
+                 form_submit_wait=5, load_images=False,
+                 show_browser=False):
         """
         Set up our WebDriver and misc utilities.
         """
@@ -32,7 +32,7 @@ class Controller(object):
             html_embeddings_file=html_embeddings_file,
             word_embeddings_file=word_embeddings_file,
         )
-        self.scraper = Scraper(
+        self.scraper = Browser(
             leave_host=leave_host, driver=driver, remote_hub=remote_hub,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=form_submit_wait,

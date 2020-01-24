@@ -16,14 +16,14 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
 from autoscrape.backends.selenium.tags import Tagger
-from autoscrape.backends.selenium.web import Web
+from autoscrape.backends.selenium.dom import Dom
 from autoscrape.search.graph import Graph
 
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Scraper(Web):
+class Browser(Tagger):
 
     def __init__(self, driver="Firefox", leave_host=False,
                  load_images=False, form_submit_natural_click=False,

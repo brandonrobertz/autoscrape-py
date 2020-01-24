@@ -4,13 +4,13 @@ from urllib.parse import urlparse
 import lxml.html
 
 from autoscrape.backends.base.tags import TaggerBase
-from autoscrape.backends.requests.web import Web
+from autoscrape.backends.requests.dom import Dom
 
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Tagger(TaggerBase, Web):
+class Tagger(TaggerBase, Dom):
     def tag_from_element(self, el):
         path = []
         while el is not None:

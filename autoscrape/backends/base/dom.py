@@ -6,7 +6,7 @@ import urllib.request
 from autoscrape.util import write_file
 
 
-class WebBase:
+class DomBase:
     """
     Stateful base of a web scraper. This class deals with finding and interacting
     with elements and tags. It also holds the base state variables like
@@ -23,32 +23,32 @@ class WebBase:
         Return element nodes matching a path where path could be xpath,
         css, etc, depending on the backend)
         """
-        raise NotImplementedError("Tagger.elements_by_path not implemented")
+        raise NotImplementedError("DomBase.elements_by_path not implemented")
 
     def element_attr(self, element, name):
         """
         For a given element and attribute name, return the value if it
         exists.
         """
-        raise NotImplementedError("Tagger.element_attr not implemented")
+        raise NotImplementedError("DomBase.element_attr not implemented")
 
     def element_by_tag(self, tag):
         """
         For a given tag, return the specified element.
         """
-        raise NotImplementedError("Tagger.element_by_tag not implemented")
+        raise NotImplementedError("DomBase.element_by_tag not implemented")
 
     def get_stylesheet(self):
         """
         Return the text of all loaded CSS stylesheets.
         """
-        raise NotImplementedError("Tagger.get_stylesheet not implemented")
+        raise NotImplementedError("DomBase.get_stylesheet not implemented")
 
     def element_tag_name(self):
         """
         Return the tag name of the given element.
         """
-        raise NotImplementedError("Tagger.element_tag_name not implemented")
+        raise NotImplementedError("DomBase.element_tag_name not implemented")
 
     def download_file(self, url, return_data=False):
         """
