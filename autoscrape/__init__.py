@@ -2,14 +2,12 @@
 __title__ = 'autoscrape-py'
 __author__ = 'Brandon Roberts (brandon@bxroberts.org)'
 __license__ = 'AGPLv3'
-__version__ = '0.2.1'
+__version__ = '1.0.0'
 
-import logging
 
-from .scrapers.manual import ManualControlScraper
-from .scrapers.test import TestScraper
-from .scrapers.ml import MLAutoScraper
-from .scrapers.null import NullScraper
+from autoscrape.scrapers.test import TestScraper
+from autoscrape.scrapers.ml import MLAutoScraper
+from autoscrape.scrapers.null import NullScraper
 
 
 """

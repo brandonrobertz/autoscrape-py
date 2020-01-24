@@ -55,14 +55,14 @@ class Dom(DomBase):
         normalized = pr.geturl()
         return normalized
 
-    def element_text(self, element):
-        t = element.text_content()
-        if t:
-            return t
-        t = element.text
-        if t:
-            return t
-        return ''
+    def element_text(self, element, block=False):
+        if block and element is not None:
+            # TODO: do recursive text getting
+            return element.text_content()
+        text = element.text
+        if not text:
+            return ''
+        return text
 
     def element_tag_name(self, element):
         if element is None:
