@@ -18,14 +18,14 @@ class DomBase:
         self.current_url = current_url
         self.current_html = current_html
 
-    def elements_by_path(self, path):
+    def elements_by_path(self, path, from_element=None):
         """
         Return element nodes matching a path where path could be xpath,
         css, etc, depending on the backend)
         """
         raise NotImplementedError("DomBase.elements_by_path not implemented")
 
-    def element_attr(self, element, name):
+    def element_attr(self, element, name, default=None):
         """
         For a given element and attribute name, return the value if it
         exists.

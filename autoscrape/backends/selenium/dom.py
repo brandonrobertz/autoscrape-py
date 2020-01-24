@@ -8,14 +8,16 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 
 class Dom(DomBase):
-    def element_attr(self, element, name):
+    def element_attr(self, element, name, default=None):
         return element.get_attribute(name)
 
     def element_by_tag(self, tag):
         return self.dom.cssselect(tag)[0]
 
-    def elements_by_path(self, xpath):
-        return self.driver.find_elements_by_xpath(xpath)
+    def elements_by_path(self, xpath, from_element=None):
+        if not from_element:
+            return self.driver.find_elements_by_xpath(xpath)
+        return from_element.find_elements_by_xpath(xpath)
 
     def get_stylesheet(self):
         script = """

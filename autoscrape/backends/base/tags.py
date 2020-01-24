@@ -37,8 +37,8 @@ class TaggerBase(DomBase):
         if not raw_href:
             return False
 
-        if hasattr(self, "normalize"):
-            href = self.normalize(raw_href).split("#")[0]
+        if hasattr(self, "_normalize_url"):
+            href = self._normalize_url(raw_href).split("#")[0]
         else:
             href = raw_href
 

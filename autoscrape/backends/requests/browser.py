@@ -52,7 +52,7 @@ class RequestsBrowser(Tagger):
             if not raw_href:
                 return False
 
-            url = self.normalize(raw_href)
+            url = self._normalize_url(raw_href)
             hash = "%s|%s" % (url, element.tag)
             if hash in self.visited:
                 logger.debug("Hash already visited: %s" % hash)
@@ -161,4 +161,54 @@ class RequestsBrowser(Tagger):
     #     }
     #     self.graph.add_action_to_current(action)
     #     return response.text
+
+    def input(self, tag, input):
+        """
+        Enter some input into an element by a given tag.
+        """
+        logger.info("Injecting text \"%s\" to input" % (input))
+        elem = self.element_by_tag(tag)
+        elem.attrib["value"] = input
+
+        self.path.append(("input", (tag,input,), {}))
+        action = {
+            "action": "input",
+            "text": input,
+            "tag": tag,
+        }
+        self.graph.add_action_to_current(action)
+
+    def submit(self, tag):
+        element = self.element_by_tag(tag)
+        parent_form = element.xpath("//ancestor::form")
+        inputs = self.elements_by_path("//input", from_element=parent_form)
+
+        params = {}
+        for input in inputs:
+            value = self.element_attr(input, "value")
+            name = self.element_attr(input, "name")
+            params[name] = value
+
+        action = self.element.attr(parent_form, "action", self.current_url)
+        method = self.element.attr(parent_form, "method", "get")
+        url = self._normalize_url(action)
+
+        request = requests.Request(
+            method,
+            url,
+            data=params
+        )
+        response = self.s.send(request)
+        self.current_url = response.url
+        self.current_html = response.text
+        self.dom = self._get_dom()
+
+        # TODO: all higher level stuff
+        self.path.append(("submit", (tag,), {}))
+        node = "Submit, tag: %s" % (tag)
+        node_meta = {
+            "submit": tag,
+        }
+        self.graph.add_node(node, **node_meta)
+        self.graph.move_to_node(node)
 

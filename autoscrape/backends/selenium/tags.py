@@ -107,7 +107,7 @@ class Tagger(TaggerBase, Dom):
             elem = form
             x_path = ".%s" % x_path
 
-        elems = self.elements_by_path(x_path)
+        elems = self.elements_by_path(x_path, from_element=elem)
         for input in elems:
             input_tag = self.tag_from_element(input)
             if not input_tag:

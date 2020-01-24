@@ -32,8 +32,10 @@ class Dom(DomBase):
     def element_by_tag(self, tag):
         return self.dom.cssselect(tag)[0]
 
-    def elements_by_path(self, path):
-        return self.dom.xpath(path)
+    def elements_by_path(self, xpath, from_element=None):
+        if not from_element:
+            return self.dom.xpath(xpath)
+        return from_element.xpath(xpath)
 
     def get_stylesheet(self, fetch_css=False):
         # TODO: parallelize this
@@ -46,7 +48,7 @@ class Dom(DomBase):
             l_href = link.attrib.get("href")
             if l_type != "text/css" and l_rel != "stylesheet":
                 continue
-            css_url = self.normalize(l_href)
+            css_url = self._normalize_url(l_href)
             stylesheet_urls.append(css_url)
 
         pool = Pool(8)
@@ -58,7 +60,7 @@ class Dom(DomBase):
             css += style.text_content()
         return css
 
-    def normalize(self, url):
+    def _normalize_url(self, url):
         parsed_current_url = urlparse(self.current_url)
         parsed_url = urlparse(url)
 
