@@ -9,7 +9,7 @@ Usage:
     scrape.py [options] BASEURL
 
 General Options:
-    --backenda BACKEND
+    --backend BACKEND
         The backend to use. Currently one of "selenium" or "requests".
         The requests browser is only capable of crawling, but is
         approximately 2-3.5x faster.
