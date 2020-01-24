@@ -23,7 +23,7 @@ from autoscrape.search.graph import Graph
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Browser(Tagger):
+class SeleniumBrowser(Tagger):
 
     def __init__(self, driver="Firefox", leave_host=False,
                  load_images=False, form_submit_natural_click=False,

@@ -2,8 +2,8 @@
 import time
 import logging
 
-# from autoscrape.backends.requests.browser import Browser
-from autoscrape.backends.selenium.browser import Browser
+from autoscrape.backends.requests.browser import RequestsBrowser
+from autoscrape.backends.selenium.browser import SeleniumBrowser
 from autoscrape.vectorization import Vectorizer
 
 
@@ -24,7 +24,7 @@ class Controller(object):
                  remote_hub="http://localhost:4444/wd/hub",
                  output=None, form_submit_natural_click=False,
                  form_submit_wait=5, load_images=False,
-                 show_browser=False):
+                 show_browser=False, browser_type="selenium"):
         """
         Set up our WebDriver and misc utilities.
         """
@@ -32,6 +32,16 @@ class Controller(object):
             html_embeddings_file=html_embeddings_file,
             word_embeddings_file=word_embeddings_file,
         )
+        Browser = None
+        if browser_type == "selenium":
+            Browser = SeleniumBrowser
+        elif browser_type == "requests":
+            Browser = RequestsBrowser
+        else:
+            raise NotImplementedError(
+                "No browser found for type: %s" % (browser_type)
+            )
+
         self.scraper = Browser(
             leave_host=leave_host, driver=driver, remote_hub=remote_hub,
             form_submit_natural_click=form_submit_natural_click,

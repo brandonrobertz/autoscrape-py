@@ -8,7 +8,7 @@ from autoscrape.search.graph import Graph
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Browser(Tagger):
+class RequestsBrowser(Tagger):
     def __init__(self, leave_host=False, **kwargs):
         # requests Session
         self.s = requests.Session()
