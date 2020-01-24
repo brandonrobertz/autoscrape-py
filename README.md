@@ -20,11 +20,27 @@ Installation and running instructions are provided for both below.
 
 Here are some straightforward use cases for AutoScrape and how you'd use the CLI tool to execute them. These, of course, assume you have the dependencies installed.
 
+### Crawler Backends
+
+There are two backends available for driving AutoScrape: `selenium` and
+`requests`. The `requests` is based on the Python requests library and is
+only capable of crawling sites. For any interaction with forms or JavaScript
+powered buttons, you'll need to use the `selenium` backend.
+
+You can control the backened with the `--backend` option:
+
+    ./scrape.py \
+      --backend requests \
+      --output requests_crawled_site \
+      'https://some.page/to-crawl'
+
+
 ### Crawl
 
 Crawl an entire website, saving all HTML and stylesheets (no screenshots):
 
     ./scrape.py \
+      --backend requests \
       --maxdepth -1 \
       --output crawled_site \
       'https://some.page/to-crawl'
@@ -34,6 +50,7 @@ Crawl an entire website, saving all HTML and stylesheets (no screenshots):
 Archive a single webpage, both code and full-content screenshot (PNG), for future reference:
 
     ./scrape.py \
+      --backend selenium \
       --full-page-screenshots \
       --load-images --maxdepth 0 \
       --save-screenshots --driver Firefox \
@@ -45,6 +62,7 @@ Archive a single webpage, both code and full-content screenshot (PNG), for futur
 Query a web form, identified by containing the text "I'm a search form", entering "NAME" into the first (0th) text input field and select January 20th, 1992 in the second (1st) date field. Then click all buttons with the text "Next ->" to get all results pages:
 
     ./scrape.py \
+      --backend selenium \
       --output search_query_data \
       --form-match "I'm a search form" \
       --input "i:0:NAME,d:1:1992-01-20" \
@@ -55,11 +73,12 @@ Query a web form, identified by containing the text "I'm a search form", enterin
 
 ### External Dependencies
 
-You need to have geckodriver installed. You can do that here:
+If you want to use the `selenium` backend for interactive crawling, you need to have geckodriver installed. You can do that here:
 
     https://github.com/mozilla/geckodriver/releases
 
-Version 0.23.0 is recommended as of November, 2018 along with Firefox version  >= 0.63.
+Your `geckodriver` needs to be compatible with your current version of Firefox
+or you will get errors.
 
 If you prefer to use Chrome, you will need the ChromeDriver (we've tested using v2.41). It can be found in your distribution's package manager or here:
 
@@ -86,7 +105,7 @@ running:
 
 You can run a test to ensure your webdriver is set up correctly by running the `test` crawler:
 
-    ./scrape.py --show-browser [SITE_URL]
+    ./scrape.py --backend selenium --show-browser [SITE_URL]
 
 The `test` crawler will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data. Data will be saved to `./autoscrape-data/` (the default output directory).
 
@@ -107,6 +126,13 @@ initial BASEURL.
 
 Usage:
     scrape.py [options] BASEURL
+
+General Options:
+    --backenda BACKEND
+        The backend to use. Currently one of "selenium" or "requests".
+        The requests browser is only capable of crawling, but is
+        approximately 2-3.5x faster.
+        [default: "selenium"]
 
 Crawl-Specific Options:
     --maxdepth DEPTH
