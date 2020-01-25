@@ -3,7 +3,7 @@
 __title__ = 'autoscrape-py'
 __author__ = 'Brandon Roberts (brandon@bxroberts.org)'
 __license__ = 'AGPLv3'
-__version__ = '1.0.0rc6'
+__version__ = '1.0.0rc7'
 
 
 from autoscrape.scrapers.test import TestScraper

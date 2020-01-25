@@ -2,6 +2,8 @@
 from os import path
 import setuptools
 
+import autoscrape
+
 
 install_requires = [
     'html5lib>=1.0.1',
@@ -34,7 +36,7 @@ def get_long_description():
 
 setuptools.setup(
     name='autoscrape',
-    version='1.0.0rc6',
+    version=autoscrape.__version__,
     description='An automated, programming-free web scraper for interactive sites',
     long_description=get_long_description(),
     author='Brandon Roberts',
