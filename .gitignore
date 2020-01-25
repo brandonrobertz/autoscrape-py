@@ -21,3 +21,7 @@ venv
 # webdriver remote settings
 nodeConfig.json
 
+# python setup tools
+build/
+dist/
+autoscrape_py.egg-info/

@@ -6,7 +6,7 @@ input data to them and scrape data on the results, from an
 initial BASEURL.
 
 Usage:
-    scrape.py [options] BASEURL
+    autoscrape [options] BASEURL
 
 General Options:
     --backend BACKEND
@@ -175,7 +175,7 @@ from docopt import docopt
 import autoscrape
 
 
-if __name__ == "__main__":
+def main():
     docopt_args = docopt(__doc__)
     print(docopt_args)
 

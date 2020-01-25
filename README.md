@@ -29,7 +29,7 @@ powered buttons, you'll need to use the `selenium` backend.
 
 You can control the backened with the `--backend` option:
 
-    ./scrape.py \
+    ./autoscrape \
       --backend requests \
       --output requests_crawled_site \
       'https://some.page/to-crawl'
@@ -39,7 +39,7 @@ You can control the backened with the `--backend` option:
 
 Crawl an entire website, saving all HTML and stylesheets (no screenshots):
 
-    ./scrape.py \
+    ./autoscrape \
       --backend requests \
       --maxdepth -1 \
       --output crawled_site \
@@ -49,7 +49,7 @@ Crawl an entire website, saving all HTML and stylesheets (no screenshots):
 
 Archive a single webpage, both code and full-content screenshot (PNG), for future reference:
 
-    ./scrape.py \
+    ./autoscrape \
       --backend selenium \
       --full-page-screenshots \
       --load-images --maxdepth 0 \
@@ -61,7 +61,7 @@ Archive a single webpage, both code and full-content screenshot (PNG), for futur
 
 Query a web form, identified by containing the text "I'm a search form", entering "NAME" into the first (0th) text input field and select January 20th, 1992 in the second (1st) date field. Then click all buttons with the text "Next ->" to get all results pages:
 
-    ./scrape.py \
+    ./autoscrape \
       --backend selenium \
       --output search_query_data \
       --form-match "I'm a search form" \
@@ -105,7 +105,7 @@ running:
 
 You can run a test to ensure your webdriver is set up correctly by running the `test` crawler:
 
-    ./scrape.py --backend selenium --show-browser [SITE_URL]
+    ./autoscrape --backend selenium --show-browser [SITE_URL]
 
 The `test` crawler will just do a depth-first click-only crawl of an entire website. It will not interact with forms or POST data. Data will be saved to `./autoscrape-data/` (the default output directory).
 
@@ -125,7 +125,7 @@ input data to them and scrape data on the results, from an
 initial BASEURL.
 
 Usage:
-    scrape.py [options] BASEURL
+    autoscrape [options] BASEURL
 
 General Options:
     --backenda BACKEND
