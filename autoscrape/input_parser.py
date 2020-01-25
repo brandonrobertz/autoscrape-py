@@ -107,4 +107,3 @@ class InputParser:
                     raise Exception("Invalid input type found: %s" % itype)
 
             yield indiv_search
-

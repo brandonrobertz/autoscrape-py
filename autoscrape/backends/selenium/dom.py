@@ -70,7 +70,7 @@ class Dom(DomBase):
                     text.append(placeholder.strip())
             except Exception as e:
                 logger.error("Error getting placeholder: %s, Error: %s" % (
-                el, e))
+                    el, e))
 
         logger.debug("Element texts: %s" % text)
         return " ".join(text)
@@ -82,4 +82,3 @@ class Dom(DomBase):
 
     def element_value(self, element):
         return element.get_attribute("value")
-

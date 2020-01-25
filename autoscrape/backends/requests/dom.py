@@ -90,4 +90,3 @@ class Dom(DomBase):
         if element is None:
             return ""
         return element.tag
-

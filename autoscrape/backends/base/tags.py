@@ -166,4 +166,3 @@ class TaggerBase(DomBase):
                 continue
             tags.append(tag)
         return tags
-

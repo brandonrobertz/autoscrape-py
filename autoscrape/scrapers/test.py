@@ -46,4 +46,3 @@ class TestScraper(BaseScraper):
 
         logger.debug("Going back...")
         self.scraper.back()
-

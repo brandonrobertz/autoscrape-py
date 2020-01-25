@@ -41,4 +41,3 @@ class Tagger(TaggerBase, Dom):
             "//form//a", "//input[@type='submit']", "//table//a",
         ])
         return super().get_buttons(in_form=in_form, path=x_path)
-

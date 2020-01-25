@@ -53,4 +53,3 @@ GET_LINKS            │     look for a next button ─────────�
                      │               ↓
 SELECT_LINK (index)  └─── click the next button & load page
 """
-

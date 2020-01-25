@@ -25,6 +25,7 @@ class RequestsBrowser(BrowserBase, Tagger):
         user    1m0.872s
         sys     0m10.976s
     """
+
     def __init__(self, leave_host=False, **kwargs):
         # requests Session
         self.s = requests.Session()
@@ -174,7 +175,7 @@ class RequestsBrowser(BrowserBase, Tagger):
 
         elem.attrib["value"] = input
 
-        self.path.append(("input", ("",input,), {}))
+        self.path.append(("input", ("", input,), {}))
         action = {
             "action": "input",
             "text": input,
@@ -233,4 +234,3 @@ class RequestsBrowser(BrowserBase, Tagger):
             }
             self.graph.add_node(node, **node_meta)
             self.graph.move_to_node(node)
-

@@ -28,4 +28,3 @@ class NullScraper(BaseScraper):
             )
         if vectorizer:
             self.vectorizer = self.control.vectorizer
-

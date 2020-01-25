@@ -47,4 +47,3 @@ class BFS(object):
         self.queue.extend(nodes)
         for node, meta in nodes:
             self.add_node(node, **meta)
-

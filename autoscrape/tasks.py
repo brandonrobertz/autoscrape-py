@@ -16,14 +16,14 @@ app = Celery(
 )
 
 app.conf.update(
-    #CELERYD_MAX_TASKS_PER_CHILD=1,
-    #CELERYD_PREFETCH_MULTIPLIER=1,
-    #CELERY_ACKS_LATE=True,
-    #CELERY_RESULT_PERSISTENT=True,
-    #CELERY_TASK_PUBLISH_RETRY=False,
-    #CELERY_TASK_RESULT_EXPIRES=None,
+    # CELERYD_MAX_TASKS_PER_CHILD=1,
+    # CELERYD_PREFETCH_MULTIPLIER=1,
+    # CELERY_ACKS_LATE=True,
+    # CELERY_RESULT_PERSISTENT=True,
+    # CELERY_TASK_PUBLISH_RETRY=False,
+    # CELERY_TASK_RESULT_EXPIRES=None,
     CELERY_TRACK_STARTED=True,
-    CELERY_BROKER_HEARTBEAT = 10
+    CELERY_BROKER_HEARTBEAT=10
 )
 
 
@@ -40,8 +40,8 @@ def start(self, baseurl, args):
     scraper = ManualControlScraper(baseurl, **args)
     scraper.run()
 
+
 @app.task(bind=True)
 def stop(self, id):
     print("Stopping AutoScrape job: %s" % id)
-    revoke(id, terminate=True) #, signal='SIGKILL')
-
+    revoke(id, terminate=True)  # , signal='SIGKILL')

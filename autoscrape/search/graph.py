@@ -70,7 +70,7 @@ class Graph(object):
         self.dbg("Moving to parent from current: %s" % self.current)
         try:
             preds = self.graph.predecessors(self.current)
-            [ self.dbg("Parent: %s" % p) for p in  preds ]
+            [self.dbg("Parent: %s" % p) for p in preds]
             parent = self.graph.predecessors(self.current).__next__()
         except StopIteration:
             self.dbg("Stop iteration exception hit! Current: %s" % self.current)
@@ -79,4 +79,3 @@ class Graph(object):
 
     def save_graph(self, output_path):
         nx.write_gpickle(self.graph, output_path)
-

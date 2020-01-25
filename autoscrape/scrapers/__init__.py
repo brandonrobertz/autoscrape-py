@@ -21,6 +21,7 @@ class BaseScraper(object):
     A base class for common scraper functionality like loglevel
     parsing & setup, file saving, etc.
     """
+
     def setup_logging(self, loglevel=None):
         if not loglevel or loglevel == "DEBUG":
             loglevel = logging.DEBUG
@@ -66,7 +67,7 @@ class BaseScraper(object):
                 "Required width=%s, height=%s, Original width=%s, height=%s" % (
                     required_width, required_height, original_size["width"],
                     original_size["height"]
-            ))
+                ))
             self.control.scraper.driver.set_window_size(
                 required_width, required_height
             )
@@ -207,4 +208,3 @@ class BaseScraper(object):
         graph_save_path = os.path.join(basedir, filename)
         logger.debug("[.] Saving graph to: %s" % graph_save_path)
         self.control.scraper.graph.save_graph(graph_save_path)
-

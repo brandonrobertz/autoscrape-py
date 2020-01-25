@@ -71,10 +71,10 @@ class Tagger(TaggerBase, Dom):
         return self.driver.execute_script(script, element)
 
     def clickable_sanity_check(self, element):
-       if not element.is_displayed() and not element.is_enabled():
-           logger.debug(" - Skipping non-displayed: %s" % (element))
-           return False
-       return super().clickable_sanity_check(element)
+        if not element.is_displayed() and not element.is_enabled():
+            logger.debug(" - Skipping non-displayed: %s" % (element))
+            return False
+        return super().clickable_sanity_check(element)
 
     def get_inputs(self, form=None, itype=None, root_node=None):
         return super().get_inputs(form=form, itype=itype, root_node=self.driver)

@@ -56,7 +56,7 @@ class Vectorizer(object):
                     continue
                 N += 1
             key, data = line.split(' ', 1)
-            vec = [ float(d) for d in data.split() ]
+            vec = [float(d) for d in data.split()]
             dim = len(vec)
         return N, dim
 
@@ -74,7 +74,7 @@ class Vectorizer(object):
         # embedding matrix
         embeddings = np.zeros(shape=(N, dim))
         logger.debug(" - Reading embeddings into memory...")
-        outputs = [ (N // 10) * i for i in range(10) ]
+        outputs = [(N // 10) * i for i in range(10)]
         with open(path, "r") as f:
             I = 0
             for line in f:
@@ -83,7 +83,7 @@ class Vectorizer(object):
                 if I in outputs:
                     logger.info(" - %0.4f%% complete" % ((I / float(N)) * 100))
                 key, data = line.split(' ', 1)
-                vec = [ float(d) for d in data.split() ]
+                vec = [float(d) for d in data.split()]
                 embeddings[I, :] = vec
                 t2id[key] = I
                 id2t[I] = key
@@ -91,9 +91,9 @@ class Vectorizer(object):
 
         logger.debug(" - Embeddings matrix: %s x %s" % embeddings.shape)
         return Embedding(
-            embeddings = embeddings,
-            t2id = t2id,
-            id2t = id2t,
+            embeddings=embeddings,
+            t2id=t2id,
+            id2t=id2t,
         )
 
     def html_to_vector(self, html):
@@ -135,8 +135,7 @@ class Vectorizer(object):
         x_text = self.text_to_vector(text)
         concat_array = [x_html, x_text]
         if element:
-            x_pos  = self.element_to_position_vector(element)
+            x_pos = self.element_to_position_vector(element)
             concat_array.append(x_pos)
         x = np.concatenate(concat_array)
         return x
-

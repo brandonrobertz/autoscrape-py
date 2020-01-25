@@ -3,4 +3,3 @@
 
 class RLAutoScraper(object):
     pass
-

@@ -127,4 +127,3 @@ class MLAutoScraper(BaseScraper):
                 self.run(depth=depth + 1)
 
         self.control.back()
-

@@ -66,9 +66,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 chrome_options.add_argument("--disable-web-security")
                 chrome_options.add_argument("--window-size=1920x1080")
             prefs = {
-                "profile.managed_default_content_settings.images":2
+                "profile.managed_default_content_settings.images": 2
             }
-            chrome_options.add_experimental_option("prefs",prefs)
+            chrome_options.add_experimental_option("prefs", prefs)
             self.driver = webdriver.Chrome(chrome_options=chrome_options)
 
         elif driver == "remote":
@@ -103,8 +103,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.leave_host = leave_host
         # characters that need to be escaped if found inside an ID tag
         self.css_escapables = ".:"
-        self.form_submit_natural_click=form_submit_natural_click
-        self.form_submit_wait=form_submit_wait
+        self.form_submit_natural_click = form_submit_natural_click
+        self.form_submit_wait = form_submit_wait
 
     def _driver_exec(self, fn, *args, **kwargs):
         """
@@ -158,7 +158,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         Run a driver interaction function, wait for the page to
         become ready, and handle any broken pipe errors
         """
-        wait_for_stale_time = 10 # seconds
+        wait_for_stale_time = 10  # seconds
         start = time.time()
         check_alerts = False
         if "check_alerts" in kwargs:
@@ -385,7 +385,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             pass
         for inp in self.expand_key_substitutions(input):
             elem.send_keys(inp)
-        self.path.append(("input", (tag,input,), {}))
+        self.path.append(("input", (tag, input,), {}))
         action = {
             "action": "input",
             "text": input,
@@ -404,7 +404,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         select = Select(elem)
         # select by visible text
         select.select_by_visible_text(option_str)
-        self.path.append(("input_select_option", (tag,option_str,), {}))
+        self.path.append(("input_select_option", (tag, option_str,), {}))
         action = {
             "action": "input_select_option",
             "option": option_str or "[none]",
@@ -424,7 +424,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         if elem.is_selected() != to_check:
             elem.click()
             self._driver_exec(elem.clear)
-        self.path.append(("input_checkbox", (tag,to_check,), {}))
+        self.path.append(("input_checkbox", (tag, to_check,), {}))
         action = {
             "action": "input_checkbox",
             "checked?": to_check,
@@ -475,7 +475,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                     form.find_elements_by_xpath,
                     "//a"
                 )
-                els = [ el for el in possible_subs if "submit" in el.text.lower() ]
+                els = [el for el in possible_subs if "submit" in el.text.lower()]
                 if els:
                     sub = els[0]
                     logger.debug("Form submit link: %s" % (sub))
@@ -557,4 +557,3 @@ class SeleniumBrowser(BrowserBase, Tagger):
             leave_host=self.leave_host,
         )
         return tagger.get_buttons()
-

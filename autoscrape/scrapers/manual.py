@@ -100,7 +100,7 @@ class ManualControlScraper(BaseScraper):
     def click_until_no_links(self, links):
         link_vectors = self.control.link_vectors()
         # import IPython; IPython.embed(); import time; time.sleep(2)
-        link_zip = list(zip(range(len(link_vectors)),link_vectors))
+        link_zip = list(zip(range(len(link_vectors)), link_vectors))
         link_zip = filter(
             lambda x: re.findall(self.result_page_links, x[1]),
             link_zip
@@ -249,7 +249,7 @@ class ManualControlScraper(BaseScraper):
 
         links = self.control.clickable
         link_vectors = self.control.link_vectors()
-        link_zip = list(zip(range(len(link_vectors)),link_vectors))
+        link_zip = list(zip(range(len(link_vectors)), link_vectors))
         if self.link_priority and not self.only_links:
             logger.debug("[.] Sorting by link priority: %s" % self.link_priority)
             link_zip.sort(
@@ -299,4 +299,3 @@ class ManualControlScraper(BaseScraper):
             self.control.scraper.driver.quit()
         except Exception:
             pass
-

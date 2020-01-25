@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 
+
 def pop_debugger():
     """
     Drop into an ipython debugger at any point in the code. Sometimes
@@ -8,5 +9,7 @@ def pop_debugger():
     This is here so we can mitigate these issues in a single place if the
     need arises.
     """
-    import IPython; IPython.embed(); import time; time.sleep(2)
-
+    import IPython
+    IPython.embed()
+    import time
+    time.sleep(2)

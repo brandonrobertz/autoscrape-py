@@ -69,7 +69,7 @@ class Controller(object):
         self.clickable = self.scraper.get_clickable()
         forms_dict = self.scraper.get_forms()
         self.forms = list(forms_dict.keys())
-        self.inputs = [ tags for tags in forms_dict.values() ]
+        self.inputs = [tags for tags in forms_dict.values()]
         self.buttons = self.scraper.get_buttons()
 
         # logger.debug("Clickable links: %s" % (len(self.clickable)))
@@ -251,4 +251,3 @@ class Controller(object):
                     text = value.replace("\n", " ")
                 buttons_data.append(text)
         return buttons_data
-

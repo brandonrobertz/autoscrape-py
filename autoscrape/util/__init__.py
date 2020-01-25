@@ -42,12 +42,13 @@ def get_filename_from_url(url):
 
 def get_extension_from_url(url):
         # try and extract the extension from the URL
-        path = parse.urlparse(url).path
-        ext = os.path.splitext(path)[1]
-        ext = ext if ext else "html"
-        if ext[0] == ".":
-            ext = ext[1:]
-        return ext
+    path = parse.urlparse(url).path
+    ext = os.path.splitext(path)[1]
+    ext = ext if ext else "html"
+    if ext[0] == ".":
+        ext = ext[1:]
+    return ext
+
 
 def write_file(filepath, data, fileclass=None, writetype="w", output=None):
     """
@@ -88,4 +89,3 @@ def write_file(filepath, data, fileclass=None, writetype="w", output=None):
             os.makedirs(dirpath)
         with open(filepath, writetype) as f:
             f.write(data)
-
