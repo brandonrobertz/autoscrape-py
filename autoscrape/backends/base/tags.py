@@ -43,9 +43,6 @@ class TaggerBase(DomBase):
             href = raw_href
 
         if href.split("#")[0] == self.current_url:
-            logger.debug("Skipping current url (%s) href %s" % (
-                self.current_url, href
-            ))
             return False
 
         # skip any weird protos ... we whitelist notrmal HTTP,

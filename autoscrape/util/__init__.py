@@ -54,11 +54,9 @@ def write_file(filepath, data, fileclass=None, writetype="w", output=None):
     Write out a scraped data file to disk or a remote callback,
     specified in output parameter.
     """
-    logger.debug("Writing file: %s to: %s" % (filepath, output))
+    logger.debug("[.] Writing file: %s to: %s" % (filepath, output))
     if not output:
         return
-
-    logger.debug("Data type: %s" % type(data))
 
     # Rest API callback mode
     if re.match("^https?://", output):

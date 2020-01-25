@@ -309,7 +309,6 @@ class SeleniumBrowser(Tagger):
         hash = "%s|%s|%s" % (href, onclick, name)
         text = self._driver_exec(elem.text)
         if hash in self.visited and not iterating_form:
-            logger.debug("Hash already visited: %s" % hash)
             return False
 
         self.visited.add(hash)

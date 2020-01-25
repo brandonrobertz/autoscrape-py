@@ -55,7 +55,6 @@ class RequestsBrowser(Tagger):
             url = self._normalize_url(raw_href)
             hash = "%s|%s" % (url, element.tag)
             if hash in self.visited:
-                logger.debug("Hash already visited: %s" % hash)
                 return False
             self.visited.add(hash)
 

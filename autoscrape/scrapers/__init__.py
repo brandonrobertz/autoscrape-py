@@ -80,7 +80,7 @@ class BaseScraper(object):
             int(time.time()), classname
         ))
 
-        logger.debug("Saving screenshot to file: %s." % filepath)
+        logger.debug("[.] Saving screenshot to file: %s." % filepath)
         png = None
         # only FF has this capability, it removes the scrollbar
         png = self.control.scraper.driver.get_screenshot_as_png()
@@ -122,7 +122,7 @@ class BaseScraper(object):
         if not self.output:
             return
 
-        logger.debug("Saving training page for class: %s" % classname)
+        logger.debug("[.] Saving training page for class: %s" % classname)
         if classname not in self.training_classes:
             raise ValueError("Base class speficied: %s" % classname)
 
@@ -175,7 +175,7 @@ class BaseScraper(object):
 
         # only save stylesheets for web content types
         if not self.disable_style_saving and ext in TEXT_EXTENSIONS:
-            logger.debug("Saving stylesheet")
+            logger.debug("[.] Saving stylesheet")
             style_filepath = "%s.css" % filepath
             # this will save stylesheet as filepath.html.css
             write_file(

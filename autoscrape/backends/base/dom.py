@@ -1,9 +1,13 @@
 # -*- coding: UTF-8 -*-
+import logging
 import os
 import re
 import urllib.request
 
 from autoscrape.util import write_file
+
+
+logger = logging.getLogger('AUTOSCRAPE')
 
 
 class DomBase:

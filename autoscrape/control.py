@@ -213,7 +213,7 @@ class Controller(object):
         return form_data
 
     def button_vectors(self, type="text"):
-        logger.debug("Building button vectors")
+        logger.debug("[.] Building button vectors")
         buttons_data = []
         if type == "text":
             for tag in self.buttons:
@@ -237,7 +237,7 @@ class Controller(object):
         in a way that a ML algorithm could decide how to prioritize the
         search pattern.
         """
-        logger.debug("Building link vectors")
+        logger.debug("[.] Building link vectors")
         buttons_data = []
         if type == "text":
             for i in range(len(self.clickable)):
