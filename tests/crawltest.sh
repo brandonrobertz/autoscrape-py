@@ -7,10 +7,8 @@ for backend in ${BACKENDS}; do
   rm -rf ${output}
   echo "=================================================="
   add_benchmark_header ${backend} "crawl"
-  ${TIME} ./scrape.py \
+  ${TIME} ${AUTOSCRAPE} \
     --backend ${backend} \
-    --keep-filename\
-    --loglevel DEBUG \
     --output ${output} \
     https://bxroberts.org \
     || die "Backend ${backend} failed crawling."

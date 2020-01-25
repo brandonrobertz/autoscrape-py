@@ -1,6 +1,7 @@
 BENCHMARK_LOG=backend-benchmark.log
 BACKENDS="requests selenium"
 TIME="$(which time) -p -a -o ${BENCHMARK_LOG}"
+AUTOSCRAPE="./scrape.py --save-graph --loglevel DEBUG"
 
 die () {
   echo "${*}"
@@ -12,3 +13,4 @@ add_benchmark_header () {
   crawlname="${2}"
   echo "Running ${benchmark} ${crawlname}" | tee -a ${BENCHMARK_LOG}
 }
+
