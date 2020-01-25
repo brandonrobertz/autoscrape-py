@@ -30,14 +30,21 @@ Installation and running instructions are provided for both below.
 Quickstart
 ----------
 
-Clone or download this repo and from the root run:
+Two ways, easiest first.
 
 ::
 
+    pip install autoscrape
+    autoscrape -h
+
+::
+
+    git clone https://github.com/brandonrobertz/autoscrape-py
+    cd autoscrape-py/
     python setup.py install
     autoscrape -h
 
-You can now use ``autoscrape`` from the command line.
+Either way, you can now use ``autoscrape`` from the command line.
 
 Usage Examples
 --------------
