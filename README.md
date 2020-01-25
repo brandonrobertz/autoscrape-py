@@ -16,7 +16,16 @@ Installation and running instructions are provided for both below.
 
 [![Quickstart Video](https://github.com/brandonrobertz/autoscrape-py/blob/master/images/quickstart-video.png)](https://www.youtube.com/watch?v=D0Mchcf6THE)
 
-## Quick Usage Examples
+## Quickstart
+
+Clone or download this repo and from the root run:
+
+    python setup.py install
+    autoscrape -h
+
+You can now use `autoscrape` from the command line.
+
+## Usage Examples
 
 Here are some straightforward use cases for AutoScrape and how you'd use the CLI tool to execute them. These, of course, assume you have the dependencies installed.
 
