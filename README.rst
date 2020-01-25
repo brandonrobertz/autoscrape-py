@@ -6,8 +6,7 @@ Autoscrape
 
    Artificial Informer Labs
 
-A project of `Artificial Informer
-Labs <https://artificialinformer.com>`__.
+A project of `Artificial Informer Labs <https://artificialinformer.com>`__.
 
 AutoScrape is an automated scraper of structured data from interactive
 web pages. You point this scraper at a site and it will be crawled,
@@ -15,10 +14,8 @@ searched for forms and structured data can then be extracted. No
 brittle, site-specific programming necessary.
 
 This is an implementation of the web scraping framework described in the
-paper, `*Robust Web Scraping in the Public Interest with
-AutoScrape* <https://bxroberts.org/files/autoscrape.pdf>`__ in
-`Proceedings of Computation + Journalism Symposium
-2019 <http://cplusj.org/>`__.
+paper, `*Robust Web Scraping in the Public Interest with AutoScrape* <https://bxroberts.org/files/autoscrape.pdf>`__ in
+`Proceedings of Computation + Journalism Symposium 2019 <http://cplusj.org/>`__.
 
 Currently there are two methods of running AutoScrape: - as a local CLI
 python script - as a containerized system via the API
@@ -388,8 +385,7 @@ port 5000. More information about the API calls can be found in
 If you have make installed, you can simply run ``make start``.
 
 NOTE: This is a work in progress prototype that will likely be removed
-once AutoScrape is integrated into `CJ
-Workbench <http://workbenchdata.com>`__.
+once AutoScrape is integrated into `CJ Workbench <http://workbenchdata.com>`__.
 
 .. |Quickstart Video| image:: https://github.com/brandonrobertz/autoscrape-py/blob/master/images/quickstart-video.png
    :target: https://www.youtube.com/watch?v=D0Mchcf6THE
