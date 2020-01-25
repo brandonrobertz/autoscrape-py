@@ -59,7 +59,7 @@ You can control the backened with the ``--backend`` option:
 
 ::
 
-    ./autoscrape \
+    autoscrape \
       --backend requests \
       --output requests_crawled_site \
       'https://some.page/to-crawl'
@@ -72,7 +72,7 @@ screenshots):
 
 ::
 
-    ./autoscrape \
+    autoscrape \
       --backend requests \
       --maxdepth -1 \
       --output crawled_site \
@@ -86,7 +86,7 @@ for future reference:
 
 ::
 
-    ./autoscrape \
+    autoscrape \
       --backend selenium \
       --full-page-screenshots \
       --load-images --maxdepth 0 \
@@ -104,7 +104,7 @@ the text "Next ->" to get all results pages:
 
 ::
 
-    ./autoscrape \
+    autoscrape \
       --backend selenium \
       --output search_query_data \
       --form-match "I'm a search form" \
