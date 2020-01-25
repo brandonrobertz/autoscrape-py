@@ -121,3 +121,12 @@ class DomBase:
             output=self.output
         )
 
+    def _no_tags(self, list, l_type="path"):
+     clean = []
+     for p in list:
+         name, args, kwargs = p
+         if name == "click":
+             args[0] = "tag"
+         clean.append((name, args, kwargs))
+     return clean
+

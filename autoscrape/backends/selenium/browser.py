@@ -15,6 +15,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
+from autoscrape.backends.base.browser import BrowserBase
 from autoscrape.backends.selenium.tags import Tagger
 from autoscrape.backends.selenium.dom import Dom
 from autoscrape.search.graph import Graph
@@ -23,7 +24,7 @@ from autoscrape.search.graph import Graph
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class SeleniumBrowser(Tagger):
+class SeleniumBrowser(BrowserBase, Tagger):
 
     def __init__(self, driver="Firefox", leave_host=False,
                  load_images=False, form_submit_natural_click=False,
@@ -222,7 +223,10 @@ class SeleniumBrowser(Tagger):
         self.graph.add_root_node(node, url=url, action="fetch")
 
     def back(self):
-        logger.debug("Going back...")
+        logger.info("[+] Going back... current n_paths=%s path=%s" % (
+            len(self.path),
+            self._no_tags(self.path),
+        ))
         self._loadwait(self.driver.back)
         self.path.pop()
         self.graph.move_to_parent()
@@ -543,7 +547,6 @@ class SeleniumBrowser(Tagger):
             leave_host=self.leave_host,
         )
         forms_dict = tagger.get_forms()
-        logger.debug("page forms: %s" % forms_dict)
         return forms_dict
 
     def get_buttons(self):

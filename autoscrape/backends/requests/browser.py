@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from autoscrape.backends.base.browser import BrowserBase
 from autoscrape.backends.requests.tags import Tagger
 from autoscrape.search.graph import Graph
 
@@ -8,7 +9,7 @@ from autoscrape.search.graph import Graph
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class RequestsBrowser(Tagger):
+class RequestsBrowser(BrowserBase, Tagger):
     """
     A simple HTTP-requests based scraper, currently capable of only
     doing crawls, but is 3.5x faster.
@@ -107,17 +108,8 @@ class RequestsBrowser(Tagger):
             node = "Fetch, url: %s" % url
             self.graph.add_root_node(node, url=url, action="fetch")
 
-    def _no_tags(self, list, l_type="path"):
-     clean = []
-     for p in list:
-         name, args, kwargs = p
-         if name == "click":
-             args[0] = "tag"
-         clean.append((name, args, kwargs))
-     return clean
-
     def back(self):
-        logger.info("[+] Going back... current n=%s path=%s" % (
+        logger.info("[+] Going back... current n_paths=%s path=%s" % (
             len(self.path),
             self._no_tags(self.path),
         ))

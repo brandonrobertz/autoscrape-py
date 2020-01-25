@@ -1,22 +1,19 @@
 #!/bin/bash
 
-die () {
-  echo "${*}"
-  exit 1
-}
+source tests/common.sh
 
-for browser in requests selenium; do
-  output="autoscrape-data-${browser}"
+for backend in ${BACKENDS}; do
+  output="autoscrape-data-${backend}"
   rm -rf ${output}
   echo "=================================================="
-  echo "Running ${browser} crawl"
-  time ./scrape.py \
-    --backend ${browser} \
+  add_benchmark_header ${backend} "crawl"
+  ${TIME} ./scrape.py \
+    --backend ${backend} \
     --keep-filename\
     --loglevel DEBUG \
     --output ${output} \
     https://bxroberts.org \
-    || die "Backend ${browser} failed crawling."
-  echo "${browser} crawl complete!"
+    || die "Backend ${backend} failed crawling."
+  echo "${backend} crawl complete!"
 done
 

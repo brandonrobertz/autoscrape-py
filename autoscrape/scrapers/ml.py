@@ -64,16 +64,16 @@ class MLAutoScraper(BaseScraper):
                     break
 
             if not found_next:
-                logger.debug("Next button not found!")
+                logger.debug("[*] Next button not found!")
                 break
 
         for _ in range(depth):
-            logger.debug("Going back from 'next'...")
+            logger.debug("[-] Going back from 'next'...")
             self.control.back()
 
     def run(self, depth=0):
         if depth > self.maxdepth:
-            logger.debug("Maximum depth %s reached, returning..." % depth)
+            logger.debug(" - Maximum depth %s reached, returning..." % depth)
             self.control.back()
             return
 
@@ -83,7 +83,7 @@ class MLAutoScraper(BaseScraper):
         # Search form, error page, data page, etc? The result of
         # this will result in a cange in logic
         x = self.control.page_vector()
-        logger.debug("Page vector x=%s" % x)
+        logger.debug(" - Page vector x=%s" % x)
 
         form_vectors = self.control.form_vectors(type="text")
         for ix in range(len(form_vectors)):
@@ -91,8 +91,8 @@ class MLAutoScraper(BaseScraper):
             # inputs are keyed by form index
             inputs = self.control.inputs[ix]
 
-            logger.debug("Form: %s Text: %s" % (ix, form_data))
-            logger.debug("Inputs: %s" % inputs)
+            logger.debug(" - Form: %s Text: %s" % (ix, form_data))
+            logger.debug(" - Inputs: %s" % inputs)
 
             # TODO: Another ML model will go here: a classifier that
             # will look through forms and identify a good search form
@@ -100,33 +100,31 @@ class MLAutoScraper(BaseScraper):
             # used if the parent model (page classifier) determines
             # that this may be a search form page. This one will search
             # the DOM and find the best matching block with inputs.
-            logger.debug("Page vector x=%s" % x)
+            logger.debug(" - Page vector x=%s" % x)
             if "Verify Degrees" not in form_data or len(inputs) != 1:
                 continue
 
             for input in self.input_generator(length=1):
-                logger.debug("Inputting %s to input %s" % (input, 0))
                 self.control.input(ix, 0, input)
                 self.control.submit(ix)
-                logger.debug("Beginning iteration of data pages")
+                logger.debug("[*] Beginning iteration of data pages")
                 self.keep_clicking_next_btns(maxdepth=3)
                 self.control.back()
 
-            logger.debug("Completed iteration!")
+            logger.debug("[+] Completed iteration!")
 
         links = self.control.clickable
-        logger.debug("All tags at this depth %s" % links)
+        logger.debug(" - All tags at this depth %s" % links)
 
         # TODO: ML model will go here: Which link should we click on?
         # This may be a job best suited for RL, but we could use a
         # simple classifier to order the links by most likely to lead
         # to a search form page.
         for ix in range(len(links)):
-            logger.debug("Attempting click on link %s" % ix)
+            logger.debug(" - Attempting click on link %s" % ix)
             if self.control.select_link(ix):
-                logger.debug("Clicked! Recursing ...")
+                logger.debug("[.] Clicked! Recursing ...")
                 self.run(depth=depth + 1)
 
-        logger.debug("Going back...")
         self.control.back()
 

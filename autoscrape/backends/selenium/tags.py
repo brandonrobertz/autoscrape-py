@@ -72,7 +72,7 @@ class Tagger(TaggerBase, Dom):
 
     def clickable_sanity_check(self, element):
        if not element.is_displayed() and not element.is_enabled():
-           logger.debug("Skipping non-displayed: %s" % (element))
+           logger.debug(" - Skipping non-displayed: %s" % (element))
            return False
        return super().clickable_sanity_check(element)
 

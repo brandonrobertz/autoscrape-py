@@ -1,16 +1,14 @@
 #!/bin/bash
 URL="https://utdirect.utexas.edu/apps/degree/degrees/nlogon/"
 
-die () {
-  echo "${*}"
-  exit 1
-}
+source tests/common.sh
 
-for browser in requests selenium; do
-  output="autoscrape-data-formsubmit-${browser}"
+for backend in ${BACKENDS}; do
+  output="autoscrape-data-formsubmit-${backend}"
   rm -rf ${output}
-  time ./scrape.py \
-    --backend ${browser} \
+  add_benchmark_header ${backend} "form submitter"
+  ${TIME} ./scrape.py \
+    --backend ${backend} \
     --maxdepth 1 \
     --formdepth 1 \
     --form-match "List students starting from" \
@@ -19,6 +17,6 @@ for browser in requests selenium; do
     --loglevel DEBUG \
     --output ${output} \
     ${URL} \
-    || die "Backend ${browser} failed submitting forms"
+    || die "Backend ${backend} failed submitting forms"
 done
 
