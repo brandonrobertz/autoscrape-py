@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+# flake8: noqa: F401
 __title__ = 'autoscrape-py'
 __author__ = 'Brandon Roberts (brandon@bxroberts.org)'
 __license__ = 'AGPLv3'

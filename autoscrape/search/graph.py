@@ -1,5 +1,4 @@
 # -*- coding: UTF-8 -*-
-from collections import deque
 import logging
 
 import networkx as nx

@@ -1,7 +1,4 @@
 import logging
-from urllib.parse import urlparse
-
-import lxml.html
 
 from autoscrape.backends.base.tags import TaggerBase
 from autoscrape.backends.requests.dom import Dom
@@ -14,7 +11,6 @@ class Tagger(TaggerBase, Dom):
     def tag_from_element(self, el):
         path = []
         while el is not None:
-            siblings = []
             nth = 1
             parent = el.getparent()
             children = []

@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-import base64
-import decimal
-import datetime
 import os
 
 from flask import Flask, request, jsonify, send_from_directory
@@ -64,13 +61,16 @@ class Data(db.Model):
             "fileclass": self.fileclass,
         }
 
+
 @app.route("/app", methods=["GET"])
 def get_index():
     return send_from_directory("www", "index.html")
 
+
 @app.route("/app/<path:path>", methods=["GET"])
 def get_path(path):
     return send_from_directory("www", path)
+
 
 @app.route("/start", methods=["POST"])
 def post_start():
@@ -95,6 +95,7 @@ def post_start():
     result = tasks.start.apply_async((baseurl, args))
     app.logger.debug("Result: %s" % result)
     return jsonify({"status": "OK", "data": result.id})
+
 
 @app.route("/status/<id>", methods=["GET"])
 def get_status(id):
@@ -125,6 +126,7 @@ def get_status(id):
         response["data"] = data.data
     return jsonify(response)
 
+
 @app.route("/stop/<id>", methods=["POST"])
 def get_stop(id):
     """
@@ -140,6 +142,7 @@ def get_stop(id):
     app.logger.debug("Stopping scraper task: %s" % id)
     tasks.stop.delay(id)
     return jsonify({"status": "OK"})
+
 
 @app.route("/receive/<id>", methods=["POST"])
 def receive_data(id):
@@ -179,6 +182,7 @@ def receive_data(id):
     # TODO: store/dispatch this data somewhere
     return jsonify({"status": "OK"})
 
+
 @app.route("/files/list/<id>", methods=["GET"])
 def list_files(id):
     """
@@ -206,6 +210,7 @@ def list_files(id):
         "data": [d.serialize for d in data]
     })
 
+
 @app.route("/files/data/<task_id>/<file_id>", methods=["GET"])
 def get_file_data(task_id, file_id):
     """
@@ -221,7 +226,7 @@ def get_file_data(task_id, file_id):
         Data.timestamp.desc()
     ).first()
 
-    app.logger.debug("Data: %s" % data);
+    app.logger.debug("Data: %s" % data)
 
     return jsonify({
         "status": "OK",
@@ -237,4 +242,3 @@ def get_file_data(task_id, file_id):
 if __name__ == "__main__":
     db.create_all()
     app.run(host='0.0.0.0', port=5001)
-

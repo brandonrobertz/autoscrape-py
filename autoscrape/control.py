@@ -39,7 +39,7 @@ class Controller(object):
             Browser = RequestsBrowser
         else:
             raise NotImplementedError(
-                "No browser found for type: %s" % (browser_type)
+                "No backend found: %s" % (backend)
             )
 
         self.scraper = Browser(
@@ -246,7 +246,7 @@ class Controller(object):
                     logger.warn("[!] Link element couldn't be found: %s" % t)
                 elif tag_name != "input":
                     text = self.scraper.element_text(elem).replace("\n", " ")
-                elif elem_tag == "input":
+                elif tag_name == "input":
                     value = self.scraper.element_attr(elem, "value")
                     text = value.replace("\n", " ")
                 buttons_data.append(text)

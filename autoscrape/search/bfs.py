@@ -35,7 +35,7 @@ class BFS(object):
         Add a single node to the tree, with edges connecting
         to the current node.
         """
-        self.queue.append(nodes)
+        self.queue.append(node)
         self.graph.add_node(node, **kwargs)
         self.graph.add_edge(self.current, node)
 

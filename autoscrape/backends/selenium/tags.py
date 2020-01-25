@@ -1,6 +1,5 @@
 # -*- coding: UTF-8 -*-
 import logging
-from urllib.parse import urlparse
 
 from autoscrape.backends.base.tags import TaggerBase
 from autoscrape.backends.selenium.dom import Dom

@@ -34,6 +34,6 @@ class TestInputParser(unittest.TestCase):
         self.assertEqual(search[1]["type"], "select")
         self.assertEqual(search[1]["index"], 2)
 
-if __name__ == "__main__":
-     unittest.main()
 
+if __name__ == "__main__":
+    unittest.main()

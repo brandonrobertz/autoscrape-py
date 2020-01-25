@@ -3,11 +3,9 @@ import time
 import logging
 import re
 
-import selenium
 from selenium import webdriver
 from selenium.common.exceptions import (
-    TimeoutException, UnexpectedAlertPresentException,
-    StaleElementReferenceException, TimeoutException,
+    TimeoutException, StaleElementReferenceException,
     NoSuchElementException, ElementNotInteractableException,
     InvalidElementStateException,
 )
@@ -17,7 +15,6 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from autoscrape.backends.base.browser import BrowserBase
 from autoscrape.backends.selenium.tags import Tagger
-from autoscrape.backends.selenium.dom import Dom
 from autoscrape.search.graph import Graph
 
 

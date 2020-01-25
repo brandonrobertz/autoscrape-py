@@ -1,9 +1,6 @@
 # -*- coding: UTF-8 -*-
 import logging
-import string
-import sys
 import re
-from itertools import product
 
 from . import BaseScraper
 from ..control import Controller
@@ -247,7 +244,6 @@ class ManualControlScraper(BaseScraper):
                 logger.debug("[*] Scrape complete! Exiting.")
                 return
 
-        links = self.control.clickable
         link_vectors = self.control.link_vectors()
         link_zip = list(zip(range(len(link_vectors)), link_vectors))
         if self.link_priority and not self.only_links:

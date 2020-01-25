@@ -80,7 +80,7 @@ def write_file(filepath, data, fileclass=None, writetype="w", output=None):
                 output, data=post_data, headers=headers
             )
             # this will make the method "POST"
-            resp = request.urlopen(req)
+            request.urlopen(req)
 
     # filesystem mode
     else:

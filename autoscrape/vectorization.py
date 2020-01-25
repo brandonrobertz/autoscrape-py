@@ -76,18 +76,19 @@ class Vectorizer(object):
         logger.debug(" - Reading embeddings into memory...")
         outputs = [(N // 10) * i for i in range(10)]
         with open(path, "r") as f:
-            I = 0
+            embed_id = 0
             for line in f:
-                if I == 0 and re.match("^[0-9]+\s[0-9]+$", line):
+                if embed_id == 0 and re.match("^[0-9]+\s[0-9]+$", line):
                     continue
-                if I in outputs:
-                    logger.info(" - %0.4f%% complete" % ((I / float(N)) * 100))
+                if embed_id in outputs:
+                    pct_done = (embed_id / float(N)) * 100
+                    logger.info(" - %0.4f%% complete" % (pct_done))
                 key, data = line.split(' ', 1)
                 vec = [float(d) for d in data.split()]
-                embeddings[I, :] = vec
-                t2id[key] = I
-                id2t[I] = key
-                I += 1
+                embeddings[embed_id, :] = vec
+                t2id[key] = embed_id
+                id2t[embed_id] = key
+                embed_id += 1
 
         logger.debug(" - Embeddings matrix: %s x %s" % embeddings.shape)
         return Embedding(

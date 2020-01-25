@@ -1,9 +1,7 @@
 import os
-import json
 import re
 
 from celery import Celery
-from celery.result import AsyncResult
 from celery.task.control import revoke
 
 from .scrapers.manual import ManualControlScraper

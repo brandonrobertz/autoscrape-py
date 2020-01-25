@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from os import path
 import setuptools
-import sys
 
 
 install_requires = [

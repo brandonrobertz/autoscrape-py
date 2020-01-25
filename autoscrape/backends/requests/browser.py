@@ -119,7 +119,7 @@ class RequestsBrowser(BrowserBase, Tagger):
         ))
 
         # We're now where we started from
-        curr = self.path.pop()
+        self.path.pop()
         if not self.path:
             self.path = []
             return
@@ -169,7 +169,6 @@ class RequestsBrowser(BrowserBase, Tagger):
         elem = self.element_by_tag(tag)
 
         input_name = self.element_name(elem)
-        input_text = self.element_text(elem)
         value = self.element_value(elem)
         logger.debug("Input name=%s value=%s" % (input_name, value))
 

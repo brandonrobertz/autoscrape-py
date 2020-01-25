@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import argparse
-import logging
 import numpy as np
 import os
 import pickle
-import time
 import html2text
 
 from autoscrape.vectorization import Vectorizer
-from autoscrape import NullScraper
 
 
 class Data:
@@ -62,7 +59,7 @@ def parse_args():
         help=("""
 Location of directory containing training HTML data. This directory needs to have the following subdirectories, which correspond to classes: data_pages, error_pages, links_to_documents, links_to_search, search_pages
 """
-        )
+              )
     )
 
     args = parser.parse_args()
@@ -135,4 +132,3 @@ if __name__ == "__main__":
 
     data = Data(X=X, y=y)
     data.dump(args.output_file)
-

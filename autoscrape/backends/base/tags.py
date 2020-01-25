@@ -68,15 +68,13 @@ class TaggerBase(DomBase):
         tags = []
         a_elems = self.elements_by_path(path)
         for element in a_elems:
-            href = self.element_attr(element, "href")
-
             if not self.clickable_sanity_check(element):
                 continue
 
             tag = self.tag_from_element(element)
             # No way to get back to here, so we can't use it
             if not tag:
-                logger.warn("No tag for element %s" % element)
+                logger.warn("No tag for element %s" % (element))
                 return False
 
             tags.append(tag)

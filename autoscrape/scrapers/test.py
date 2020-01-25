@@ -3,6 +3,8 @@ import logging
 
 from . import BaseScraper
 
+from autoscrape.backends.requests.browser import RequestsBrowser
+
 
 logger = logging.getLogger('AUTOSCRAPE')
 
@@ -13,7 +15,7 @@ class TestScraper(BaseScraper):
         Initialize our scraper and get the first page.
         """
         super(TestScraper, self).setup_logging(loglevel=loglevel)
-        self.scraper = Browser()
+        self.scraper = RequestsBrowser()
         self.scraper.fetch(baseurl)
         self.maxdepth = maxdepth
 

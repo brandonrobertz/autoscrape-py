@@ -51,9 +51,8 @@ if __name__ == "__main__":
             '-', '_'
         )] = docopt_args[option]
 
-    elif option == "extract":
+    if option == "extract":
         # TODO: walk directory, feed files to below:
         rule = hext.Rule(strhext)
         document = hext.Html(strhtml)
         result = rule.extract(document)
-

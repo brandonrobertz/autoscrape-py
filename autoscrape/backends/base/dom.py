@@ -4,7 +4,7 @@ import os
 import re
 import urllib.request
 
-from autoscrape.util import write_file
+from autoscrape.util import write_file, get_filename_from_url
 
 
 logger = logging.getLogger('AUTOSCRAPE')

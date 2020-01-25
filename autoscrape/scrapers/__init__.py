@@ -5,8 +5,6 @@ import os
 import re
 import time
 
-from urllib.parse import urlparse
-
 from ..filetypes import TEXT_EXTENSIONS
 from ..util import (
     get_filename_from_url, get_extension_from_url, write_file

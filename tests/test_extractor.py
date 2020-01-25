@@ -67,7 +67,7 @@ CASES = [{
   </div>
 </article>
     """,
-},{
+}, {
     "extractor": """""",
     "html": """""",
 }]

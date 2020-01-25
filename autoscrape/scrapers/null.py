@@ -3,6 +3,7 @@ import logging
 
 from . import BaseScraper
 from ..control import Controller
+from autoscrape.backends.requests.browser import RequestsBrowser
 from autoscrape.backends.selenium.browser import SeleniumBrowser
 
 
@@ -16,9 +17,20 @@ class NullScraper(BaseScraper):
     """
 
     def __init__(self, *args, html_embeddings=None, word_embeddings=None,
-                 loglevel="INFO", scraper=True, controller=False,
+                 loglevel="INFO", scraper=True, controller=False, backend=None,
                  driver="Chrome", vectorizer=False, **kwargs):
         super(NullScraper, self).setup_logging(loglevel=loglevel)
+
+        Browser = None
+        if backend == "selenium":
+            Browser = SeleniumBrowser
+        elif backend == "requests":
+            Browser = RequestsBrowser
+        else:
+            raise NotImplementedError(
+                "No backend found: %s" % (backend)
+            )
+
         if scraper:
             self.scraper = Browser(driver=driver)
         if controller:

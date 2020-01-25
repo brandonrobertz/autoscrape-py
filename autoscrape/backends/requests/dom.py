@@ -12,7 +12,7 @@ def download_stylesheet(css_url):
     response = requests.get(css_url)
     data = response.text
     if type(data) == bytes:
-        return text.decode("utf-8")
+        return data.decode("utf-8")
     return data
 
 

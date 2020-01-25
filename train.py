@@ -4,12 +4,9 @@ import argparse
 import pickle
 
 import numpy as np
-from sklearn.metrics import classification_report
 from sklearn.model_selection import cross_val_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-
-from vectorize_data import Data
 
 
 def parse_args():
@@ -65,7 +62,7 @@ if __name__ == "__main__":
         print("Fitting SVC model..")
         model = SVC()
     else:
-        raise NotImplmentedError("Bad model selected: %s" % args.model)
+        raise NotImplementedError("Bad model selected: %s" % args.model)
 
     # model.fit(X, y)
 
@@ -83,4 +80,3 @@ if __name__ == "__main__":
         pickle.dump(model, f)
 
     print("Done!")
-
