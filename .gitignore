@@ -25,3 +25,4 @@ nodeConfig.json
 build/
 dist/
 autoscrape_py.egg-info/
+autoscrape.egg-info/
