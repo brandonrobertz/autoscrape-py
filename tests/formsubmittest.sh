@@ -11,7 +11,6 @@ for browser in requests selenium; do
   rm -rf ${output}
   time ./scrape.py \
     --backend ${browser} \
-    --show-browser \
     --maxdepth 1 \
     --formdepth 1 \
     --form-match "List students starting from" \
