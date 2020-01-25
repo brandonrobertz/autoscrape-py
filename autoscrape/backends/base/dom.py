@@ -50,6 +50,30 @@ class DomBase:
         """
         raise NotImplementedError("DomBase.element_tag_name not implemented")
 
+    def element_text(self, element, block=False):
+        """
+        Return the text of an element, or the combined text of all its
+        descendants (if block=True).
+        """
+        raise NotImplementedError("DomBase.element_text not implemented")
+
+    def element_value(self, element):
+        """
+        Return the text value of an element (e.g., input element). Since
+        this is usually called like element.value() or element.value, we
+        wrap this functionality here.
+        """
+        if not hasattr(element, "value"):
+            raise NotImplementedError("DomBase.element_value not implemented")
+        return element.value
+
+    def element_name(self, element):
+        """
+        Return the name of an element (e.g., input element).        """
+        if not hasattr(element, "name"):
+            raise NotImplementedError("DomBase.element_name not implemented")
+        return element.name
+
     def download_file(self, url, return_data=False):
         """
         Fetch the given url, returning a byte stream of the page data. This
@@ -59,7 +83,7 @@ class DomBase:
         Note that we're doing this as opposed to some XHR thing inside the
         selenium driver due to CORS issues.
         """
-        print("Fetching non-HTML page directly: %s" % url)
+        logger.debug("Fetching non-HTML page directly: %s" % url)
         user_agent = (
             "Mozilla/5.0 "
             "(Windows NT 10.0; Win64; x64; rv:62.0) "

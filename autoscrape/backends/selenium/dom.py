@@ -80,3 +80,6 @@ class Dom(DomBase):
             return ""
         return element.tag_name
 
+    def element_value(self, element):
+        return element.get_attribute("value")
+

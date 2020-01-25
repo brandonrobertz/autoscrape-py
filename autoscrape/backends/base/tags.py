@@ -55,13 +55,11 @@ class TaggerBase(DomBase):
            not href.startswith("https:") and \
            not href.startswith("http:") and \
            not href.startswith("javascript"):
-            # logger.debug("Skipping element w/ href %s" % href)
             return False
 
         # Don't leave base host ... configurable?
         elem_host = urlparse(href).netloc
         if not self.leave_host and elem_host != self.base_host:
-            # logger.debug("Skipping external host link %s" % href)
             return False
 
         return True
@@ -87,27 +85,88 @@ class TaggerBase(DomBase):
             tags.append(tag)
         return tags
 
-    def get_inputs(self, form=None, itype=None):
+    def get_inputs(self, form=None, itype=None, root_node=None):
         """
-        Get inputs, either for full page or by a form.  Returns a list
-        of tags. itype can be one of "text", "select", "checkbox", or
-        None (all types), indicating the type of input.
+        Get inputs, either for full page or by a form WebElement.
+        Returns a list of tags. itype can be one of "text", "select",
+        "checkbox", or None (all types), indicating the type of input.
         """
-        raise NotImplementedError("Tagger.get_inputs not implemented")
+        x_path = "//input"
+        if itype == "select":
+            x_path = "//select"
+        elif itype:
+            x_path = "//input[@type='%s']" % (itype)
+
+        elem = root_node
+        tags = []
+        if form is not None:
+            elem = form
+            x_path = ".%s" % x_path
+
+        elems = self.elements_by_path(x_path, from_element=elem)
+        for input in elems:
+            input_tag = self.tag_from_element(input)
+            if not input_tag:
+                logger.warn("No tag for input %s" % input)
+                continue
+
+            tags.append(input_tag)
+
+        return tags
 
     def get_forms(self):
         """
         Get all tags to forms on a page and their respective text
-        inputs. Tags are returned in a dict, with the form CSSPath as
+        inputs. Tags are returned in a dict, with the form tag as
         the key and a list of input CSSPaths under the form.
         """
-        raise NotImplementedError("Tagger.get_forms not implemented")
+        x_path = "//form"
+        forms = self.elements_by_path(x_path)
 
-    def get_buttons(self, in_form=False):
+        tags = {}
+        for elem in forms:
+            # TODO: migrate these to DOM? requests can't really do this...
+            if hasattr(elem, "is_displayed") and not elem.is_displayed():
+                continue
+            if hasattr(elem, "is_enabled") and not elem.is_enabled():
+                continue
+
+            tag = self.tag_from_element(elem)
+            if not tag:
+                logger.warn("No tag for element %s" % elem)
+                continue
+
+            tags[tag] = [
+                self.get_inputs(form=elem, itype="text"),
+                self.get_inputs(form=elem, itype="select"),
+                self.get_inputs(form=elem, itype="checkbox"),
+                self.get_inputs(form=elem, itype="date"),
+            ]
+
+        return tags
+
+    def get_buttons(self, in_form=False, path=None):
         """
         Return all tags leading to a form link, button, or submit input button,
         optionally given a base form to look from. This is used to identify
         clickable things related to forms.
         """
-        raise NotImplementedError("Tagger.get_buttons not implemented")
+        x_path = path or "|".join([
+            "//form//a", "//button", "//input[@type='button']",
+            "//input[@type='submit']", "//table//a",
+        ])
+        btns = self.elements_by_path(x_path)
+
+        tags = []
+        for elem in btns:
+            if hasattr(elem, "is_displayed") and not elem.is_displayed():
+                continue
+            if hasattr(elem, "is_enabled") and not elem.is_enabled():
+                continue
+            tag = self.tag_from_element(elem)
+            if not tag:
+                logger.warn("No tag for element %s" % elem)
+                continue
+            tags.append(tag)
+        return tags
 

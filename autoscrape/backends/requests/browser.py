@@ -45,9 +45,9 @@ class RequestsBrowser(Tagger):
 
     def click(self, tag, **kwargs):
         element = self.element_by_tag(tag)
-        text = element.text
+        text = self.element_text(element)
         url = None
-        if element.tag == "a":
+        if self.element_tag_name(element) == "a":
             raw_href = self.element_attr(element, "href")
             if not raw_href:
                 return False
@@ -59,8 +59,15 @@ class RequestsBrowser(Tagger):
                 return False
             self.visited.add(hash)
 
-            print("!! Clicking link", url)
+            logger.info("[+] Clicking link: %s" % url)
             self.fetch(url)
+        elif element.tag == "input":
+            element_type = element.type
+            if element_type == "submit":
+                parent_form = element.xpath(".//ancestor::form")[0]
+                parent_form_tag = self.tag_from_element(parent_form)
+                self.submit(parent_form_tag, add_node=False)
+                url = self.current_url
         else:
             raise NotImplementedError(
                 "click not supported for tag: %s" % (element.tag)
@@ -88,8 +95,8 @@ class RequestsBrowser(Tagger):
         the time we just want to click a link or submit a form using
         webdriver.
         """
-        print("%s! Fetching url=%s initial=%s" % (
-            ("!" if initial else " "), url, initial,
+        logger.info("%s Fetching url=%s initial=%s" % (
+            ("[+]" if initial else " -"), url, initial,
         ))
         response = self.s.get(url)
         self.current_url = response.url
@@ -111,7 +118,7 @@ class RequestsBrowser(Tagger):
      return clean
 
     def back(self):
-        print("!! Going back... current n=%s path=%s" % (
+        logger.info("[+] Going back... current n=%s path=%s" % (
             len(self.path),
             self._no_tags(self.path),
         ))
@@ -140,7 +147,7 @@ class RequestsBrowser(Tagger):
         return self.current_url
 
     def get_clickable(self, **kwargs):
-        print(" ! Getting clickable...")
+        logger.debug(" - Getting clickable...")
         self.dom = self._get_dom()
         tagger = Tagger(
             current_html=self.current_html,
@@ -148,9 +155,6 @@ class RequestsBrowser(Tagger):
             leave_host=self.leave_host,
         )
         clickable = tagger.get_clickable()
-        print("clickable n=%s" % (len(clickable)))
-        print(" n=%s, path=%s" % (len(self.path), self._no_tags(self.path)))
-        print(" --")
         return clickable
 
     # def download_file(self, url):
@@ -166,8 +170,14 @@ class RequestsBrowser(Tagger):
         """
         Enter some input into an element by a given tag.
         """
-        logger.info("Injecting text \"%s\" to input" % (input))
+        logger.info("[+] Injecting text \"%s\" to input" % (input))
         elem = self.element_by_tag(tag)
+
+        input_name = self.element_name(elem)
+        input_text = self.element_text(elem)
+        value = self.element_value(elem)
+        logger.debug("Input name=%s value=%s" % (input_name, value))
+
         elem.attrib["value"] = input
 
         self.path.append(("input", (tag,input,), {}))
@@ -178,37 +188,55 @@ class RequestsBrowser(Tagger):
         }
         self.graph.add_action_to_current(action)
 
-    def submit(self, tag):
-        element = self.element_by_tag(tag)
-        parent_form = element.xpath("//ancestor::form")
-        inputs = self.elements_by_path("//input", from_element=parent_form)
+    def submit(self, tag, add_node=True):
+        """
+        Submit a form, by extracting the method and url, then
+        constructing the params and sending the request, along
+        with the form data.
+        """
+        form = self.element_by_tag(tag)
+        inputs = self.elements_by_path("//input", from_element=form)
 
-        params = {}
+        data = {}
         for input in inputs:
-            value = self.element_attr(input, "value")
-            name = self.element_attr(input, "name")
-            params[name] = value
+            # TODO: handle non-text type inputs
+            name = self.element_name(input)
+            if not name:
+                continue
+            value = self.element_value(input)
+            data[name] = value
 
-        action = self.element.attr(parent_form, "action", self.current_url)
-        method = self.element.attr(parent_form, "method", "get")
+        action = self.element_attr(form, "action", default=self.current_url)
+        method = self.element_attr(form, "method", default="get")
         url = self._normalize_url(action)
+
+        request_kwargs = {}
+        if method.lower() == "post":
+            request_kwargs["data"] = data
+        elif method.lower() == "get":
+            params = []
+            for key in data.keys():
+                params.append([key, data.get(key, "")])
+            request_kwargs["params"] = params
 
         request = requests.Request(
             method,
             url,
-            data=params
+            **request_kwargs
         )
-        response = self.s.send(request)
+        prepped = request.prepare()
+        response = self.s.send(prepped)
         self.current_url = response.url
         self.current_html = response.text
         self.dom = self._get_dom()
 
         # TODO: all higher level stuff
-        self.path.append(("submit", (tag,), {}))
-        node = "Submit, tag: %s" % (tag)
-        node_meta = {
-            "submit": tag,
-        }
-        self.graph.add_node(node, **node_meta)
-        self.graph.move_to_node(node)
+        if add_node:
+            self.path.append(("submit", (tag,), {}))
+            node = "Submit, tag: %s" % (tag)
+            node_meta = {
+                "submit": tag,
+            }
+            self.graph.add_node(node, **node_meta)
+            self.graph.move_to_node(node)
 

@@ -33,11 +33,12 @@ class Tagger(TaggerBase, Dom):
         tag = " > ".join(path)
         return tag
 
-    def get_inputs(self, form=None, itype=None):
-        return []
+    def get_inputs(self, form=None, itype=None, root_node=None):
+        return super().get_inputs(form=form, itype=itype, root_node=self.dom)
 
-    def get_forms(self):
-        return {}
+    def get_buttons(self, in_form=False, path=None):
+        x_path = path or "|".join([
+            "//form//a", "//input[@type='submit']", "//table//a",
+        ])
+        return super().get_buttons(in_form=in_form, path=x_path)
 
-    def get_buttons(self, in_form=False):
-        return []

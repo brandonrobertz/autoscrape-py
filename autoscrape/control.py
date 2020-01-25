@@ -124,9 +124,6 @@ class Controller(object):
         self.load_indices()
 
     def select_link(self, index):
-        print("Select link, clickable n=%s" % (
-            len(self.clickable)
-        ))
         tag = self.clickable[index]
         clicked = self.scraper.click(tag)
         if clicked:
@@ -209,7 +206,7 @@ class Controller(object):
         if type == "text":
             for tag in self.forms:
                 form = self.scraper.element_by_tag(tag)
-                txt = self.scraper.element_text(form)
+                txt = self.scraper.element_text(form, block=True)
                 if txt:
                     form_data.append(txt)
 
@@ -220,15 +217,15 @@ class Controller(object):
         buttons_data = []
         if type == "text":
             for tag in self.buttons:
-                btn = self.scraper.element_by_tag(tag)
+                elem = self.scraper.element_by_tag(tag)
                 value = ""
-                if btn:
-                    value = btn.get_attribute("value")
+                if elem is not None:
+                    value = self.scraper.element_value(elem)
                 text = []
                 if value:
                     text.append(value)
-                if btn and btn.text:
-                    text.append(btn.text)
+                if elem is not None and self.scraper.element_text(elem):
+                    text.append(self.scraper.element_text(elem))
                 logger.debug("  %s => value: %s, text: %s" % (
                     tag[-25:], value, text))
                 buttons_data.append(" ".join(text))

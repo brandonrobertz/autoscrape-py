@@ -76,95 +76,18 @@ class Tagger(TaggerBase, Dom):
            return False
        return super().clickable_sanity_check(element)
 
-    def get_clickable(self):
+    def get_inputs(self, form=None, itype=None, root_node=None):
+        return super().get_inputs(form=form, itype=itype, root_node=self.driver)
+
+    def get_clickable(self, path=None):
         """
         Get all clickable element tags on the current page.
 
         TODO: In the future we may need to recurse the page to find
         other clickable types like JS-enabled divs, etc.
         """
-        path = "|".join([
+        x_path = path or "|".join([
             "//a", "//button", "//input[@type='submit']",
             "//input[@type='button']"
         ])
-        return super().get_clickable(path=path)
-
-    def get_inputs(self, form=None, itype=None):
-        """
-        Get inputs, either for full page or by a form WebElement.
-        Returns a list of tags. itype can be one of "text", "select",
-        "checkbox", or None (all types), indicating the type of input.
-        """
-        x_path = "//input|input"
-        if itype == "select":
-            x_path = "//select|select"
-        elif itype:
-            x_path = "//input[@type='%s']|input[@type='%s']" % (itype, itype)
-
-        elem = self.driver
-        tags = []
-        if form:
-            elem = form
-            x_path = ".%s" % x_path
-
-        elems = self.elements_by_path(x_path, from_element=elem)
-        for input in elems:
-            input_tag = self.tag_from_element(input)
-            if not input_tag:
-                logger.warn("No tag for input %s" % input)
-                continue
-
-            tags.append(input_tag)
-
-        return tags
-
-    def get_forms(self):
-        """
-        Get all tags to forms on a page and their respective
-        text inputs. Tags are returned in a dict, with the
-        form CSSPath as the key and a list of input CSSPaths
-        under the form.
-        """
-        x_path = "//form"
-        forms = self.elements_by_path(x_path)
-
-        tags = {}
-        for elem in forms:
-            if not elem.is_displayed() or not elem.is_enabled():
-                continue
-
-            tag = self.tag_from_element(elem)
-            if not tag:
-                logger.warn("No tag for element %s" % elem)
-                continue
-
-            tags[tag] = [
-                self.get_inputs(form=elem, itype="text"),
-                self.get_inputs(form=elem, itype="select"),
-                self.get_inputs(form=elem, itype="checkbox"),
-                self.get_inputs(form=elem, itype="date"),
-            ]
-
-        return tags
-
-    def get_buttons(self, in_form=False):
-        x_path = "|".join([
-            "//form//a", "//button", "//input[@type='button']",
-            "//input[@type='submit']", "//table//a",
-        ])
-        btns = self.elements_by_path(x_path)
-
-        tags = []
-        for elem in btns:
-            if not elem.is_displayed() or not elem.is_enabled():
-                continue
-
-            tag = self.tag_from_element(elem)
-            if not tag:
-                logger.warn("No tag for element %s" % elem)
-                continue
-
-            tags.append(tag)
-
-        return tags
-
+        return super().get_clickable(path=x_path)

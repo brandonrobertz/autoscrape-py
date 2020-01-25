@@ -135,7 +135,7 @@ class SeleniumBrowser(Tagger):
             pipe_retries += 1
 
     def __del__(self):
-        if self.driver:
+        if hasattr(self, "driver") and self.driver:
             try:
                 self.driver.quit()
             except Exception:
@@ -232,7 +232,7 @@ class SeleniumBrowser(Tagger):
         Look for targets either non-blank or not _self and set to _self.
         This needs to be a JavaScript injected script with element as param.
         """
-        target = elem.get_attribute("target")
+        target = self.element_attr(elem, "target")
         if not target or target == "_self":
             return
 
@@ -456,7 +456,7 @@ class SeleniumBrowser(Tagger):
                 form.find_element_by_xpath,
                 "//input[@type='submit']"
             )
-            logger.debug("Form submit input button: %s" % sub)
+            logger.debug("Form submit input button: %s" % (sub))
         except NoSuchElementException as e:
             pass
 
@@ -474,7 +474,7 @@ class SeleniumBrowser(Tagger):
                 els = [ el for el in possible_subs if "submit" in el.text.lower() ]
                 if els:
                     sub = els[0]
-                    logger.debug("Form submit link: %s" % sub)
+                    logger.debug("Form submit link: %s" % (sub))
             except NoSuchElementException as e:
                 pass
 

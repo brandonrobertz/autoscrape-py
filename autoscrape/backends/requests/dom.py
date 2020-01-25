@@ -26,19 +26,18 @@ class Dom(DomBase):
 
     def element_attr(self, element, name, default=None):
         if element.attrib and "href" in element.attrib:
-            return element.attrib.get("href")
+            return element.attrib["href"]
         return default
 
     def element_by_tag(self, tag):
         return self.dom.cssselect(tag)[0]
 
     def elements_by_path(self, xpath, from_element=None):
-        if not from_element:
+        if from_element is None:
             return self.dom.xpath(xpath)
         return from_element.xpath(xpath)
 
     def get_stylesheet(self, fetch_css=False):
-        # TODO: parallelize this
         stylesheet_urls = []
         for link in self.dom.xpath("//link"):
             if not link.attrib:
@@ -61,11 +60,12 @@ class Dom(DomBase):
         return css
 
     def _normalize_url(self, url):
+        argnames = ['scheme', 'netloc', 'path', 'params', 'query', 'fragment']
         parsed_current_url = urlparse(self.current_url)
         parsed_url = urlparse(url)
 
         args = []
-        for argname in ['scheme', 'netloc', 'path', 'params', 'query', 'fragment']:
+        for argname in argnames:
             value = getattr(parsed_url, argname, None)
             if not value:
                 value = getattr(parsed_current_url, argname, '')
@@ -83,6 +83,9 @@ class Dom(DomBase):
         if not text:
             return ''
         return text
+
+    def element_name(self, element):
+        return element.name
 
     def element_tag_name(self, element):
         if element is None:
