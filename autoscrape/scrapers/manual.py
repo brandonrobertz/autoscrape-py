@@ -121,19 +121,20 @@ class ManualControlScraper(BaseScraper):
         links, and clicks them until one is not found. This saves the
         pages as it goes.
         """
-        logger.debug("*** Entering 'next' iteration routine")
+        logger.debug("[*] Entering 'next' iteration routine")
         depth = 0
         while True:
             if self.formdepth and depth > self.formdepth:
-                logger.debug("Max 'next' formdepth reached %s" % depth)
+                logger.debug("[!] Max 'next' formdepth reached %s" % depth)
                 break
 
             found_next = False
             button_data = self.control.button_vectors()
             n_buttons = len(button_data)
-            logger.debug("** 'Next' Iteration Depth %s" % depth)
+            logger.debug("Current 'Next' Iteration Depth %s" % depth)
             logger.debug("Button vectors (%s): %s" % (
-                n_buttons, button_data))
+                n_buttons, button_data
+            ))
 
             # save the initial landing data page
             self.save_training_page(classname="data_pages")
@@ -144,8 +145,6 @@ class ManualControlScraper(BaseScraper):
 
             for ix in range(n_buttons):
                 button = button_data[ix]
-                # TODO: replace this with a ML model to decide whether or
-                # not this is a "next" button.
                 logger.debug("Checking button: %s" % button)
                 if self.next_match.lower() in button.lower():
                     logger.debug("Next button found! Clicking: %s" % ix)
@@ -168,7 +167,7 @@ class ManualControlScraper(BaseScraper):
             self.control.back()
 
     def scrape(self, depth=0):
-        logger.info("Crawl depth %s" % depth)
+        logger.info("[.] Crawl depth %s" % depth)
         if self.maxdepth != -1 and depth > self.maxdepth:
             logger.info("Maximum depth %s reached, returning..." % depth)
             self.control.back()
@@ -194,8 +193,6 @@ class ManualControlScraper(BaseScraper):
             logger.debug("Form: %s Text: %s" % (ix, form_data))
             logger.debug("Inputs: %s" % inputs)
 
-            # TODO: ML model here to determine if this form is
-            # scrapeable. Currently this uses strict text match.
             if self.form_match.lower() not in form_data.lower():
                 continue
 
@@ -203,10 +200,6 @@ class ManualControlScraper(BaseScraper):
             self.save_training_page(classname="search_pages")
             self.save_screenshot(classname="search_pages")
 
-            # TODO: ML model here to determine which inputs require
-            # input before submission. The form-selecting classifier
-            # above has already made the decision to submit this form,
-            # so that is assumed at this point.
             for input_phase in self.input_gen:
                 logger.debug("Input plan: %s" % input_phase)
                 for single_input in input_phase:
@@ -254,8 +247,6 @@ class ManualControlScraper(BaseScraper):
                 logger.debug("Scrape complete! Exiting.")
                 return
 
-        # TODO: this will be replaced by a ML algorith to sort links by those
-        # most likely to be fruitful
         links = self.control.clickable
         link_vectors = self.control.link_vectors()
         link_zip = list(zip(range(len(link_vectors)),link_vectors))
@@ -276,21 +267,20 @@ class ManualControlScraper(BaseScraper):
                 link_zip
             )
 
-        print("Links: %s" % (link_zip))
         for ix, text in link_zip:
-            print("Link index: %s text: %s" % (ix, text))
+            print(" - Link index: %s text: %s" % (ix, text))
             if self.maxdepth != -1 and depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
                 break
 
-            logger.debug("Attempting to click link text: %s" % text)
+            logger.debug(" - Attempting to click link text: %s" % text)
             if self.control.select_link(ix):
-                logger.debug("Link clicked. Going a level deeper...")
+                logger.debug("[.] Link clicked. Going a level deeper...")
                 self.scrape(depth=depth + 1)
             else:
-                logger.debug("Link downloaded or click failed: %s" % text)
+                logger.debug(" - Link downloaded or click failed: %s" % text)
 
-        logger.debug("Searching forms and links on page complete")
+        logger.debug("[*] Searching forms and links on page complete")
         self.control.back()
 
     def run(self, *args, **kwargs):

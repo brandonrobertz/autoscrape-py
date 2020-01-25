@@ -77,7 +77,6 @@ class Dom(DomBase):
 
     def element_text(self, element, block=False):
         if block and element is not None:
-            # TODO: do recursive text getting
             return element.text_content()
         text = element.text
         if not text:
