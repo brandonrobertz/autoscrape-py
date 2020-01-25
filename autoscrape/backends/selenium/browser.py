@@ -170,7 +170,7 @@ class SeleniumBrowser(Tagger):
         time.sleep(1)
 
         if check_alerts:
-            logger.debug("Checking for popup alerts...")
+            logger.debug("[.] Checking for popup alerts...")
             try:
                 WebDriverWait(self.driver, 1).until(
                     EC.alert_is_present(),
@@ -178,7 +178,7 @@ class SeleniumBrowser(Tagger):
                 )
                 alert = self.driver.switch_to_alert()
                 alert.accept()
-                logger.debug("Alert accepted!")
+                logger.debug("[.] Alert accepted!")
             except TimeoutException:
                 pass
 
@@ -188,7 +188,7 @@ class SeleniumBrowser(Tagger):
             try:
                 elem.text
             except StaleElementReferenceException:
-                logger.debug("Stale element found! Loading complete.")
+                logger.debug("[.] Stale element found! Loading complete.")
                 break
             stale_check_times += 1
             time.sleep(wait_for_stale_time / stale_check_max_times)

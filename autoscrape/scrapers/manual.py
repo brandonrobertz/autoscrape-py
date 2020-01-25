@@ -239,24 +239,24 @@ class ManualControlScraper(BaseScraper):
                 scraped = True
                 self.control.back()
 
-            logger.debug("Completed iteration!")
+            logger.debug("[*] Completed iteration!")
             # Only scrape a single form, due to explicit, single
             # match configuration option
 
             if scraped:
-                logger.debug("Scrape complete! Exiting.")
+                logger.debug("[*] Scrape complete! Exiting.")
                 return
 
         links = self.control.clickable
         link_vectors = self.control.link_vectors()
         link_zip = list(zip(range(len(link_vectors)),link_vectors))
         if self.link_priority and not self.only_links:
-            logger.debug("Sorting by link priority: %s" % self.link_priority)
+            logger.debug("[.] Sorting by link priority: %s" % self.link_priority)
             link_zip.sort(
                 key=lambda x: not re.findall(self.link_priority, x[1])
             )
         if self.ignore_links and not self.only_links:
-            logger.debug("Ignoring links matching: %s" % self.ignore_links)
+            logger.debug("[.] Ignoring links matching: %s" % self.ignore_links)
             link_zip = filter(
                 lambda x: not re.findall(self.ignore_links, x[1]),
                 link_zip

@@ -25,12 +25,12 @@ class Vectorizer(object):
         """
         self.html = None
         if html_embeddings_file:
-            logger.debug("Loading HTML embeddings")
+            logger.debug("[.] Loading HTML embeddings")
             self.html = self.load_embedding(html_embeddings_file)
 
         self.word = None
         if word_embeddings_file:
-            logger.debug("Loading word embeddings")
+            logger.debug("[.] Loading word embeddings")
             self.word = self.load_embedding(word_embeddings_file)
 
     def setup_logging(self, loglevel=None):
@@ -53,38 +53,35 @@ class Vectorizer(object):
         with open(path, "r") as f:
             for line in f:
                 if N == 0 and re.match("^[0-9]+\s[0-9]+$", line):
-                    logger.debug("Skipping embedding meta first line")
                     continue
                 N += 1
             key, data = line.split(' ', 1)
-            logger.debug("key=%s data=%s" % ( key, data))
             vec = [ float(d) for d in data.split() ]
             dim = len(vec)
         return N, dim
 
     def load_embedding(self, path):
-        logger.info("Loading embedding file %s..." % path)
+        logger.info("[+] Loading embedding file %s..." % path)
         N, dim = self.embeddings_length(path)
-        logger.info("vocab size: %s, dim: %s" % (
+        logger.info(" - vocab size: %s, dim: %s" % (
             N, dim
         ))
-        logger.debug("Allocating embedding matrix...")
+        logger.debug(" - Allocating embedding matrix...")
         # token to ID (embedding row)
         t2id = dict()
         # ID to token
         id2t = dict()
         # embedding matrix
         embeddings = np.zeros(shape=(N, dim))
-        logger.debug("Reading embeddings into memory...")
+        logger.debug(" - Reading embeddings into memory...")
         outputs = [ (N // 10) * i for i in range(10) ]
         with open(path, "r") as f:
             I = 0
             for line in f:
                 if I == 0 and re.match("^[0-9]+\s[0-9]+$", line):
-                    logger.debug("Skipping embedding meta first line")
                     continue
                 if I in outputs:
-                    logger.info("%0.4f%% complete" % ((I / float(N)) * 100))
+                    logger.info(" - %0.4f%% complete" % ((I / float(N)) * 100))
                 key, data = line.split(' ', 1)
                 vec = [ float(d) for d in data.split() ]
                 embeddings[I, :] = vec
@@ -92,7 +89,7 @@ class Vectorizer(object):
                 id2t[I] = key
                 I += 1
 
-        logger.debug("Embeddings matrix: %s x %s" % embeddings.shape)
+        logger.debug(" - Embeddings matrix: %s x %s" % embeddings.shape)
         return Embedding(
             embeddings = embeddings,
             t2id = t2id,
@@ -117,7 +114,6 @@ class Vectorizer(object):
             t = t.strip().lower()
             if not t:
                 continue
-            logger.debug("Token=%s" % t)
             N += 1
             if re.match("\s", t):
                 t = "</s>"
@@ -125,7 +121,8 @@ class Vectorizer(object):
                 id = self.word.t2id[t]
             except Exception as e:
                 logger.warn("Skipping word=%s,  Error=%s" % (
-                    t, e))
+                    t, e
+                ))
                 continue
             x += self.word.embeddings[id]
         return x / N

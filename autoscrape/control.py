@@ -65,7 +65,7 @@ class Controller(object):
         self.inputs = []
 
     def load_indices(self):
-        logger.debug("Loading page vectors...")
+        logger.debug("[.] Loading page vectors...")
         self.clickable = self.scraper.get_clickable()
         forms_dict = self.scraper.get_forms()
         self.forms = list(forms_dict.keys())
@@ -132,8 +132,6 @@ class Controller(object):
 
     def select_button(self, index, iterating_form=False):
         tag = self.buttons[index]
-        logger.debug("Clicking button ix: %s, tag: %s" % (
-            index, tag))
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         time.sleep(1)
         if clicked:
@@ -201,7 +199,7 @@ class Controller(object):
         Another alternative strategy would be to try the search and then
         look at the next page.
         """
-        logger.debug("Loading form vectors")
+        logger.debug("[.] Loading form vectors")
         form_data = []
         if type == "text":
             for tag in self.forms:
@@ -246,7 +244,7 @@ class Controller(object):
                 tag_name = self.scraper.element_tag_name(elem)
                 text = ""
                 if elem is None:
-                    logger.warn("Link element couldn't be found: %s" % t)
+                    logger.warn("[!] Link element couldn't be found: %s" % t)
                 elif tag_name != "input":
                     text = self.scraper.element_text(elem).replace("\n", " ")
                 elif elem_tag == "input":

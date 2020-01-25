@@ -196,16 +196,15 @@ class BaseScraper(object):
         effect.
         """
         if not self.output or not self.save_graph:
-            logger.debug("No output or save-graph options. Not saving")
+            logger.debug("[!] No output or save-graph options. Not saving")
             return
 
         filename = "%s.gpickle" % int(time.time() * 1000)
         basedir = os.path.join(self.output, "graph")
         if not os.path.exists(basedir):
-            logger.debug("Creating graph subdir: %s" % basedir)
             os.makedirs(basedir)
 
         graph_save_path = os.path.join(basedir, filename)
-        logger.debug("Saving graph to: %s" % graph_save_path)
+        logger.debug("[.] Saving graph to: %s" % graph_save_path)
         self.control.scraper.graph.save_graph(graph_save_path)
 
