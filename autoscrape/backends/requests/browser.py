@@ -12,7 +12,8 @@ logger = logging.getLogger('AUTOSCRAPE')
 class RequestsBrowser(BrowserBase, Tagger):
     """
     A simple HTTP-requests based scraper, currently capable of only
-    doing crawls, but is 3.5x faster.
+    doing crawls and very basic HTTP Post requests, but is between
+    2x and 5x faster.
 
         bxroberts.org full crawl - requests backend
         real    0m34.066s
