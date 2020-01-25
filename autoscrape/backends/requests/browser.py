@@ -48,6 +48,7 @@ class RequestsBrowser(BrowserBase, Tagger):
         element = self.element_by_tag(tag)
         text = self.element_text(element)
         url = None
+        hash = None
         if self.element_tag_name(element) == "a":
             raw_href = self.element_attr(element, "href")
             if not raw_href:
@@ -68,19 +69,20 @@ class RequestsBrowser(BrowserBase, Tagger):
                 parent_form_tag = self.tag_from_element(parent_form)
                 self.submit(parent_form_tag, add_node=False)
                 url = self.current_url
+                hash = "%s|%s" % (url, element_type)
         else:
             raise NotImplementedError(
                 "click not supported for tag: %s" % (element.tag)
             )
 
         self.path.append((
-            "click", [tag], {"url": url}
+            "click", ["[tag]"], {"url": url}
         ))
-        node = "Click, text: %s, url: %s, tag: %s" % (text, url, tag)
+        node = "Click\n text: %s\n hash: %s" % (text, hash)
         node_meta = {
-            "click": tag,
-            "click_text": text,
-            "click_iterating_form": None,
+            "click": "[tag]",
+            "click_text": text or "[none]",
+            "click_iterating_form": "[none]",
         }
         self.graph.add_node(
             node,
@@ -105,7 +107,7 @@ class RequestsBrowser(BrowserBase, Tagger):
 
         if initial:
             self.path.append(("fetch", [url], {"initial": initial}))
-            node = "Fetch, url: %s" % url
+            node = "Fetch\n url: %s" % url
             self.graph.add_root_node(node, url=url, action="fetch")
 
     def back(self):
@@ -171,11 +173,11 @@ class RequestsBrowser(BrowserBase, Tagger):
 
         elem.attrib["value"] = input
 
-        self.path.append(("input", (tag,input,), {}))
+        self.path.append(("input", ("",input,), {}))
         action = {
             "action": "input",
-            "text": input,
-            "tag": tag,
+            "text": input or "[none]",
+            "tag": "[tag]",
         }
         self.graph.add_action_to_current(action)
 
@@ -224,9 +226,9 @@ class RequestsBrowser(BrowserBase, Tagger):
         # TODO: all higher level stuff
         if add_node:
             self.path.append(("submit", (tag,), {}))
-            node = "Submit, tag: %s" % (tag)
+            node = "Submit\n tag: %s" % (tag)
             node_meta = {
-                "submit": tag,
+                "submit": "[tag]",
             }
             self.graph.add_node(node, **node_meta)
             self.graph.move_to_node(node)

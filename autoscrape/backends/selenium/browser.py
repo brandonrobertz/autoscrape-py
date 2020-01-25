@@ -219,7 +219,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         logger.info("Fetching %s" % url)
         self._loadwait(self.driver.get, url)
         self.path.append(("fetch", (url,), {}))
-        node = "Fetch, url: %s" % url
+        node = "Fetch\n url: %s" % url
         self.graph.add_root_node(node, url=url, action="fetch")
 
     def back(self):
@@ -329,10 +329,10 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.path.append((
             "click", (tag,), {"iterating_form": iterating_form}
         ))
-        node = "Click, text: %s, hash: %s, tag: %s" % (text, hash, tag)
+        node = "Click\n text: %s\n hash: %s" % (text, hash)
         node_meta = {
-            "click": tag,
-            "click_text": text,
+            "click": "[tag]",
+            "click_text": text or "[none]",
             "click_iterating_form": iterating_form,
         }
         self.graph.add_node(
@@ -387,8 +387,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.path.append(("input", (tag,input,), {}))
         action = {
             "action": "input",
-            "text": input,
-            "tag": tag,
+            "text": input or "[none]",
+            "tag": "[tag]",
         }
         self.graph.add_action_to_current(action)
 
@@ -406,8 +406,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.path.append(("input_select_option", (tag,option_str,), {}))
         action = {
             "action": "input_select_option",
-            "option": option_str,
-            "tag": tag,
+            "option": option_str or "[none]",
+            "tag": "[tag]",
         }
         self.graph.add_action_to_current(action)
 
@@ -427,7 +427,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         action = {
             "action": "input_checkbox",
             "checked?": to_check,
-            "tag": tag,
+            "tag": "[tag]",
         }
         self.graph.add_action_to_current(action)
 
@@ -500,9 +500,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
             self._loadwait(form.submit, check_alerts=True)
 
         self.path.append(("submit", (tag,), {}))
-        node = "Submit, tag: %s" % (tag)
+        node = "Submit\n tag: %s" % (tag)
         node_meta = {
-            "submit": tag,
+            "submit": "[tag]",
             "submit_natural_click": self.form_submit_natural_click,
         }
         self.graph.add_node(node, **node_meta)

@@ -12,7 +12,7 @@ class BrowserBase(TaggerBase):
          if name == "click":
              if not args:
                  continue
-             args[0] = "tag"
+             args[0] = "[tag]"
          clean.append((name, args, kwargs))
      return clean
 

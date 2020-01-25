@@ -224,8 +224,7 @@ class Controller(object):
                     text.append(value)
                 if elem is not None and self.scraper.element_text(elem):
                     text.append(self.scraper.element_text(elem))
-                logger.debug("  %s => value: %s, text: %s" % (
-                    tag[-25:], value, text))
+                logger.debug(" - button value: %s, text: %s" % (value, text))
                 buttons_data.append(" ".join(text))
         return buttons_data
 
