@@ -36,8 +36,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
         if driver == "Firefox":
             firefox_options = webdriver.firefox.options.Options()
             if not show_browser:
-                logger.debug("Headless mode enabled")
-                firefox_options.add_argument("--headless")
+                logger.debug(" - Headless mode enabled")
+                firefox_options.add_argument("-headless")
+                firefox_options.headless = True
             firefox_profile = webdriver.FirefoxProfile()
             if not load_images:
                 # disable images

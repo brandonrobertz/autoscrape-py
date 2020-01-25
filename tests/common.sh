@@ -1,7 +1,7 @@
 BENCHMARK_LOG=backend-benchmark.log
-BACKENDS="requests selenium"
+BACKENDS="selenium requests"
 TIME="$(which time) -p -a -o ${BENCHMARK_LOG}"
-AUTOSCRAPE="./autoscrape.py --save-graph --loglevel DEBUG"
+AUTOSCRAPE="./autoscrape.py --driver Chrome --save-graph --loglevel DEBUG"
 
 die () {
   echo "${*}"
