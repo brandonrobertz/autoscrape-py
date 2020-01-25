@@ -1,7 +1,6 @@
 BENCHMARK_LOG=backend-benchmark.log
 BACKENDS="selenium requests"
 TIME="$(which time) -p -a -o ${BENCHMARK_LOG}"
-echo "Invoking AutoScrape via ${SCRIPT}"
 
 AUTOSCRAPE="./autoscrape.py --save-graph --loglevel DEBUG"
 
