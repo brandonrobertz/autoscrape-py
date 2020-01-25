@@ -12,6 +12,7 @@ install_requires = [
     'numpy>=1.15.0',
     'cssselect>=1.1.0',
     'requests>=2.22.0',
+    'lxml>=4.4.2',
 ]
 
 install_dev_requires = [
@@ -21,7 +22,6 @@ install_dev_requires = [
     'psycopg2>=2.7.6.1',
     'flask-sqlalchemy>=2.3.2',
     'six>=1.11.0',
-    'lxml>=4.4.2',
 ]
 
 setup(
@@ -69,7 +69,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'autoscrape = autoscrape.cli.autoscrape:main',
+            'autoscrape = autoscrape.cli.scrape:main',
         ]
     },
     install_requires=install_requires

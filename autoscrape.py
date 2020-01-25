@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-import autoscrape
+from autoscrape.cli import scrape
 
 
 if __name__ == "__main__":
-    autoscrape.cli.autoscrape.main()
+    scrape.main()
