@@ -9,11 +9,7 @@ die () {
 for browser in requests selenium; do
   output="autoscrape-data-formsubmit-${browser}"
   rm -rf ${output}
-
-  # if [[ "${browser}" == "requests" ]]; then
-  #   continue
-  # fi
-  ./scrape.py \
+  time ./scrape.py \
     --backend ${browser} \
     --show-browser \
     --maxdepth 1 \
