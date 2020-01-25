@@ -77,13 +77,13 @@ class RequestsBrowser(BrowserBase, Tagger):
             )
 
         self.path.append((
-            "click", ["[tag]"], {"url": url}
+            "click", [tag], {"url": url}
         ))
         node = "Click\n text: %s\n hash: %s" % (text, hash)
         node_meta = {
-            "click": "[tag]",
-            "click_text": text or "[none]",
-            "click_iterating_form": "[none]",
+            "click": tag,
+            "click_text": text,
+            "click_iterating_form": None,
         }
         self.graph.add_node(
             node,
@@ -177,8 +177,8 @@ class RequestsBrowser(BrowserBase, Tagger):
         self.path.append(("input", ("",input,), {}))
         action = {
             "action": "input",
-            "text": input or "[none]",
-            "tag": "[tag]",
+            "text": input,
+            "tag": tag,
         }
         self.graph.add_action_to_current(action)
 
@@ -229,7 +229,7 @@ class RequestsBrowser(BrowserBase, Tagger):
             self.path.append(("submit", (tag,), {}))
             node = "Submit\n tag: %s" % (tag)
             node_meta = {
-                "submit": "[tag]",
+                "submit": tag,
             }
             self.graph.add_node(node, **node_meta)
             self.graph.move_to_node(node)

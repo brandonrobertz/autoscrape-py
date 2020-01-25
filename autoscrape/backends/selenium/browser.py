@@ -332,8 +332,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
         ))
         node = "Click\n text: %s\n hash: %s" % (text, hash)
         node_meta = {
-            "click": "[tag]",
-            "click_text": text or "[none]",
+            "click": tag,
+            "click_text": text,
             "click_iterating_form": iterating_form,
         }
         self.graph.add_node(
@@ -388,8 +388,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.path.append(("input", (tag,input,), {}))
         action = {
             "action": "input",
-            "text": input or "[none]",
-            "tag": "[tag]",
+            "text": input,
+            "tag": tag,
         }
         self.graph.add_action_to_current(action)
 
@@ -408,7 +408,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         action = {
             "action": "input_select_option",
             "option": option_str or "[none]",
-            "tag": "[tag]",
+            "tag": tag,
         }
         self.graph.add_action_to_current(action)
 
@@ -428,7 +428,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         action = {
             "action": "input_checkbox",
             "checked?": to_check,
-            "tag": "[tag]",
+            "tag": tag,
         }
         self.graph.add_action_to_current(action)
 
@@ -503,7 +503,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.path.append(("submit", (tag,), {}))
         node = "Submit\n tag: %s" % (tag)
         node_meta = {
-            "submit": "[tag]",
+            "submit": tag,
             "submit_natural_click": self.form_submit_natural_click,
         }
         self.graph.add_node(node, **node_meta)

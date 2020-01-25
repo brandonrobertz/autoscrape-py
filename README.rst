@@ -34,6 +34,8 @@ Two ways, easiest first.
     pip install autoscrape
     autoscrape -h
 
+Or:
+
 ::
 
     git clone https://github.com/brandonrobertz/autoscrape-py

@@ -1,7 +1,15 @@
 BENCHMARK_LOG=backend-benchmark.log
 BACKENDS="selenium requests"
 TIME="$(which time) -p -a -o ${BENCHMARK_LOG}"
-AUTOSCRAPE="./autoscrape.py --driver Chrome --save-graph --loglevel DEBUG"
+#SCRIPT="autoscrape"
+#if ! which autoscrape 2> /dev/null > /dev/null; then
+#  SCRIPT="./autoscrape.py"
+#fi
+
+ SCRIPT="./autoscrape.py"
+echo "Invoking AutoScrape via ${SCRIPT}"
+
+AUTOSCRAPE="${SCRIPT} --save-graph --loglevel DEBUG"
 
 die () {
   echo "${*}"
