@@ -1,6 +1,13 @@
 Autoscrape
 ==========
 
+.. image:: https://pypip.in/v/autoscrape/badge.svg
+        :target: https://pypi.python.org/pypi/autoscrape/
+
+.. image:: https://pypip.in/license/autoscrape/badge.svg
+        :target: https://pypi.python.org/pypi/autoscrape/
+
+
 .. figure:: https://github.com/brandonrobertz/autoscrape-py/blob/master/images/ai.png
    :alt: Artificial Informer Labs
 
