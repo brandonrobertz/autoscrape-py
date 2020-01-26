@@ -149,8 +149,7 @@ manager or here:
 
     https://sites.google.com/a/chromium.org/chromedriver/downloads
 
-Installing the remaining Python dependencies can be done using pip or
-pipenv:
+Installing the remaining Python dependencies can be done using pip.
 
 Pip Install Method
 ~~~~~~~~~~~~~~~~~~
@@ -161,16 +160,6 @@ required) and install the Python dependencies:
 ::
 
     pip install -r requirements.txt
-
-Pipenv Method
-~~~~~~~~~~~~~
-
-AutoScrape also supports pipenv. You can install required dependencies
-by running:
-
-::
-
-    pipenv install
 
 Running Standalone Scraper
 --------------------------

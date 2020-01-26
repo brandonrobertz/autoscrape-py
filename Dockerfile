@@ -9,12 +9,6 @@ RUN apt-get update && \
         build-essential \
         cython
 
-RUN pip install pipenv==2018.11.26
-
-RUN true \
-    && echo '#!/bin/sh\ncd /app\nexec pipenv run python "$@"' >/usr/bin/pipenv-run-python \
-    && chmod +x /usr/bin/pipenv-run-python
-
 # Install the Python deps (common across worker & web server, for now)
 RUN mkdir /app
 WORKDIR /app
@@ -61,15 +55,15 @@ RUN curl -L https://github.com/mozilla/geckodriver/releases/download/v0.23.0/gec
 # RUN curl https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip -o /usr/bin/chromedriver
 # RUN chmod +x /usr/bin/chromedriver
 
-COPY Pipfile Pipfile.lock /app/
-RUN pipenv install
+COPY requirements.txt /app/
+RUN pip install -r /app/requirements.txt
 
 FROM autoscrape-worker-deps AS autoscrape-worker
-CMD [ "pipenv", "run", "celery", "-A", "autoscrape.tasks", "worker", "--loglevel=info" ]
+CMD [ "python3", "celery", "-A", "autoscrape.tasks", "worker", "--loglevel=info" ]
 
 FROM autoscrape-server-deps AS autoscrape-server
 EXPOSE 5000
-CMD [ "pipenv", "run", "python", "autoscrape-server.py" ]
+CMD [ "python3", "autoscrape-server.py" ]
 
 FROM rabbitmq:3.7.8-management as rabbitmq
 EXPOSE 15672
