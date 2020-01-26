@@ -107,8 +107,8 @@ for future reference:
       --output archived_webpage \
       'https://some.page/to-archive'
 
-Search Queries and Result Pages
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Search Forms and Cral Result Pages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Query a web form, identified by containing the text "I'm a search form",
 entering "NAME" into the first (0th) text input field and select January
@@ -377,7 +377,16 @@ AutoScrape can also be ran as a containerized cluster environment, where
 scrapes can be triggered and stopped via API calls and data can be
 streamed to this server.
 
-To run this you need
+This requires the `autoscrape-www <https://github.com/brandonrobertz/autoscrape-www>`__ submodule to be pulled:
+
+::
+
+    git submodule init
+    git submodule update
+
+This will pull the browser-based UI into the `www/` folder.
+
+You also need
 `docker-ce <https://docs.docker.com/install/#server>`__ and
 `docker-compose <https://docs.docker.com/compose/install/>`__. Once you
 have these dependencies installed, simply run:
