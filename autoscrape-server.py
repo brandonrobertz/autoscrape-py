@@ -81,7 +81,7 @@ def post_start():
     to query status or stop the scrape.
 
     Curl Example:
-        curl http://localhost:5000/start -H 'content-type: application/json' --data '{"baseurl": "https://bxroberts.org", "form_submit_wait": "5", "input": null, "save_graph": false, "load_images": false, "maxdepth": "0", "next_match": "next page", "leave_host": false, "show_browser": false, "driver": "Firefox", "form_submit_natural_click": false, "formdepth": "0", "link_priority": null, "keep_filename": false, "ignore_links": null, "form_match": null, "save_screenshots": true, "remote_hub": "http://localhost:4444/wd/hub", "loglevel": "DEBUG", "output": "http://flask:5001/receive/<JOB-ID-HERE>", "disable_style_saving": false}'
+        curl http://localhost:5000/start -H 'content-type: application/json' --data '{"baseurl": "https://bxroberts.org", "backend": "selenium", "form_submit_wait": "5", "input": null, "save_graph": false, "load_images": false, "maxdepth": "0", "next_match": "next page", "leave_host": false, "show_browser": false, "driver": "Firefox", "form_submit_natural_click": false, "formdepth": "0", "link_priority": null, "keep_filename": false, "ignore_links": null, "form_match": null, "save_screenshots": true, "remote_hub": "http://localhost:4444/wd/hub", "loglevel": "DEBUG", "output": "http://flask:5001/receive/<JOB-ID-HERE>", "disable_style_saving": false}'
 
     Success Returns:
         HTTP 200 OK
@@ -92,6 +92,8 @@ def post_start():
     app.logger.debug("Arguments: %s" % args)
     baseurl = args.pop("baseurl")
     app.logger.debug("Baseurl: %s" % baseurl)
+    if "backend" not in args:
+        args["backend"] = "requests"
     result = tasks.start.apply_async((baseurl, args))
     app.logger.debug("Result: %s" % result)
     return jsonify({"status": "OK", "data": result.id})
