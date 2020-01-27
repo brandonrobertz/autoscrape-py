@@ -11,8 +11,6 @@ Autoscrape
 .. figure:: https://github.com/brandonrobertz/autoscrape-py/blob/master/images/ai.png
    :alt: Artificial Informer Labs
 
-   Artificial Informer Labs
-
 A project of `Artificial Informer Labs <https://artificialinformer.com>`__.
 
 AutoScrape is an automated scraper of structured data from interactive
