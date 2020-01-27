@@ -53,7 +53,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 firefox_options=firefox_options,
                 firefox_profile=firefox_profile,
             )
-            self.driver.set_page_load_timeout(10)
+            self.driver.set_page_load_timeout(30)
 
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
@@ -196,7 +196,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
 
         # wait for the page to become ready, up to 30s, checks every 0.5s
         logger.debug(" - Performing native WebDriverWait...")
-        wait = WebDriverWait(self.driver, 10)
+        wait = WebDriverWait(self.driver, 30)
         wait.until(self._wait_check)
         t = time.time() - start
         logger.debug("Page wait for load check succeeded in %s" % t)
@@ -335,6 +335,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
             # some other problem. for now lets assume we didn't change
             # pages until we find otherwise.
             else:
+                logger.error("[!] Scraper operation timed out!!")
+                logger.error("[!] Current URL: %s" % (self.page_url))
                 return False
         except Exception as e:
             logger.error("[!] Error clicking %s: %s" % (href, e))
