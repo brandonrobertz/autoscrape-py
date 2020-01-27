@@ -80,10 +80,10 @@ class BaseScraper(object):
             int(time.time()), classname
         ))
 
-        logger.debug("[.] Saving screenshot to file: %s." % filepath)
         png = None
-        # only FF has this capability, it removes the scrollbar
-        png = self.control.scraper.driver.get_screenshot_as_png()
+        if hasattr(self.control, "driver"):
+            logger.debug("[.] Saving screenshot to file: %s." % filepath)
+            png = self.control.scraper.driver.get_screenshot_as_png()
 
         # if self.control.scraper.driver_name == "Firefox":
         #     try:
