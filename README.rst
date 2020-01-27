@@ -107,8 +107,8 @@ for future reference:
       --output archived_webpage \
       'https://some.page/to-archive'
 
-Search Forms and Cral Result Pages
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Search Forms and Crawl Result Pages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Query a web form, identified by containing the text "I'm a search form",
 entering "NAME" into the first (0th) text input field and select January
@@ -199,11 +199,18 @@ Autoscrape manual-mode full options:
         autoscrape [options] BASEURL
 
     General Options:
-        --backend BACKEND
-            The backend to use. Currently one of "selenium" or "requests".
-            The requests browser is only capable of crawling, but is
-            approximately 2-3.5x faster.
-            [default: "selenium"]
+    --backend BACKEND
+        The backend to use. Currently one of "selenium" or "requests".
+        The requests browser is only capable of crawling, but is
+        approximately 2-3.5x faster.
+        [default: selenium]
+
+    --loglevel LEVEL
+        Loglevel, note that DEBUG is extremely verbose.
+        [default: INFO]
+
+    --quiet
+        This will silence all logging to console.
 
     Crawl-Specific Options:
         --maxdepth DEPTH
@@ -311,10 +318,6 @@ Autoscrape manual-mode full options:
             If using "remote" driver, specify the hub URI to
             connect to. Needs the proto, address, port, and path.
             [default: http://localhost:4444/wd/hub]
-
-        --loglevel LEVEL
-            Loglevel, note that DEBUG is extremely verbose.
-            [default: INFO]
 
     Data Saving Options:
         --output DIRECTORY_OR_URL
