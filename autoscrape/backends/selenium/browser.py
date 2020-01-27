@@ -53,6 +53,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 firefox_options=firefox_options,
                 firefox_profile=firefox_profile,
             )
+            self.driver.set_page_load_timeout(10)
 
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
@@ -145,7 +146,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         This is the check that gets ran to determine whether
         the page is loaded or not.
         """
-        logger.debug("Waiting for page to load...")
+        logger.debug(" - Waiting for page to load (document.readyState)...")
         script = "return document.readyState;"
         result = self._driver_exec(driver.execute_script, script)
         return result == "complete"
@@ -184,6 +185,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         stale_check_max_times = 10.0
         stale_check_times = 0
         while stale_check_times < stale_check_max_times:
+            logger.debug(" - Doing stale check (no. %s)..." % (stale_check_times))
             try:
                 elem.text
             except StaleElementReferenceException:
@@ -193,7 +195,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
             time.sleep(wait_for_stale_time / stale_check_max_times)
 
         # wait for the page to become ready, up to 30s, checks every 0.5s
-        wait = WebDriverWait(self.driver, 30)
+        logger.debug(" - Performing native WebDriverWait...")
+        wait = WebDriverWait(self.driver, 10)
         wait.until(self._wait_check)
         t = time.time() - start
         logger.debug("Page wait for load check succeeded in %s" % t)
@@ -320,8 +323,24 @@ class SeleniumBrowser(BrowserBase, Tagger):
 
         try:
             self._loadwait(elem.click)
+        except TimeoutException as e:
+            # this is a fix for landing on the "view image" page
+            # that browsers now all include. these cause a timeout
+            # error w/ selenium. override the exception here, which
+            # would tell the scraper we didn't change pages, and the
+            # rest should work
+            IMAGE_TYPES = ".*\.(jpg|jpeg|png|gif|bmp)"
+            if re.match(IMAGE_TYPES, self.page_url):
+                logger.debug("[*] We're on a image viewer page!")
+            # some other problem. for now lets assume we didn't change
+            # pages until we find otherwise.
+            else:
+                return False
         except Exception as e:
-            logger.error("Error clicking %s: %s" % (href, e))
+            logger.error("[!] Error clicking %s: %s" % (href, e))
+            logger.error("[!] Stacktrace: %s" % (e.stacktrace))
+            logger.error("[!] Screen: %s" % (e.screen))
+            logger.error("[!] Current URL: %s" % (self.page_url))
             return False
 
         self.path.append((

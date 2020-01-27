@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 import os
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import (
+    Flask, request, jsonify, send_from_directory, redirect, url_for
+)
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from sqlalchemy_utils import database_exists, create_database
 
 import autoscrape.tasks as tasks
 
-from sqlalchemy import create_engine
-from sqlalchemy_utils import database_exists, create_database
 
 connect_str = 'postgresql://%s:%s@%s/autoscrape' % (
     os.environ["CJW_DB_USER"],
@@ -62,6 +64,11 @@ class Data(db.Model):
         }
 
 
+@app.route("/", methods=["GET"])
+def get_root():
+    return redirect(url_for("get_index"), code=302)
+
+
 @app.route("/app", methods=["GET"])
 def get_index():
     return send_from_directory("www", "index.html")
@@ -92,8 +99,6 @@ def post_start():
     app.logger.debug("Arguments: %s" % args)
     baseurl = args.pop("baseurl")
     app.logger.debug("Baseurl: %s" % baseurl)
-    if "backend" not in args:
-        args["backend"] = "requests"
     result = tasks.start.apply_async((baseurl, args))
     app.logger.debug("Result: %s" % result)
     return jsonify({"status": "OK", "data": result.id})

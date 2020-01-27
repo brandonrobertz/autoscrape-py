@@ -3,7 +3,9 @@ import json
 import logging
 import os
 import re
-from urllib import request, parse
+from urllib import parse
+
+import requests
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -76,11 +78,10 @@ def write_file(filepath, data, fileclass=None, writetype="w", output=None):
             headers = {
                 "content-type": "application/json"
             }
-            req = request.Request(
+            r = requests.post(
                 output, data=post_data, headers=headers
             )
-            # this will make the method "POST"
-            request.urlopen(req)
+            r.status_code
 
     # filesystem mode
     else:

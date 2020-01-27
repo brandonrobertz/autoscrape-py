@@ -105,6 +105,7 @@ class ManualControlScraper(BaseScraper):
         # Click until we get no more matches
         for ix, text in link_zip:
             logger.debug("Trying to click ix: %s, text: %s" % (ix, text))
+            logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
             if self.control.select_link(ix):
                 self.click_until_no_links(links)
                 self.save_training_page(classname="data_pages")
@@ -245,6 +246,7 @@ class ManualControlScraper(BaseScraper):
                 return
 
         link_vectors = self.control.link_vectors()
+        logger.debug("[.] Links on page: %s" % (link_vectors))
         link_zip = list(zip(range(len(link_vectors)), link_vectors))
         if self.link_priority and not self.only_links:
             logger.debug("[.] Sorting by link priority: %s" % self.link_priority)
@@ -265,13 +267,16 @@ class ManualControlScraper(BaseScraper):
 
         for ix, text in link_zip:
             logger.info(" - Link index: %s text: %s" % (ix, text))
+            logger.debug(" - All links oh page: %s" % (link_zip))
             if self.maxdepth != -1 and depth == self.maxdepth:
                 logger.debug("At maximum depth: %s, skipping links." % depth)
                 break
 
             logger.debug(" - Attempting to click link text: %s" % text)
+            logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
             if self.control.select_link(ix):
                 logger.debug("[.] Link clicked. Going a level deeper...")
+                logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
                 self.scrape(depth=depth + 1)
             else:
                 logger.debug(" - Link downloaded or click failed: %s" % text)

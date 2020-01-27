@@ -34,7 +34,7 @@ services:
     volumes:
       - ./:/app:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
-    command: [ 'pipenv', 'run', 'python3', 'autoscrape-server.py' ]
+    command: [ 'python3', 'autoscrape-server.py' ]
     ports:
       - '5000:5001'
     links:
@@ -54,7 +54,7 @@ services:
     volumes:
       - ./:/app:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
-    command: [ 'pipenv', 'run', 'celery', '-A', 'autoscrape.tasks', 'worker', '--loglevel=info' ]
+    command: [ 'celery', '-A', 'autoscrape.tasks', 'worker', '--loglevel=info' ]
     #user: nobody
     links:
       - rabbitmq

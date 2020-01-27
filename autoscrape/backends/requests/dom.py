@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import lxml.html
-from multiprocessing import Pool
+# use threads so we can run autoscrape inside celery
+from multiprocessing.pool import ThreadPool
 
 import requests
 from urllib.parse import urlparse, ParseResult
@@ -50,7 +51,7 @@ class Dom(DomBase):
             css_url = self._normalize_url(l_href)
             stylesheet_urls.append(css_url)
 
-        pool = Pool(8)
+        pool = ThreadPool(8)
         results = pool.map(download_stylesheet, stylesheet_urls)
         pool.close()
 
