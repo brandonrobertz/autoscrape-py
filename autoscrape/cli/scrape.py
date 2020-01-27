@@ -15,6 +15,13 @@ General Options:
         approximately 2-3.5x faster.
         [default: selenium]
 
+    --loglevel LEVEL
+        Loglevel, note that DEBUG is extremely verbose.
+        [default: INFO]
+
+    --quiet
+        This will silence all logging to console.
+
 Crawl-Specific Options:
     --maxdepth DEPTH
         Maximum depth to crawl a site (in search of form
@@ -122,10 +129,6 @@ Webdriver-Specific and General Options:
         connect to. Needs the proto, address, port, and path.
         [default: http://localhost:4444/wd/hub]
 
-    --loglevel LEVEL
-        Loglevel, note that DEBUG is extremely verbose.
-        [default: INFO]
-
 Data Saving Options:
     --output DIRECTORY_OR_URL
         If specified, this indicates where to save pages during a
@@ -169,15 +172,18 @@ Data Saving Options:
         with a scraped page. To save storage, you can disable this
         functionality by using this option.
 """
+import logging
 
 from docopt import docopt
 
 import autoscrape
 
 
+logger = logging.getLogger('AUTOSCRAPE')
+
+
 def main():
     docopt_args = docopt(__doc__)
-    print(docopt_args)
 
     BASEURL = docopt_args.pop("BASEURL")
 
@@ -186,8 +192,15 @@ def main():
     for option in docopt_args:
         args[option[2:].replace('-', '_')] = docopt_args[option]
 
-    print("args", args)
+    # configure stdout logging
+    docopt_args["stdout"] = True
+    if "quiet" in args:
+        quiet = args.pop("quiet")
+        args["stdout"] = not quiet
+
     scraper = autoscrape.ManualControlScraper(BASEURL, **args)
+
+    logger.debug("AutoScrape starting with arguments: %s" % (docopt_args))
     scraper.run()
 
     # elif args.scraper == "autoscrape-ml":

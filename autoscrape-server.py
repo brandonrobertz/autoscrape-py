@@ -98,6 +98,7 @@ def post_start():
     args = request.get_json()
     app.logger.debug("Arguments: %s" % args)
     baseurl = args.pop("baseurl")
+    args["stdout"] = False
     app.logger.debug("Baseurl: %s" % baseurl)
     result = tasks.start.apply_async((baseurl, args))
     app.logger.debug("Result: %s" % result)

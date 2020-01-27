@@ -5,7 +5,7 @@ source tests/common.sh
 for backend in ${BACKENDS}; do
   output="${OUTPUT_BASE}/autoscrape-data-${backend}"
   rm -rf ${output}
-  echo "=================================================="
+  add_separator
   add_benchmark_header ${backend} "crawl"
   ${TIME} ${AUTOSCRAPE} \
     --backend ${backend} \

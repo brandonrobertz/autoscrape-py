@@ -31,8 +31,8 @@ class ManualControlScraper(BaseScraper):
     # so users can get familiar with the concepts of self-exploration
     # and self-learning but without having to get the ML concepts.
 
-    def __init__(self, baseurl, loglevel=None, maxdepth=10, formdepth=0,
-                 next_match=None, form_match=None,
+    def __init__(self, baseurl, loglevel=None, stdout=None, maxdepth=10,
+                 formdepth=0, next_match=None, form_match=None,
                  output=None, keep_filename=False,
                  disable_style_saving=False,
                  save_screenshots=False, save_graph=False,
@@ -44,7 +44,9 @@ class ManualControlScraper(BaseScraper):
                  form_submit_wait=5, load_images=False, show_browser=False,
                  backend="selenium"):
         # setup logging, etc
-        super(ManualControlScraper, self).setup_logging(loglevel=loglevel)
+        super(ManualControlScraper, self).setup_logging(
+            loglevel=loglevel, stdout=stdout
+        )
         # set up web scraper controller
         self.control = Controller(
             leave_host=leave_host, driver=driver, remote_hub=remote_hub,

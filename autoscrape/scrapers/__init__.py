@@ -20,10 +20,10 @@ class BaseScraper(object):
     parsing & setup, file saving, etc.
     """
 
-    def setup_logging(self, loglevel=None):
-        if not loglevel or loglevel == "DEBUG":
+    def setup_logging(self, loglevel=None, stdout=False):
+        if loglevel == "DEBUG":
             loglevel = logging.DEBUG
-        elif loglevel == "INFO":
+        elif not loglevel or loglevel == "INFO":
             loglevel = logging.INFO
         elif loglevel == "WARN":
             loglevel = logging.WARN
@@ -31,8 +31,9 @@ class BaseScraper(object):
             loglevel = logging.ERROR
 
         logger.setLevel(loglevel)
-        console_handler = logging.StreamHandler()
-        logger.addHandler(console_handler)
+        if stdout:
+            console_handler = logging.StreamHandler()
+            logger.addHandler(console_handler)
 
     def save_screenshot(self, classname=None):
         """

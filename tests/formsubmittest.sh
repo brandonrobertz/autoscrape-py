@@ -6,6 +6,7 @@ source tests/common.sh
 for backend in ${BACKENDS}; do
   output="${OUTPUT_BASE}/autoscrape-data-formsubmit-${backend}"
   rm -rf ${output}
+  add_separator
   add_benchmark_header ${backend} "form submitter"
   ${TIME} ${AUTOSCRAPE} \
     --backend ${backend} \

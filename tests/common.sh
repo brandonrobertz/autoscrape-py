@@ -18,3 +18,6 @@ add_benchmark_header () {
   echo "Running ${benchmark} ${crawlname}" | tee -a ${BENCHMARK_LOG}
 }
 
+add_separator () {
+  echo "======================================================================"
+}
