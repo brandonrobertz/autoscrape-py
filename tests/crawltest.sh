@@ -3,7 +3,7 @@
 source tests/common.sh
 
 for backend in ${BACKENDS}; do
-  output="autoscrape-data-${backend}"
+  output="${OUTPUT_BASE}/autoscrape-data-${backend}"
   rm -rf ${output}
   echo "=================================================="
   add_benchmark_header ${backend} "crawl"

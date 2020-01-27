@@ -1,8 +1,11 @@
-BENCHMARK_LOG=backend-benchmark.log
+OUTPUT_BASE="autoscrape-data-tests"
+BENCHMARK_LOG="${OUTPUT_BASE}/backend-benchmark.log"
 BACKENDS="selenium requests"
 TIME="$(which time) -p -a -o ${BENCHMARK_LOG}"
 
 AUTOSCRAPE="./autoscrape.py --save-graph --loglevel DEBUG"
+
+mkdir -p ${OUTPUT_BASE}
 
 die () {
   echo "${*}"

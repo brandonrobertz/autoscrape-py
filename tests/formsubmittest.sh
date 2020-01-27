@@ -3,12 +3,11 @@ URL="https://utdirect.utexas.edu/apps/degree/degrees/nlogon/"
 
 source tests/common.sh
 
-for backend in requests selenium; do
-  output="autoscrape-data-formsubmit-${backend}"
+for backend in ${BACKENDS}; do
+  output="${OUTPUT_BASE}/autoscrape-data-formsubmit-${backend}"
   rm -rf ${output}
   add_benchmark_header ${backend} "form submitter"
   ${TIME} ${AUTOSCRAPE} \
-    --show-browser \
     --backend ${backend} \
     --maxdepth 1 \
     --formdepth 1 \
