@@ -19,11 +19,13 @@ searched for forms and structured data can then be extracted. No
 brittle, site-specific programming necessary.
 
 This is an implementation of the web scraping framework described in the
-paper, `*Robust Web Scraping in the Public Interest with AutoScrape* <https://bxroberts.org/files/autoscrape.pdf>`__ in
-`Proceedings of Computation + Journalism Symposium 2019 <http://cplusj.org/>`__.
+paper, `Robust Web Scraping in the Public Interest with AutoScrape <https://bxroberts.org/files/autoscrape.pdf>`__ and presented at
+`Computation + Journalism Symposium 2019 <http://cplusj.org/>`__.
 
-Currently there are two methods of running AutoScrape: - as a local CLI
-python script - as a containerized system via the API
+Currently there are two methods of running AutoScrape:
+
+- as a local CLI python script
+- as a containerized system via the API and Web UI
 
 Installation and running instructions are provided for both below.
 
