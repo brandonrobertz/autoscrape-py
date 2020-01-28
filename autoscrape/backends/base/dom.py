@@ -118,7 +118,7 @@ class DomBase:
         filepath = os.path.join(dl_dir, parsed_filename)
         write_file(
             filepath, data, fileclass="download", writetype="wb",
-            output=self.output
+            output=self.output, url=self.page_url,
         )
 
     def _no_tags(self, list, l_type="path"):

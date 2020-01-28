@@ -52,7 +52,8 @@ def get_extension_from_url(url):
     return ext
 
 
-def write_file(filepath, data, fileclass=None, writetype="w", output=None):
+def write_file(filepath, data, fileclass=None, writetype="w", output=None,
+               url=None):
     """
     Write out a scraped data file to disk or a remote callback,
     specified in output parameter.
@@ -70,7 +71,8 @@ def write_file(filepath, data, fileclass=None, writetype="w", output=None):
             encoded = base64.b64encode(bytes(data, "utf-8")).decode()
         payload = {
             "name": filepath,
-            "data": encoded
+            "data": encoded,
+            "url": url,
         }
         if fileclass:
             payload["fileclass"] = fileclass

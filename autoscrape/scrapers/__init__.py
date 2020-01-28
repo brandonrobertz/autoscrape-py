@@ -81,7 +81,7 @@ class BaseScraper(object):
         ))
 
         png = None
-        if hasattr(self.control, "driver"):
+        if hasattr(self.control.scraper, "driver"):
             logger.debug("[.] Saving screenshot to file: %s." % filepath)
             png = self.control.scraper.driver.get_screenshot_as_png()
 
@@ -105,7 +105,8 @@ class BaseScraper(object):
         if png:
             write_file(
                 filepath, png, fileclass="screenshot",
-                writetype="wb", output=self.output
+                writetype="wb", output=self.output,
+                url=self.control.scraper.page_url,
             )
 
         if self.full_page_screenshots:
@@ -170,7 +171,8 @@ class BaseScraper(object):
 
         write_file(
             filepath, data, fileclass=classname,
-            writetype=writetype, output=self.output
+            writetype=writetype, output=self.output,
+            url=self.control.scraper.page_url,
         )
 
         # only save stylesheets for web content types
@@ -180,7 +182,8 @@ class BaseScraper(object):
             # this will save stylesheet as filepath.html.css
             write_file(
                 style_filepath, self.control.scraper.get_stylesheet(),
-                fileclass=classname, output=self.output
+                fileclass=classname, output=self.output,
+                url=self.control.scraper.page_url,
             )
 
     def save_scraper_graph(self):

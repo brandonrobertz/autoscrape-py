@@ -42,14 +42,16 @@ class Data(db.Model):
     name = db.Column(db.String, nullable=False)
     fileclass = db.Column(db.String, nullable=False)
     data = db.Column(db.String, nullable=False)
+    url = db.Column(db.String, nullable=False)
 
     db.UniqueConstraint('task_id', 'name', name='unique_name_per_task_1')
 
-    def __init__(self, task_id, name, fileclass, data):
+    def __init__(self, task_id, name, fileclass, data, url):
         self.task_id = task_id
         self.name = name
         self.fileclass = fileclass
         self.data = data
+        self.url = url
 
     def __repr__(self):
         return '<Data %r, %r>' % (self.name, self.fileclass)
@@ -61,6 +63,7 @@ class Data(db.Model):
             "timestamp": self.timestamp.isoformat(),
             "name": self.name,
             "fileclass": self.fileclass,
+            "url": self.url,
         }
 
 
@@ -129,9 +132,10 @@ def get_status(id):
         "status": "OK",
         "message": result.state,
     }
-    if data and data.data:
+    if data:
         app.logger.debug("Data: %s" % data)
         response["data"] = data.data
+        response["url"] = data.url
     return jsonify(response)
 
 
@@ -167,12 +171,15 @@ def receive_data(id):
         }
     """
     app.logger.debug("Task ID : %s" % id)
+    args = request.get_json()
+    name = args["name"]
+    app.logger.debug("Name: %s" % name)
+    fileclass = args["fileclass"]
+    app.logger.debug("File class: %s" % (fileclass))
+    url = args["url"]
+    app.logger.debug("URL: %s" % (url))
+
     try:
-        args = request.get_json()
-        name = args["name"]
-        app.logger.debug("Name: %s" % name)
-        fileclass = args["fileclass"]
-        app.logger.debug("File class: %s" % fileclass)
         data = args["data"]
         app.logger.debug("Data: %s" % len(data))
         # app.logger.debug("Decoded: %s" % decoded)
@@ -182,7 +189,7 @@ def receive_data(id):
         fileclass = None
 
     # TODO: write b64 data to postgres under task ID key
-    scraped_data = Data(id, name, fileclass, data)
+    scraped_data = Data(id, name, fileclass, data, url)
     db.session.add(scraped_data)
     db.session.commit()
     app.logger.debug("Updated task state")
@@ -242,7 +249,8 @@ def get_file_data(task_id, file_id):
             "task_id": task_id,
             "id": file_id,
             "name": data.name,
-            "data": data.data
+            "data": data.data,
+            "url": data.url,
         }
     })
 
