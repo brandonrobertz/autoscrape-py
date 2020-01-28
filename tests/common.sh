@@ -3,7 +3,7 @@ BENCHMARK_LOG="${OUTPUT_BASE}/backend-benchmark.log"
 BACKENDS="selenium requests"
 TIME="$(which time) -p -a -o ${BENCHMARK_LOG}"
 
-AUTOSCRAPE="./autoscrape.py --save-graph --loglevel DEBUG"
+AUTOSCRAPE="./autoscrape.py --save-graph --loglevel DEBUG --save-screenshots"
 
 mkdir -p ${OUTPUT_BASE}
 
@@ -21,3 +21,4 @@ add_benchmark_header () {
 add_separator () {
   echo "======================================================================"
 }
+
