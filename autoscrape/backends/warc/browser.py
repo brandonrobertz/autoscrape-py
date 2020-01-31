@@ -7,11 +7,15 @@ from autoscrape.backends.requests.browser import RequestsBrowser
 from autoscrape.backends.requests.tags import Tagger
 from autoscrape.search.graph import Graph
 
-import plyvel
-import warc
-
 
 logger = logging.getLogger('AUTOSCRAPE')
+
+
+try:
+    import plyvel
+    import warc
+except ModuleNotFoundError:
+    pass
 
 
 class WARCBrowser(RequestsBrowser):

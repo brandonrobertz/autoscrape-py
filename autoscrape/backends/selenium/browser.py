@@ -26,7 +26,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
     def __init__(self, driver="Firefox", leave_host=False,
                  load_images=False, form_submit_natural_click=False,
                  form_submit_wait=5, output=None, show_browser=False,
-                 remote_hub="http://localhost:4444/wd/hub"):
+                 remote_hub="http://localhost:4444/wd/hub", **kwargs):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
