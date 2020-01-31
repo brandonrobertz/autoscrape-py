@@ -96,6 +96,9 @@ class WARCBrowser(RequestsBrowser):
         return db
 
     def _warc_payload(self, record):
+        """
+        Extract the body from a WARC response "payload".
+        """
         # find the initial blank line, indicating body starts
         line = True
         while line:
@@ -107,6 +110,11 @@ class WARCBrowser(RequestsBrowser):
         return payload
 
     def _load_warc_file(self, filename):
+        """
+        Take a specified WARC file, load it and keep it in memory in a quickly
+        readable format (python dict). This operates directly on the class
+        variable self.warc_cache and also handles maximum cache size pruning.
+        """
         logger.debug("[-] Loading WARC file: %s" % (filename))
         if len(self.warc_cache_stack) > self.warc_cache_size:
             least_used = self.warc_cache_stack.pop()
@@ -146,6 +154,13 @@ class WARCBrowser(RequestsBrowser):
                 self._load_warc_file(filename)
             record = self.warc_cache[filename][record_number]
             self.current_html = record["payload"]
+
+            try:
+                self.warc_cache_stack.remove(filename)
+            except ValueError:
+                pass
+
+            self.warc_cache_stack.insert(0, filename)
 
         self.current_url = url
         self.dom = self._get_dom()
