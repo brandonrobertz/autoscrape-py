@@ -33,15 +33,14 @@ class ManualControlScraper(BaseScraper):
 
     def __init__(self, baseurl, loglevel=None, stdout=None, maxdepth=10,
                  formdepth=0, next_match=None, form_match=None,
-                 output=None, keep_filename=False,
-                 disable_style_saving=False,
+                 output=None, keep_filename=False, disable_style_saving=False,
                  save_screenshots=False, save_graph=False,
-                 full_page_screenshots=False,
-                 input=None, leave_host=False,
+                 full_page_screenshots=False, input=None, leave_host=False,
                  driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
                  link_priority=None, ignore_links=None, only_links=None,
                  result_page_links=None, form_submit_natural_click=False,
                  form_submit_wait=5, load_images=False, show_browser=False,
+                 warc_index_file=None, warc_directory=None,
                  backend="selenium"):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(
@@ -53,6 +52,7 @@ class ManualControlScraper(BaseScraper):
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=int(form_submit_wait),
             load_images=load_images, show_browser=show_browser,
+            warc_index_file=warc_index_file, warc_directory=warc_directory,
             output=output, backend=backend,
         )
         self.control.initialize(baseurl)

@@ -4,6 +4,7 @@ import logging
 
 from autoscrape.backends.requests.browser import RequestsBrowser
 from autoscrape.backends.selenium.browser import SeleniumBrowser
+from autoscrape.backends.warc.browser import WARCBrowser
 from autoscrape.vectorization import Vectorizer
 
 
@@ -20,8 +21,8 @@ class Controller(object):
     """
 
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
-                 leave_host=False, driver="Firefox",
-                 remote_hub="http://localhost:4444/wd/hub",
+                 warc_index_file=None, warc_directory=None, leave_host=False,
+                 driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
                  output=None, form_submit_natural_click=False,
                  form_submit_wait=5, load_images=False,
                  show_browser=False, backend="selenium"):
@@ -37,6 +38,8 @@ class Controller(object):
             Browser = SeleniumBrowser
         elif backend == "requests":
             Browser = RequestsBrowser
+        elif backend == "warc":
+            Browser = WARCBrowser
         else:
             raise NotImplementedError(
                 "No backend found: %s" % (backend)
@@ -46,8 +49,9 @@ class Controller(object):
             leave_host=leave_host, driver=driver, remote_hub=remote_hub,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=form_submit_wait,
+            warc_index_file=warc_index_file, warc_directory=warc_directory,
+            load_images=load_images, show_browser=show_browser,
             output=output,
-            load_images=load_images, show_browser=show_browser
         )
         self.clickable = []
         # simply a list of form tags, each forms input contents is

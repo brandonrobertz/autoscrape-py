@@ -10,9 +10,10 @@ Usage:
 
 General Options:
     --backend BACKEND
-        The backend to use. Currently one of "selenium" or "requests".
-        The requests browser is only capable of crawling, but is
-        approximately 2-3.5x faster.
+        The backend to use. Currently one of "selenium", "requests" or
+        "warc".  The requests browser is only capable of crawling, but
+        is approximately 2-3.5x faster. WARC is for emulating browsing
+        through Common Crawl archival data.
         [default: selenium]
 
     --loglevel LEVEL
@@ -129,6 +130,19 @@ Webdriver-Specific and General Options:
         connect to. Needs the proto, address, port, and path.
         [default: http://localhost:4444/wd/hub]
 
+WARC Options:
+    --warc-directory PATH_TO_WARCS
+        Path to the folder containing GZipped WARC files. These can be
+        downloaded from Common Crawl. Required when using the "warc"
+        backend.
+
+    --warc-index-file PATH_TO_LEVELDB
+        Path to the level DB database holding the URL-to-file
+        index: URL => (filename, record_number)
+        This will be generated from the WARCS in the --warc-directory
+        speficied if it's not already. Required when using the "warc"
+        backend.
+
 Data Saving Options:
     --output DIRECTORY_OR_URL
         If specified, this indicates where to save pages during a
@@ -203,10 +217,3 @@ def main():
     logger.debug("AutoScrape starting with arguments: %s" % (docopt_args))
     scraper.run()
 
-    # elif args.scraper == "autoscrape-ml":
-    #     kwargs["html_embeddings"] = args.html_embeddings or None
-    #     kwargs["word_embeddings"] = args.word_embeddings or None
-    #     autoscrape.MLAutoScraper(args.baseurl, **kwargs).run()
-
-    # else:
-    #     print("No scraper found for %s" % args.scraper)
