@@ -3,6 +3,7 @@ import hashlib
 import logging
 import os
 import re
+import sys
 import time
 
 from ..filetypes import TEXT_EXTENSIONS
@@ -32,7 +33,7 @@ class BaseScraper(object):
 
         logger.setLevel(loglevel)
         if stdout:
-            console_handler = logging.StreamHandler()
+            console_handler = logging.StreamHandler(stream=sys.stdout)
             logger.addHandler(console_handler)
 
     def save_screenshot(self, classname=None):
