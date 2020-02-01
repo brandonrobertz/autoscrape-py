@@ -64,6 +64,27 @@ class WARCBrowser(RequestsBrowser):
         self.current_url = None
         self.current_html = None
 
+    def _warc_payload(self, record):
+        """
+        Extract the body from a WARC response "payload".
+        """
+        # find the initial blank line, indicating body starts
+        line = True
+        while line:
+            line = record.payload.readline().strip()
+        payload = ""
+        for line in record.payload:
+            cleaned = line.decode("utf-8").strip()
+            payload += cleaned
+        return payload
+
+    def _warc_record_sane(self, record):
+        if record.type != "response":
+            return False
+        if "WARC-Target-URI" not in record:
+            return False
+        return True
+
     def _build_warc_index(self):
         """
         Read through all WARC files in self.warc_directory and build
@@ -86,28 +107,14 @@ class WARCBrowser(RequestsBrowser):
             logger.debug(" - Parsing %s" % (filename))
             record_number = -1
             for record in warc.open(filename):
-                record_number += 1
-                if "WARC-Target-URI" not in record:
+                if not self._warc_record_sane(record):
                     continue
+                record_number += 1
                 uri = record["WARC-Target-URI"]
                 uri_bytes = bytes(uri, "utf-8")
                 value = pickle.dumps((filename, record_number))
                 db.put(uri_bytes, value)
         return db
-
-    def _warc_payload(self, record):
-        """
-        Extract the body from a WARC response "payload".
-        """
-        # find the initial blank line, indicating body starts
-        line = True
-        while line:
-            line = record.payload.readline().strip()
-        payload = ""
-        for line in record.payload:
-            cleaned = line.decode("utf-8").strip()
-            payload += cleaned
-        return payload
 
     def _load_warc_file(self, filename):
         """
@@ -122,11 +129,11 @@ class WARCBrowser(RequestsBrowser):
 
         self.warc_cache[filename] = []
         for record in warc.open(filename):
-            if "WARC-Target-URI" not in record:
+            if not self._warc_record_sane(record):
                 continue
             payload = self._warc_payload(record)
             if not payload:
-                continue
+                payload = "<html></html>"
             self.warc_cache[filename].append({
                 "header": {k: v for k,v in record.header.items()},
                 "payload": payload,
@@ -152,7 +159,8 @@ class WARCBrowser(RequestsBrowser):
             ))
             if filename not in self.warc_cache:
                 self._load_warc_file(filename)
-            record = self.warc_cache[filename][record_number]
+            warcfile = self.warc_cache[filename]
+            record = warcfile[record_number]
             self.current_html = record["payload"]
 
             try:
