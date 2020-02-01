@@ -270,7 +270,7 @@ class ManualControlScraper(BaseScraper):
         for ix, text in link_zip:
             logger.debug(" - Link index: %s text: %s" % (ix, text))
             if self.maxdepth != -1 and depth == self.maxdepth:
-                logger.debug("At maximum depth: %s, skipping links." % depth)
+                logger.debug(" - At maximum depth: %s, skipping links." % depth)
                 break
 
             logger.debug(" - Attempting to click link text: %s" % text)
@@ -280,7 +280,7 @@ class ManualControlScraper(BaseScraper):
                 logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
                 self.scrape(depth=depth + 1)
             else:
-                logger.debug(" - Link downloaded or click failed: %s" % text)
+                logger.debug(" - Click failed, skipping: %s" % text)
 
         logger.debug("[*] Searching forms and links on page complete")
         self.control.back()
