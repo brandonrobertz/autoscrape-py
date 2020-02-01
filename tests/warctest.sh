@@ -9,4 +9,4 @@ time ./autoscrape.py \
   --output '' \
   'http://calendar.uconn.edu/2017/day/065/433/'
 
-#rm -rf /tmp/level.db
+rm -rf /tmp/level.db
