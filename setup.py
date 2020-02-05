@@ -14,7 +14,7 @@ install_requires = [
     'numpy>=1.15.0',
     'cssselect>=1.1.0',
     'requests>=2.22.0',
-    'lxml>=4.4.2',
+    'lxml>=4.3.0',
 ]
 
 
