@@ -2,30 +2,17 @@
 from os import path
 import setuptools
 
-import autoscrape
+try:
+    # for pip >= 10
+    from pip._internal.req import parse_requirements
+except ImportError:
+    # for pip <= 9.0.3
+    from pip.req import parse_requirements
 
 
-install_requires = [
-    'html5lib>=1.0.1',
-    'selenium>=2.12.0',
-    'webencodings>=0.5.1',
-    'docopt>=0.6.2',
-    'networkx>=2.2',
-    'numpy>=1.15.0',
-    'cssselect>=1.1.0',
-    'requests>=2.22.0',
-    'lxml>=4.3.0',
-]
-
-
-install_dev_requires = [
-    # For the frontend UX
-    'Flask>=1.0.2',
-    'celery>=4.1.1',
-    'psycopg2>=2.7.6.1',
-    'flask-sqlalchemy>=2.3.2',
-    'six>=1.11.0',
-]
+def load_requirements(fname):
+    reqs = parse_requirements(fname, session="test")
+    return [str(ir.req) for ir in reqs]
 
 
 def get_long_description():
@@ -36,15 +23,12 @@ def get_long_description():
 
 setuptools.setup(
     name='autoscrape',
-    version=autoscrape.__version__,
+    version='1.1.2',
     description='An automated, programming-free web scraper for interactive sites',
     long_description=get_long_description(),
     author='Brandon Roberts',
     author_email='brandon@bxroberts.org',
     url='https://github.com/brandonrobertz/autoscrape-py',
-    # project_urls={
-    #     'Documentation': 'https://csvkit.readthedocs.io/en/latest/',
-    # },
     license='AGPLv3',
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -74,6 +58,7 @@ setuptools.setup(
         'autoscrape.backends.base',
         'autoscrape.backends.selenium',
         'autoscrape.backends.requests',
+        'autoscrape.backends.warc',
         'autoscrape.scrapers',
         'autoscrape.search',
     ],
@@ -82,5 +67,5 @@ setuptools.setup(
             'autoscrape = autoscrape.cli.scrape:main',
         ]
     },
-    install_requires=install_requires
+    install_requires=load_requirements("requirements.txt"),
 )
