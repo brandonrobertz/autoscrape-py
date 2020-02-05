@@ -13,7 +13,7 @@ except ImportError:
 def load_requirements(fname):
     BASEDIR = path.abspath(path.dirname(__file__))
     filepath = path.join(BASEDIR, fname)
-    reqs = parse_requirements(fname, session="test")
+    reqs = parse_requirements(filepath, session="test")
     return [str(ir.req) for ir in reqs]
 
 
