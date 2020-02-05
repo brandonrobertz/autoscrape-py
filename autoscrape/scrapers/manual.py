@@ -40,7 +40,7 @@ class ManualControlScraper(BaseScraper):
                  link_priority=None, ignore_links=None, only_links=None,
                  result_page_links=None, form_submit_natural_click=False,
                  form_submit_wait=5, load_images=False, show_browser=False,
-                 warc_index_file=None, warc_directory=None,
+                 warc_index_file=None, warc_directory=None, return_data=False,
                  backend="selenium"):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(
@@ -66,6 +66,11 @@ class ManualControlScraper(BaseScraper):
         self.form_match = form_match
         # Where to write training data from crawl
         self.output = output
+        # Whether or not to return crawled data upon completion. This can be
+        # used along with output, or on its own. This will store all
+        # data in memory (in self.crawl_data) during the crawl, so beware!
+        self.return_data = return_data
+        self.crawl_data = []
         # If this is true, do not use a file hash for the filename
         self.keep_filename = keep_filename
         # Disable saving of stylesheets for web content types
@@ -306,3 +311,6 @@ class ManualControlScraper(BaseScraper):
             self.control.scraper.driver.quit()
         except Exception:
             pass
+
+        if self.return_data:
+            return self.crawl_data

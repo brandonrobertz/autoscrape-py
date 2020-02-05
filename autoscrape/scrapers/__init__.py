@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+import datetime
 import hashlib
 import logging
 import os
@@ -103,7 +104,7 @@ class BaseScraper(object):
         #     except Exception as e:
         #         logger.warn("Error saving screenshot: %s" % e)
 
-        if png:
+        if png and self.output:
             write_file(
                 filepath, png, fileclass="screenshot",
                 writetype="wb", output=self.output,
@@ -121,7 +122,7 @@ class BaseScraper(object):
         Writes the current page to the output data directory (if provided)
         to the given class folder.
         """
-        if not self.output:
+        if not self.output and not self.return_data:
             return
 
         logger.debug("[.] Saving training page for class: %s" % classname)
@@ -143,7 +144,8 @@ class BaseScraper(object):
             data = self.control.scraper.download_file(url)
 
         ext = get_extension_from_url(url)
-        if ext not in TEXT_EXTENSIONS:
+        link_to_text = ext in TEXT_EXTENSIONS
+        if not link_to_text:
             data = self.control.scraper.download_file(url, return_data=True)
             classname = "downloads"
 
@@ -170,22 +172,38 @@ class BaseScraper(object):
         else:
             filepath = os.path.join(classdir, "%s.%s" % (h, ext))
 
-        write_file(
-            filepath, data, fileclass=classname,
-            writetype=writetype, output=self.output,
-            url=self.control.scraper.page_url,
-        )
+        crawl_data = None
+        if self.output:
+            write_file(
+                filepath, data, fileclass=classname,
+                writetype=writetype, output=self.output,
+                url=self.control.scraper.page_url,
+            )
+        if self.return_data:
+            now = datetime.datetime.utcnow()
+            crawl_data = {
+                "url": url,
+                "html": data,
+                "date": now.isoformat(timespec="seconds") + "Z",
+            }
 
         # only save stylesheets for web content types
-        if not self.disable_style_saving and ext in TEXT_EXTENSIONS:
+        if link_to_text and not self.disable_style_saving:
             logger.debug("[.] Saving stylesheet")
             style_filepath = "%s.css" % filepath
             # this will save stylesheet as filepath.html.css
-            write_file(
-                style_filepath, self.control.scraper.get_stylesheet(),
-                fileclass=classname, output=self.output,
-                url=self.control.scraper.page_url,
-            )
+            stylesheet = self.control.scraper.get_stylesheet()
+            if self.output:
+                write_file(
+                    style_filepath, stylesheet,
+                    fileclass=classname, output=self.output,
+                    url=self.control.scraper.page_url,
+                )
+            if self.return_data:
+                crawl_data["css"] = stylesheet
+
+        if self.return_data:
+            self.crawl_data.append(crawl_data)
 
     def save_scraper_graph(self):
         """

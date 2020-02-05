@@ -17,7 +17,7 @@ class MLAutoScraper(BaseScraper):
     """
 
     def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
-                 html_embeddings=None, word_embeddings=None):
+                 html_embeddings=None, word_embeddings=None, **kwargs):
         # setup logging, etc
         super(MLAutoScraper, self).setup_logging(loglevel=loglevel)
         # set up web scraper controller
