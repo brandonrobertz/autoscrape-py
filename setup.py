@@ -2,20 +2,6 @@
 from os import path
 import setuptools
 
-try:
-    # for pip >= 10
-    from pip._internal.req import parse_requirements
-except ImportError:
-    # for pip <= 9.0.3
-    from pip.req import parse_requirements
-
-
-def load_requirements(fname):
-    BASEDIR = path.abspath(path.dirname(__file__))
-    filepath = path.join(BASEDIR, fname)
-    reqs = parse_requirements(filepath, session="test")
-    return [str(ir.req) for ir in reqs]
-
 
 def get_long_description():
     BASEDIR = path.abspath(path.dirname(__file__))
@@ -25,7 +11,7 @@ def get_long_description():
 
 setuptools.setup(
     name='autoscrape',
-    version='1.1.4',
+    version='1.1.5',
     description='An automated, programming-free web scraper for interactive sites',
     long_description=get_long_description(),
     author='Brandon Roberts',
@@ -69,5 +55,16 @@ setuptools.setup(
             'autoscrape = autoscrape.cli.scrape:main',
         ]
     },
-    install_requires=load_requirements("requirements.txt"),
+    install_requires=[
+        'selenium>=3.141.0',
+        'lxml>=4.3.0',
+        'html5lib>=1.0.1',
+        'webencodings>=0.5.1',
+        'docopt>=0.6.2',
+        'networkx>=2.2',
+        'numpy>=1.15.0',
+        'cssselect>=1.1.0',
+        'requests>=2.22.0',
+        'lxml>=4.3.0',
+    ],
 )
