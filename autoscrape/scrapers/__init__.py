@@ -130,7 +130,7 @@ class BaseScraper(object):
             raise ValueError("Base class speficied: %s" % classname)
 
         # always keep filename for downloads, for now
-        if re.match("^https?://", self.output):
+        if not self.output or re.match("^https?://", self.output):
             classdir = classname
         else:
             classdir = os.path.join(self.output, classname)
