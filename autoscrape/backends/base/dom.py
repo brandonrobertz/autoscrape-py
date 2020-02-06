@@ -2,7 +2,7 @@
 import logging
 import os
 import re
-import urllib.request
+import urllib
 
 from autoscrape.util import write_file, get_filename_from_url
 
@@ -97,7 +97,13 @@ class DomBase:
             "User-Agent": user_agent,
             "Referrer": self.page_url,
         })
-        response = urllib.request.urlopen(request)
+
+        try:
+            response = urllib.request.urlopen(request)
+        except urllib.error.HTTPError as e:
+            logger.debug("[!] HTTP error while downloading: %s" % (e))
+            return
+
         data = response.read()
         action = {
             "action": "download_file",

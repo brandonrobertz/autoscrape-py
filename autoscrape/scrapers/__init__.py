@@ -149,6 +149,10 @@ class BaseScraper(object):
             data = self.control.scraper.download_file(url, return_data=True)
             classname = "downloads"
 
+        # we had some kind of error downloading
+        if data is None:
+            return
+
         # hash the contents of the file, so we don't *not* save dynamic
         # JS pages with the same URl and that we *don't* excessively save
         # the same page over and over

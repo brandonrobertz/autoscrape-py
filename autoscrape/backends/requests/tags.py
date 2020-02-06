@@ -37,3 +37,19 @@ class Tagger(TaggerBase, Dom):
             "//form//a", "//input[@type='submit']", "//table//a",
         ])
         return super().get_buttons(in_form=in_form, path=x_path)
+
+    def clickable_sanity_check(self, element):
+        raw_href = self.element_attr(element, "href")
+        if not raw_href:
+            return False
+
+        href = self._normalize_url(raw_href).split("#")[0]
+        if href.split("#")[0] == self.current_url:
+            return False
+
+        # skip any weird protos ... we whitelist notrmal HTTP,
+        # anchor tags and blank tags (to support JavaScript & btns)
+        if href and href.startswith("javascript"):
+            return False
+
+        return super().clickable_sanity_check(element, href=href)

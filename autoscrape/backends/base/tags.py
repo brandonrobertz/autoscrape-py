@@ -26,21 +26,22 @@ class TaggerBase(DomBase):
         """
         raise NotImplementedError("Tagger.tag_from_element not implemented")
 
-    def clickable_sanity_check(self, element):
+    def clickable_sanity_check(self, element, href=None):
         """
         Check a series of element nodes, checking their attributes and other
         attributes, determining if a element is actually 'clickable'. This
         check determines which nodes will end up as clickable options for
         the scraper on this page.
         """
-        raw_href = self.element_attr(element, "href")
-        if not raw_href:
-            return False
+        if not href:
+            raw_href = self.element_attr(element, "href")
+            if not raw_href:
+                return False
 
-        if hasattr(self, "_normalize_url"):
-            href = self._normalize_url(raw_href).split("#")[0]
-        else:
-            href = raw_href
+            if hasattr(self, "_normalize_url"):
+                href = self._normalize_url(raw_href).split("#")[0]
+            else:
+                href = raw_href
 
         if href.split("#")[0] == self.current_url:
             return False
