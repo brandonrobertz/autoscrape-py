@@ -10,6 +10,7 @@ from selenium.common.exceptions import (
     InvalidElementStateException,
 )
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -26,14 +27,17 @@ class SeleniumBrowser(BrowserBase, Tagger):
     def __init__(self, driver="Firefox", leave_host=False,
                  load_images=False, form_submit_natural_click=False,
                  form_submit_wait=5, output=None, show_browser=False,
+                 browser_binary=None,
                  remote_hub="http://localhost:4444/wd/hub", **kwargs):
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
         if driver == "Firefox":
+            logger.debug(" - Starting Firefox")
             firefox_options = webdriver.firefox.options.Options()
             if not show_browser:
                 logger.debug(" - Headless mode enabled")
+                firefox_options.add_argument("--headless")
                 firefox_options.add_argument("-headless")
                 firefox_options.headless = True
             firefox_profile = webdriver.FirefoxProfile()
@@ -49,15 +53,21 @@ class SeleniumBrowser(BrowserBase, Tagger):
             firefox_profile.set_preference(
                 'security.fileuri.strict_origin_policy', 'false'
             )
+            binary = None
+            if browser_binary is not None:
+                logger.debug(" - Using binary: %s" % (browser_binary))
+                binary = FirefoxBinary(browser_binary)
             self.driver = webdriver.Firefox(
                 firefox_options=firefox_options,
                 firefox_profile=firefox_profile,
+                firefox_binary=binary,
             )
             self.driver.set_page_load_timeout(30)
 
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
         elif driver == "Chrome":
+            logger.debug(" - Starting Chrome")
             chrome_options = webdriver.ChromeOptions()
             if not show_browser:
                 chrome_options.add_argument("--headless")
@@ -67,9 +77,13 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 "profile.managed_default_content_settings.images": 2
             }
             chrome_options.add_experimental_option("prefs", prefs)
+            if browser_binary is not None:
+                logger.debug(" - Using binary: %s" % (browser_binary))
+                options.binary_location = browser_binary
             self.driver = webdriver.Chrome(chrome_options=chrome_options)
 
         elif driver == "remote":
+            logger.debug(" - Starting remote browser")
             self.driver = webdriver.Remote(
                 command_executor=remote_hub,
                 desired_capabilities={
@@ -92,6 +106,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
         # queue of the path that led us to the current page
         # this is in the form of (command, *args, **kwargs)
         self.path = []
+        # store the values of the history stack length (via JS) for use in determining
+        # whether or not we actually navigated somewhere
+        self.history_stack = []
         # tree building
         self.graph = Graph()
         # sometimes the firefox driver loses its pipe to the browser. in
@@ -141,6 +158,14 @@ class SeleniumBrowser(BrowserBase, Tagger):
             except Exception:
                 pass
 
+    def _get_history_depth(self):
+        """
+        Retrieve the browser history depth for use in detecting
+        whether or not we actually navigated to a new page.
+        """
+        script = "return window.history.length;"
+        return self._driver_exec(self.driver.execute_script, script)
+
     def _wait_check(self, driver):
         """
         This is the check that gets ran to determine whether
@@ -148,7 +173,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         """
         logger.debug(" - Waiting for page to load (document.readyState)...")
         script = "return document.readyState;"
-        result = self._driver_exec(driver.execute_script, script)
+        result = self._driver_exec(self.driver.execute_script, script)
         return result == "complete"
 
     def _loadwait(self, fn, *args, **kwargs):
@@ -220,15 +245,23 @@ class SeleniumBrowser(BrowserBase, Tagger):
         logger.info("Fetching %s" % url)
         self._loadwait(self.driver.get, url)
         self.path.append(("fetch", (url,), {}))
+        self.history_stack.append(self._get_history_depth())
         node = "Fetch\n url: %s" % url
         self.graph.add_root_node(node, url=url, action="fetch")
+        # this is the initial load, so we can just set history here
+        self.history_depth = self._get_history_depth()
 
     def back(self):
-        logger.info("[+] Going back... current n_paths=%s path=%s" % (
-            len(self.path),
-            self._no_tags(self.path),
+        logger.info("[+] Going back...")
+        logger.debug(" - current path-length=%s path=%s" % (
+            len(self.path), self._no_tags(self.path),
         ))
-        self._loadwait(self.driver.back)
+        # only go 'back' if the history depth changed from
+        # now to the previous (back) value. if they're the
+        # same, we just clicked something inside the page
+        current_hist = self.history_stack.pop()
+        if current_hist != self.history_stack[-1]:
+            self._loadwait(self.driver.back)
         self.path.pop()
         self.graph.move_to_parent()
 
@@ -345,6 +378,10 @@ class SeleniumBrowser(BrowserBase, Tagger):
             logger.error("[!] Current URL: %s" % (self.page_url))
             return False
 
+        # set the history depth now that we've clicked
+        self.history_depth = self._get_history_depth()
+
+        self.history_stack.append(self._get_history_depth())
         self.path.append((
             "click", (tag,), {"iterating_form": iterating_form}
         ))
@@ -518,6 +555,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             logger.debug("Using form.submit selenium shim")
             self._loadwait(form.submit, check_alerts=True)
 
+        self.history_stack.append(self._get_history_depth())
         self.path.append(("submit", (tag,), {}))
         node = "Submit\n tag: %s" % (tag)
         node_meta = {

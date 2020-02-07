@@ -47,6 +47,10 @@ Crawl-Specific Options:
         MATCH_STRING (can be a regex or just a string match)
         from consideration for clicking.
 
+    --ignore-extensions IGNORE_EXTENSIONS
+        Don't click on or download URLs pointing to files with
+        these extensions.
+
     --result-page-links MATCH_STRINGS_LIST
         If specified, AutoScrape will click on any links matching
         this string when it arrives on a search result page.
@@ -124,6 +128,10 @@ Webdriver-Specific and General Options:
     --driver DRIVER
         Which browser to use. Current support for "Firefox",
         "Chrome", and "remote". [default: Firefox]
+
+    --browser-binary PATH_TO_BROWSER
+        Path to a specific browser binary. If left blank
+        selenium will pull the browser found on your path.
 
     --remote-hub URI
         If using "remote" driver, specify the hub URI to

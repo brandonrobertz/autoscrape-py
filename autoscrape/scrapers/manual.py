@@ -36,11 +36,13 @@ class ManualControlScraper(BaseScraper):
                  output=None, keep_filename=False, disable_style_saving=False,
                  save_screenshots=False, save_graph=False,
                  full_page_screenshots=False, input=None, leave_host=False,
-                 driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
+                 driver="Firefox", browser_binary=None,
+                 remote_hub="http://localhost:4444/wd/hub",
                  link_priority=None, ignore_links=None, only_links=None,
-                 result_page_links=None, form_submit_natural_click=False,
-                 form_submit_wait=5, load_images=False, show_browser=False,
-                 warc_index_file=None, warc_directory=None, return_data=False,
+                 ignore_extensions=None, result_page_links=None,
+                 form_submit_natural_click=False, form_submit_wait=5,
+                 load_images=False, show_browser=False, warc_index_file=None,
+                 warc_directory=None, return_data=False,
                  backend="selenium"):
         # setup logging, etc
         super(ManualControlScraper, self).setup_logging(
@@ -53,7 +55,7 @@ class ManualControlScraper(BaseScraper):
             form_submit_wait=int(form_submit_wait),
             load_images=load_images, show_browser=show_browser,
             warc_index_file=warc_index_file, warc_directory=warc_directory,
-            output=output, backend=backend,
+            output=output, backend=backend, browser_binary=browser_binary,
         )
         self.control.initialize(baseurl)
         # depth of DFS in search of form
@@ -86,6 +88,8 @@ class ManualControlScraper(BaseScraper):
         self.link_priority = link_priority
         # string or regex to be used to omit links from clickable
         self.ignore_links = ignore_links
+        # string or regex to use to not go to URLs with extensions
+        self.ignore_extensions = ignore_extensions
         # Whitelisted links to click
         self.only_links = only_links
         # Apply any link clicking rules to the results pages
@@ -176,6 +180,13 @@ class ManualControlScraper(BaseScraper):
         if self.maxdepth != -1 and depth > self.maxdepth:
             logger.info("Maximum depth %s reached, returning..." % depth)
             self.control.back()
+            return
+
+        if self.ignore_extensions and re.findall(self.ignore_extensions,
+                                                 self.control.scraper.page_url):
+            logger.debug(" - Ignoring URL matching ignored extension: %s" % (
+                self.control.scraper.page_url
+            ))
             return
 
         self.save_training_page(classname="crawl_pages")

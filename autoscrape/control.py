@@ -22,10 +22,10 @@ class Controller(object):
 
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
                  warc_index_file=None, warc_directory=None, leave_host=False,
-                 driver="Firefox", remote_hub="http://localhost:4444/wd/hub",
-                 output=None, form_submit_natural_click=False,
-                 form_submit_wait=5, load_images=False,
-                 show_browser=False, backend="selenium"):
+                 driver="Firefox", browser_binary=None,
+                 remote_hub="http://localhost:4444/wd/hub", output=None,
+                 form_submit_natural_click=False, form_submit_wait=5,
+                 load_images=False, show_browser=False, backend="selenium"):
         """
         Set up our WebDriver and misc utilities.
         """
@@ -46,7 +46,8 @@ class Controller(object):
             )
 
         self.scraper = Browser(
-            leave_host=leave_host, driver=driver, remote_hub=remote_hub,
+            leave_host=leave_host, driver=driver,
+            browser_binary=browser_binary, remote_hub=remote_hub,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=form_submit_wait,
             warc_index_file=warc_index_file, warc_directory=warc_directory,
