@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 TEXT_EXTENSIONS = (
     # ASP Classic
     "asp",

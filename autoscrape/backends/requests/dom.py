@@ -23,15 +23,37 @@ class Dom(DomBase):
         self.dom = self._get_dom()
 
     def _get_dom(self):
-        return lxml.html.fromstring(self.current_html)
+        try:
+            dom = lxml.html.fromstring(self.current_html)
+        # this handles trying to load XML, RSS feed, etc
+        except ValueError as e:
+            if "Please use bytes input" in str(e):
+                html_b = bytes(self.current_html, encoding="utf-8")
+                dom = lxml.html.fromstring(html_b)
+            else:
+                raise e
+        # if our page's HTML is just an element, like an
+        # iframe, without a body or html then lxml will
+        # return an element surrounded by a body and html.
+        # so here we make element the root and use that as
+        # our base DOM.
+        while True:
+            parent = dom.getparent()
+            if parent is None:
+                break
+            dom = parent
+        return dom
 
     def element_attr(self, element, name, default=None):
-        if element.attrib and "href" in element.attrib:
-            return element.attrib["href"]
-        return default
+        if not element.attrib:
+            return default
+        return element.attrib.get(name, default)
 
     def element_by_tag(self, tag):
-        return self.dom.cssselect(tag)[0]
+        elements = self.dom.cssselect(tag)
+        if not elements:
+            return None
+        return elements[0]
 
     def elements_by_path(self, xpath, from_element=None):
         if from_element is None:
@@ -62,13 +84,14 @@ class Dom(DomBase):
 
     def _normalize_url(self, url):
         argnames = ['scheme', 'netloc', 'path', 'params', 'query', 'fragment']
+        inheritable = ['scheme', 'netloc', 'path']
         parsed_current_url = urlparse(self.current_url)
         parsed_url = urlparse(url)
 
         args = []
         for argname in argnames:
             value = getattr(parsed_url, argname, None)
-            if not value:
+            if not value and argname in inheritable:
                 value = getattr(parsed_current_url, argname, '')
             args.append(value)
 
@@ -79,6 +102,8 @@ class Dom(DomBase):
     def element_text(self, element, block=False):
         if block and element is not None:
             return element.text_content()
+        if element is None:
+            return ''
         text = element.text
         if not text:
             return ''

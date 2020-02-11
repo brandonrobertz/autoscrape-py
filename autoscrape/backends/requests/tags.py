@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import logging
 
 from autoscrape.backends.base.tags import TaggerBase
@@ -38,8 +39,17 @@ class Tagger(TaggerBase, Dom):
         ])
         return super().get_buttons(in_form=in_form, path=x_path)
 
+    def get_clickable(self, path=None):
+        clickable = super().get_clickable(path="//a|//iframe")
+        return clickable
+
     def clickable_sanity_check(self, element):
         raw_href = self.element_attr(element, "href")
+
+        tag_name = self.element_tag_name(element)
+        if tag_name == "iframe":
+            raw_href = self.element_attr(element, "src")
+
         if not raw_href:
             return False
 

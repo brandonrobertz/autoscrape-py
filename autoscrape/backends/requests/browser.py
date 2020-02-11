@@ -1,4 +1,6 @@
+# -*- coding: UTF-8 -*-
 import logging
+import time
 
 import requests
 from autoscrape.backends.base.browser import BrowserBase
@@ -51,7 +53,8 @@ class RequestsBrowser(BrowserBase, Tagger):
         text = self.element_text(element)
         url = None
         hash = None
-        if self.element_tag_name(element) == "a":
+        tag_name = self.element_tag_name(element)
+        if tag_name == "a":
             raw_href = self.element_attr(element, "href")
             if not raw_href:
                 return False
@@ -63,8 +66,9 @@ class RequestsBrowser(BrowserBase, Tagger):
             self.visited.add(hash)
 
             logger.info("[+] Clicking link: %s" % url)
-            self.fetch(url)
-        elif element.tag == "input":
+            if not self.fetch(url):
+                return False
+        elif tag_name == "input":
             element_type = element.type
             if element_type == "submit":
                 parent_form = element.xpath(".//ancestor::form")[0]
@@ -72,9 +76,23 @@ class RequestsBrowser(BrowserBase, Tagger):
                 self.submit(parent_form_tag, add_node=False)
                 url = self.current_url
                 hash = "%s|%s" % (url, element_type)
+        elif tag_name == "iframe":
+            raw_href = self.element_attr(element, "src")
+            if not raw_href:
+                return False
+
+            url = self._normalize_url(raw_href)
+            hash = "%s|%s" % (url, element.tag)
+            if hash in self.visited:
+                return False
+            self.visited.add(hash)
+
+            logger.info("[+] Fetching iframe: %s" % url)
+            if not self.fetch(url):
+                return False
         else:
             raise NotImplementedError(
-                "click not supported for tag: %s" % (element.tag)
+                "click not implemented for element: %s" % (tag_name)
             )
 
         self.path.append((
@@ -102,15 +120,44 @@ class RequestsBrowser(BrowserBase, Tagger):
         logger.info("%s Fetching url=%s initial=%s" % (
             ("[+]" if initial else " -"), url, initial,
         ))
-        response = self.s.get(url)
-        self.current_url = response.url
+        retries = 3
+        success = True
+        while True:
+            try:
+                response = self.s.get(url)
+                break
+            except requests.exceptions.ConnectionError:
+                logger.error(" ! Connection error, retrying...")
+                if not retries:
+                    logger.error(" ! Connection error, skipping URL...")
+                    return False
+                time.sleep(5)
+            retries -= 1
+
+        if not response.text:
+            logger.error(" ! Blank response. Skipping URL...")
+            return False
+
+        # Requests' encoding detection is faulty. The following
+        # block will fix most issues
+        if response.encoding and "utf" not in response.encoding.lower():
+            response.encoding = response.apparent_encoding
         self.current_html = response.text
+        # this check fixes improper decoding of UTF byte order mark
+        if self.current_html[:3] == "ï»¿":
+            self.current_html = self.current_html.encode(
+                response.encoding
+            ).decode("utf-8-sig")
+
+        self.current_url = response.url
         self.dom = self._get_dom()
 
         if initial:
             self.path.append(("fetch", [url], {"initial": initial}))
             node = "Fetch\n url: %s" % url
             self.graph.add_root_node(node, url=url, action="fetch")
+
+        return True
 
     def back(self):
         logger.info("[+] Going back... current n_paths=%s path=%s" % (

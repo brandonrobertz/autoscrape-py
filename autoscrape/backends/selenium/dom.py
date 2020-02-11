@@ -72,8 +72,9 @@ class Dom(DomBase):
                 logger.error("Error getting placeholder: %s, Error: %s" % (
                     el, e))
 
-        logger.debug("Element texts: %s" % text)
-        return " ".join(text)
+        full_text = " ".join(text)
+        logger.debug(" - Found text: %s" % full_text)
+        return full_text
 
     def element_tag_name(self, element):
         if element is None:

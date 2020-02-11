@@ -57,7 +57,7 @@ class TaggerBase(DomBase):
 
         # Don't leave base host ... configurable?
         elem_host = urlparse(href).netloc
-        if not self.leave_host and elem_host != self.base_host:
+        if elem_host and not self.leave_host and elem_host != self.base_host:
             return False
 
         return True

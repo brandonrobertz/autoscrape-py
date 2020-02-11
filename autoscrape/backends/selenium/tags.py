@@ -85,8 +85,8 @@ class Tagger(TaggerBase, Dom):
         TODO: In the future we may need to recurse the page to find
         other clickable types like JS-enabled divs, etc.
         """
-        x_path = path or "|".join([
+        xpath = path or "|".join([
             "//a", "//button", "//input[@type='submit']",
             "//input[@type='button']"
         ])
-        return super().get_clickable(path=x_path)
+        return super().get_clickable(path=xpath)

@@ -189,7 +189,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             del kwargs["check_alerts"]
 
         # get any element as a reference for staleness check
-        elem = self.driver.find_element_by_xpath("//*")
+        elem = self.driver.find_element_by_xpath("html")
 
         self._driver_exec(fn, *args, **kwargs)
         time.sleep(1)
@@ -207,7 +207,21 @@ class SeleniumBrowser(BrowserBase, Tagger):
             except TimeoutException:
                 pass
 
-        stale_check_max_times = 10.0
+        # wait for the page to become ready, up to 30s, checks every 0.5s
+        logger.debug(" - Performing native WebDriverWait...")
+        wait = WebDriverWait(self.driver, 30)
+        wait.until(self._wait_check)
+
+        stale_check_max_times = 30.0
+        stale_check_times = 0
+        while stale_check_times < stale_check_max_times:
+            logger.debug(" - Doing ID check (no. %s)..." % (stale_check_times))
+            if elem.id != self.driver.find_element_by_xpath("html").id:
+                break
+            stale_check_times += 1
+            time.sleep(wait_for_stale_time / stale_check_max_times)
+
+        stale_check_max_times = 30.0
         stale_check_times = 0
         while stale_check_times < stale_check_max_times:
             logger.debug(" - Doing stale check (no. %s)..." % (stale_check_times))
@@ -219,12 +233,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
             stale_check_times += 1
             time.sleep(wait_for_stale_time / stale_check_max_times)
 
-        # wait for the page to become ready, up to 30s, checks every 0.5s
-        logger.debug(" - Performing native WebDriverWait...")
-        wait = WebDriverWait(self.driver, 30)
-        wait.until(self._wait_check)
         t = time.time() - start
-        logger.debug("Page wait for load check succeeded in %s" % t)
+        logger.debug(" - Wait for load succeeded in %s" % t)
 
     def scrolltoview(self, elem):
         """
@@ -242,26 +252,27 @@ class SeleniumBrowser(BrowserBase, Tagger):
         the time we just want to click a link or submit a form using
         webdriver.
         """
-        logger.info("Fetching %s" % url)
+        logger.info("[.] Fetching %s" % url)
         self._loadwait(self.driver.get, url)
         self.path.append(("fetch", (url,), {}))
         self.history_stack.append(self._get_history_depth())
         node = "Fetch\n url: %s" % url
         self.graph.add_root_node(node, url=url, action="fetch")
-        # this is the initial load, so we can just set history here
-        self.history_depth = self._get_history_depth()
 
     def back(self):
         logger.info("[+] Going back...")
         logger.debug(" - current path-length=%s path=%s" % (
             len(self.path), self._no_tags(self.path),
         ))
+        logger.debug("History stack: %s" % (self.history_stack))
         # only go 'back' if the history depth changed from
         # now to the previous (back) value. if they're the
         # same, we just clicked something inside the page
-        current_hist = self.history_stack.pop()
-        if current_hist != self.history_stack[-1]:
-            self._loadwait(self.driver.back)
+        if len(self.history_stack) > 1:
+            current_hist = self.history_stack.pop()
+            if current_hist != self.history_stack[-1]:
+                logger.debug("History depth changed since last action.")
+                self._loadwait(self.driver.back)
         self.path.pop()
         self.graph.move_to_parent()
 
@@ -312,30 +323,11 @@ class SeleniumBrowser(BrowserBase, Tagger):
             msg = "Error finding element for tag %s. Error: %s"
             logger.error(msg % (tag, e))
 
-    def elem_stats(self, elem):
-        # position  = self._driver_exec(elem.location)
-        # css_vis   = self._driver_exec(elem.value_of_css_property, "visibility")
-        # css_dis   = self._driver_exec(elem.value_of_css_property, "display")
-        # displayed = self._driver_exec(elem.is_displayed)
-        # enabled   = self._driver_exec(elem.is_enabled)
-        # size      = self._driver_exec(elem.size)
-        # text      = self._driver_exec(elem.text)
-        # logger.debug("  element position %s" % position)
-        # logger.debug("  displayed: %s" % displayed)
-        # logger.debug("  enabled: %s" % enabled)
-        # logger.debug("  size: %s" % size)
-        # logger.debug("  css visibility: %s" % css_vis)
-        # logger.debug("  css display: %s" % css_dis)
-        # logger.debug("  text: %s" % text.replace("\n", "\\n"))
-        pass
-
     def click(self, tag, iterating_form=False):
         """
         Click an element by a given tag. Returns True if the link
         hasn't been visited and was actually clicked.
         """
-        logger.debug("Attempting to click tag %s" % tag)
-
         elem = self.element_by_tag(tag)
         if not elem:
             logger.warn("Element by tag not found. Tag: %s" % tag)
@@ -352,7 +344,6 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.visited.add(hash)
         self.disable_target(elem)
         self.scrolltoview(elem)
-        self.elem_stats(elem)
 
         try:
             self._loadwait(elem.click)
@@ -377,9 +368,6 @@ class SeleniumBrowser(BrowserBase, Tagger):
             logger.error("[!] Screen: %s" % (e.screen))
             logger.error("[!] Current URL: %s" % (self.page_url))
             return False
-
-        # set the history depth now that we've clicked
-        self.history_depth = self._get_history_depth()
 
         self.history_stack.append(self._get_history_depth())
         self.path.append((
@@ -430,7 +418,6 @@ class SeleniumBrowser(BrowserBase, Tagger):
         logger.info("Injecting text \"%s\" to input" % (input))
         elem = self.element_by_tag(tag)
         self._driver_exec(self.scrolltoview, elem)
-        self.elem_stats(elem)
         try:
             self._driver_exec(elem.clear)
         except ElementNotInteractableException as e:
@@ -505,7 +492,6 @@ class SeleniumBrowser(BrowserBase, Tagger):
         """
         logger.info("Submitting form by tag: %s" % tag)
         form = self.element_by_tag(tag)
-        self.elem_stats(form)
         self._driver_exec(self.scrolltoview, form)
 
         # try to find a Submit input button

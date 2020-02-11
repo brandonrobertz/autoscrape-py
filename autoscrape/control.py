@@ -138,7 +138,6 @@ class Controller(object):
     def select_button(self, index, iterating_form=False):
         tag = self.buttons[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
-        time.sleep(1)
         if clicked:
             self.load_indices()
         return clicked

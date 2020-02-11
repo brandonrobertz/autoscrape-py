@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from autoscrape.backends.base.tags import TaggerBase
 
 

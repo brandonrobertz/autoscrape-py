@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
 AUTOSCRAPE - Interactively crawl, find searchable forms,
@@ -37,15 +36,23 @@ Crawl-Specific Options:
         in the BASEURL. This option lets the scraper leave
         the host.
 
-    --link-priority SORT_STRING
-        A string to sort the links by. In this case, any link
-        containing "SORT_STRING" will be clicked before any other
-        links.
+    --only-links MATCH_STREING
+        A whitelist of links to follow. All others will
+        be ignored. Can be a string or a regex with
+        multiple strings to match separated by a pipe
+        (|) character.
 
     --ignore-links MATCH_STRING
         This option can be used to remove any links matching
         MATCH_STRING (can be a regex or just a string match)
-        from consideration for clicking.
+        from consideration for clicking. Accepts the same
+        argument format as --only-links.
+
+    --link-priority SORT_STRING
+        A string to sort the links by. In this case, any link
+        containing "SORT_STRING" will be clicked before any other
+        links. In most cases you probably want to use the
+        whitelist, --only-links, option.
 
     --ignore-extensions IGNORE_EXTENSIONS
         Don't click on or download URLs pointing to files with

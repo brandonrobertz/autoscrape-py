@@ -107,7 +107,6 @@ class ManualControlScraper(BaseScraper):
 
     def click_until_no_links(self, links):
         link_vectors = self.control.link_vectors()
-        # import IPython; IPython.embed(); import time; time.sleep(2)
         link_zip = list(zip(range(len(link_vectors)), link_vectors))
         link_zip = filter(
             lambda x: re.findall(self.result_page_links, x[1]),
@@ -266,21 +265,22 @@ class ManualControlScraper(BaseScraper):
         link_vectors = self.control.link_vectors()
         logger.debug("[.] Links on page: %s" % (link_vectors))
         link_zip = list(zip(range(len(link_vectors)), link_vectors))
-        if self.link_priority and not self.only_links:
-            logger.debug("[.] Sorting by link priority: %s" % self.link_priority)
-            link_zip.sort(
-                key=lambda x: not re.findall(self.link_priority, x[1])
-            )
-        if self.ignore_links and not self.only_links:
-            logger.debug("[.] Ignoring links matching: %s" % self.ignore_links)
+        if self.ignore_links:
+            logger.debug(" - Ignoring links matching: %s" % self.ignore_links)
             link_zip = filter(
                 lambda x: not re.findall(self.ignore_links, x[1]),
                 link_zip
             )
         if self.only_links:
+            logger.debug(" - Keeping only links matching: %s" % self.ignore_links)
             link_zip = filter(
                 lambda x: re.findall(self.only_links, x[1]),
                 link_zip
+            )
+        if self.link_priority:
+            logger.debug(" - Sorting by link priority: %s" % self.link_priority)
+            link_zip.sort(
+                key=lambda x: not re.findall(self.link_priority, x[1])
             )
 
         for ix, text in link_zip:
@@ -289,8 +289,8 @@ class ManualControlScraper(BaseScraper):
                 logger.debug(" - At maximum depth: %s, skipping links." % depth)
                 break
 
-            logger.debug(" - Attempting to click link text: %s" % text)
             logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
+            logger.debug(" - Attempting to click link text: %s" % text)
             if self.control.select_link(ix):
                 logger.debug("[.] Link clicked. Going a level deeper...")
                 logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
@@ -304,20 +304,20 @@ class ManualControlScraper(BaseScraper):
     def run(self, *args, **kwargs):
         # we have to catch this so, in the case of failure, we
         # don't have random browser windows hanging around
-        try:
-            self.scrape(*args, **kwargs)
-        except Exception as e:
-            msg = "[!] Fatal error scraping: %s. Cleaning up, quitting."
-            logger.error(msg % (e))
-            if hasattr(self.control.scraper, "driver"):
-                self.control.scraper.driver.quit()
-            if self.output and self.save_graph:
-                self.save_scraper_graph()
-            raise e
-        else:
-            logger.info("[+] AutoScrape run complete.")
-            if self.output and self.save_graph:
-                self.save_scraper_graph()
+        # try:
+        self.scrape(*args, **kwargs)
+        # except Exception as e:
+        #     msg = "[!] Fatal error scraping: %s. Cleaning up, quitting."
+        #     logger.error(msg % (e))
+        #     if hasattr(self.control.scraper, "driver"):
+        #         self.control.scraper.driver.quit()
+        #     if self.output and self.save_graph:
+        #         self.save_scraper_graph()
+        #     raise e
+        # else:
+        #     logger.info("[+] AutoScrape run complete.")
+        #     if self.output and self.save_graph:
+        #         self.save_scraper_graph()
         try:
             self.control.scraper.driver.quit()
         except Exception:
