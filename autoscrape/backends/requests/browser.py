@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 import logging
+import re
 import time
 
 import requests
@@ -48,11 +49,29 @@ class RequestsBrowser(BrowserBase, Tagger):
         self.current_url = None
         self.current_html = None
 
+    def _no_endslash_url(self, url):
+        # remove trailing slash
+        url_noslash = re.sub(r"/$", "", url)
+        # and trailing slash before query params
+        return re.sub(r"/&", "&", url_noslash)
+
+    def _check_and_set_visited(self, url):
+        """
+        Take a URL and see if we've visited it (or a slash-ending
+        variation) if we haven't this sets the URL to the
+        visited set. Returns True if we've visited False if not.
+        """
+        url_no_endslash = self._no_endslash_url(url)
+        if url_no_endslash in self.visited or url in self.visited:
+            return True
+        self.visited.add(url)
+        self.visited.add(url_no_endslash)
+        return False
+
     def click(self, tag, **kwargs):
         element = self.element_by_tag(tag)
         text = self.element_text(element)
         url = None
-        hash = None
         tag_name = self.element_tag_name(element)
         if tag_name == "a":
             raw_href = self.element_attr(element, "href")
@@ -60,10 +79,8 @@ class RequestsBrowser(BrowserBase, Tagger):
                 return False
 
             url = self._normalize_url(raw_href)
-            hash = "%s|%s" % (url, element.tag)
-            if hash in self.visited:
+            if self._check_and_set_visited(url):
                 return False
-            self.visited.add(hash)
 
             logger.info("[+] Clicking link: %s" % url)
             if not self.fetch(url):
@@ -75,17 +92,17 @@ class RequestsBrowser(BrowserBase, Tagger):
                 parent_form_tag = self.tag_from_element(parent_form)
                 self.submit(parent_form_tag, add_node=False)
                 url = self.current_url
-                hash = "%s|%s" % (url, element_type)
+                if self._check_and_set_visited(url):
+                    return False
+
         elif tag_name == "iframe":
             raw_href = self.element_attr(element, "src")
             if not raw_href:
                 return False
 
             url = self._normalize_url(raw_href)
-            hash = "%s|%s" % (url, element.tag)
-            if hash in self.visited:
+            if self._check_and_set_visited(url):
                 return False
-            self.visited.add(hash)
 
             logger.info("[+] Fetching iframe: %s" % url)
             if not self.fetch(url):
@@ -98,7 +115,7 @@ class RequestsBrowser(BrowserBase, Tagger):
         self.path.append((
             "click", [tag], {"url": url}
         ))
-        node = "Click\n text: %s\n hash: %s" % (text, hash)
+        node = "Click\n text: %s\n URL: %s" % (text, url)
         node_meta = {
             "click": tag,
             "click_text": text,
@@ -160,11 +177,10 @@ class RequestsBrowser(BrowserBase, Tagger):
         return True
 
     def back(self):
-        logger.info("[+] Going back... current n_paths=%s path=%s" % (
-            len(self.path),
-            self._no_tags(self.path),
+        logger.info("[+] Going back...")
+        logger.debug(" - current path-length=%s path=%s" % (
+            len(self.path), self._no_tags(self.path),
         ))
-
         # We're now where we started from
         self.path.pop()
         if not self.path:

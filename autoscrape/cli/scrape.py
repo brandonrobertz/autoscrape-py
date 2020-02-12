@@ -31,6 +31,10 @@ Crawl-Specific Options:
         Setting to -1 means unlimited maximum crawl depth.
         [default: 10]
 
+    --max-pages NUM
+        Maximum number of unique pages, in total, to fetch.
+        AutoScrape will stop crawling once this is hit.
+
     --leave-host
         By default, autoscrape will not leave the host given
         in the BASEURL. This option lets the scraper leave

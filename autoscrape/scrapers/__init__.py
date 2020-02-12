@@ -122,7 +122,8 @@ class BaseScraper(object):
         Writes the current page to the output data directory (if provided)
         to the given class folder.
         """
-        if not self.output and not self.return_data:
+        if not self.output and \
+           not self.return_data and self.max_pages is not None:
             return
 
         logger.debug("[.] Saving training page for class: %s" % classname)

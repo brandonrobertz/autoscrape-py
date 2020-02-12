@@ -32,6 +32,7 @@ class ManualControlScraper(BaseScraper):
     # and self-learning but without having to get the ML concepts.
 
     def __init__(self, baseurl, loglevel=None, stdout=None, maxdepth=10,
+                 max_pages=None,
                  formdepth=0, next_match=None, form_match=None,
                  output=None, keep_filename=False, disable_style_saving=False,
                  save_screenshots=False, save_graph=False,
@@ -62,6 +63,10 @@ class ManualControlScraper(BaseScraper):
         self.maxdepth = int(maxdepth)
         # current depth of iterating through 'next' form buttons
         self.formdepth = int(formdepth)
+        # max total pages to fetch
+        self.max_pages = int(max_pages) if max_pages else None
+        # keep number of fetched pages here.
+        self.total_pages = 0
         # match for link to identify a "next" button
         self.next_match = next_match
         # string to match a form (by element text) we want to scrape
@@ -106,6 +111,10 @@ class ManualControlScraper(BaseScraper):
             self.input_gen = []
 
     def click_until_no_links(self, links):
+        if self.max_pages is not None and self.total_pages >= self.max_pages:
+            logger.info(" - Maximum pages %s reached, returning..." % self.max_pages)
+            return
+
         link_vectors = self.control.link_vectors()
         link_zip = list(zip(range(len(link_vectors)), link_vectors))
         link_zip = filter(
@@ -117,6 +126,7 @@ class ManualControlScraper(BaseScraper):
             logger.debug("Trying to click ix: %s, text: %s" % (ix, text))
             logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
             if self.control.select_link(ix):
+                self.total_pages += 1
                 self.click_until_no_links(links)
                 self.save_training_page(classname="data_pages")
                 self.save_screenshot(classname="data_pages")
@@ -177,8 +187,11 @@ class ManualControlScraper(BaseScraper):
     def scrape(self, depth=0):
         logger.info("[.] Crawl depth %s" % depth)
         if self.maxdepth != -1 and depth > self.maxdepth:
-            logger.info("Maximum depth %s reached, returning..." % depth)
+            logger.info(" - Maximum depth %s reached, returning..." % depth)
             self.control.back()
+            return
+        if self.max_pages is not None and self.total_pages >= self.max_pages:
+            logger.info(" - Maximum pages %s reached, returning..." % self.max_pages)
             return
 
         if self.ignore_extensions and re.findall(self.ignore_extensions,
@@ -248,6 +261,7 @@ class ManualControlScraper(BaseScraper):
 
                 self.save_screenshot(classname="interaction_pages")
                 self.control.submit(ix)
+                self.total_pages += 1
                 logger.debug("Beginning iteration of data pages")
                 self.save_screenshot(classname="interaction_pages")
                 self.keep_clicking_next_btns()
@@ -288,12 +302,16 @@ class ManualControlScraper(BaseScraper):
             if self.maxdepth != -1 and depth == self.maxdepth:
                 logger.debug(" - At maximum depth: %s, skipping links." % depth)
                 break
+            if self.max_pages is not None and self.total_pages >= self.max_pages:
+                logger.info(" - Maximum pages reached, skipping links.")
+                break
 
             logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
             logger.debug(" - Attempting to click link text: %s" % text)
             if self.control.select_link(ix):
                 logger.debug("[.] Link clicked. Going a level deeper...")
                 logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
+                self.total_pages += 1
                 self.scrape(depth=depth + 1)
             else:
                 logger.debug(" - Click failed, skipping: %s" % text)

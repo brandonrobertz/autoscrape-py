@@ -34,9 +34,10 @@ def get_filename_from_url(url):
     host = parsed.netloc
     # split filename/path and extension
     file_parts = os.path.splitext(parsed.path)
-    file_part = file_parts[0].replace("/", "_")
+    # file_part = file_parts[0].replace("/", "__")
     extension = file_parts[1] or ".html"
-    filename = "%s_%s" % (host, file_part)
+    # filename = "%s_%s" % (host, file_part)
+    filename = url.replace("/", "_").replace(":", "_")
     if parsed.query:
         query_part = "_".join(parsed.query.split("&"))
         filename = "%s__%s" % (filename, query_part)
