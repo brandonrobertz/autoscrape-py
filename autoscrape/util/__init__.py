@@ -45,7 +45,7 @@ def get_filename_from_url(url):
 
 
 def get_extension_from_url(url):
-        # try and extract the extension from the URL
+    # try and extract the extension from the URL
     path = parse.urlparse(url).path
     ext = os.path.splitext(path)[1]
     ext = ext if ext else "html"

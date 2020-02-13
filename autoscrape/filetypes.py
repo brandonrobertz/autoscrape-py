@@ -58,11 +58,6 @@ TEXT_EXTENSIONS = (
     # SSI
     "shtml",
 
-    # XML
-    "xml",
-    "rss",
-    "svg",
-
     # Other (C, perl etc.)
     # NOTE: these could also be data
     "cgi",
@@ -79,4 +74,5 @@ TEXT_EXTENSIONS = (
     "xml",
     "rss",
     "atom",
+    "svg",
 )

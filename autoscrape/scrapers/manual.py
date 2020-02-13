@@ -2,9 +2,9 @@
 import logging
 import re
 
-from . import BaseScraper
-from ..control import Controller
-from ..input_parser import InputParser
+from autoscrape.scrapers import BaseScraper
+from autoscrape.control import Controller
+from autoscrape.input_parser import InputParser
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -46,7 +46,7 @@ class ManualControlScraper(BaseScraper):
                  warc_directory=None, return_data=False,
                  backend="selenium"):
         # setup logging, etc
-        super(ManualControlScraper, self).setup_logging(
+        super().setup_logging(
             loglevel=loglevel, stdout=stdout
         )
         # set up web scraper controller
@@ -115,7 +115,7 @@ class ManualControlScraper(BaseScraper):
             logger.info(" - Maximum pages %s reached, returning..." % self.max_pages)
             return
 
-        link_vectors = self.control.link_vectors()
+        link_vectors = self.control.vectorizer.link_vectors()
         link_zip = list(zip(range(len(link_vectors)), link_vectors))
         link_zip = filter(
             lambda x: re.findall(self.result_page_links, x[1]),
@@ -147,7 +147,7 @@ class ManualControlScraper(BaseScraper):
                 break
 
             found_next = False
-            button_data = self.control.button_vectors()
+            button_data = self.control.vectorizer.button_vectors()
             n_buttons = len(button_data)
             logger.debug("Current 'Next' Iteration Depth %s" % depth)
             logger.debug("Button vectors (%s): %s" % (
@@ -204,7 +204,7 @@ class ManualControlScraper(BaseScraper):
         self.save_training_page(classname="crawl_pages")
         self.save_screenshot(classname="crawl_pages")
         scraped = False
-        form_vectors = self.control.form_vectors(type="text")
+        form_vectors = self.control.vectorizer.form_vectors()
 
         # NOTE: we never get into this loop if self.input_gen is empty
         # this arises when input was not handed to the initializer
@@ -276,7 +276,7 @@ class ManualControlScraper(BaseScraper):
                 logger.debug("[*] Scrape complete! Exiting.")
                 return
 
-        link_vectors = self.control.link_vectors()
+        link_vectors = self.control.vectorizer.link_vectors()
         logger.debug("[.] Links on page: %s" % (link_vectors))
         link_zip = list(zip(range(len(link_vectors)), link_vectors))
         if self.ignore_links:

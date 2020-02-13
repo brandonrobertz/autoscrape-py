@@ -3,6 +3,7 @@ import io
 import logging
 import os
 import pickle
+import sys
 
 from autoscrape.backends.requests.browser import RequestsBrowser
 from autoscrape.backends.requests.tags import Tagger
@@ -22,6 +23,16 @@ except ModuleNotFoundError:
 class WARCBrowser(RequestsBrowser):
     def __init__(self, warc_index_file=None, warc_directory=None,
                  leave_host=False, **kwargs):
+        try:
+            warc
+        except NameError:
+            logger.debug(
+                "WARC dependencies not installed."
+                " (Hint: pip install autoscrape[warc-backend])"
+                " Exiting."
+            )
+            sys.exit(1)
+
         no_dir_msg = "Error: No warc_directory specified for WARCBrowser"
         assert warc_directory is not None, no_dir_msg
 

@@ -7,8 +7,8 @@ import re
 import sys
 import time
 
-from ..filetypes import TEXT_EXTENSIONS
-from ..util import (
+from autoscrape.filetypes import TEXT_EXTENSIONS
+from autoscrape.util import (
     get_filename_from_url, get_extension_from_url, write_file
 )
 

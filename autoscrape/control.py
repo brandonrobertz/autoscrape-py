@@ -3,15 +3,29 @@ import time
 import logging
 
 from autoscrape.backends.requests.browser import RequestsBrowser
-from autoscrape.backends.selenium.browser import SeleniumBrowser
-from autoscrape.backends.warc.browser import WARCBrowser
-from autoscrape.vectorization import Vectorizer
+from autoscrape.vectorization.text import TextVectorizer
+
+# backends/vectorizers with optional dependencies
+try:
+    from autoscrape.vectorization.ebmeddings import EmbeddingsVectorizer
+except ModuleNotFoundError:
+    pass
+
+try:
+    from autoscrape.backends.selenium.browser import SeleniumBrowser
+except ModuleNotFoundError:
+    pass
+
+try:
+    from autoscrape.backends.warc.browser import WARCBrowser
+except ModuleNotFoundError:
+    pass
 
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Controller(object):
+class Controller:
     """
     High-level control for scraping a web page. This allows us to control
     all of the possible scraper commands in an automated way, using a set
@@ -20,19 +34,16 @@ class Controller(object):
     and elements on the webpage.
     """
 
-    def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
-                 warc_index_file=None, warc_directory=None, leave_host=False,
-                 driver="Firefox", browser_binary=None,
+    def __init__(self, leave_host=False, driver="Firefox", browser_binary=None,
                  remote_hub="http://localhost:4444/wd/hub", output=None,
                  form_submit_natural_click=False, form_submit_wait=5,
-                 load_images=False, show_browser=False, backend="selenium"):
+                 warc_index_file=None, warc_directory=None,
+                 load_images=False, show_browser=False,
+                 html_embeddings_file=None, word_embeddings_file=None,
+                 backend="selenium", vectorizer="text"):
         """
         Set up our WebDriver and misc utilities.
         """
-        self.vectorizer = Vectorizer(
-            html_embeddings_file=html_embeddings_file,
-            word_embeddings_file=word_embeddings_file,
-        )
         Browser = None
         if backend == "selenium":
             Browser = SeleniumBrowser
@@ -54,6 +65,23 @@ class Controller(object):
             load_images=load_images, show_browser=show_browser,
             output=output,
         )
+
+        Vectorizer = None
+        if vectorizer == "text":
+            self.vectorizer = TextVectorizer(
+                scraper=self.scraper, controller=self
+            )
+        elif vectorizer == "embeddings":
+            self.vectorizer = EmbeddingsVectorizer(
+                scraper=self.scraper, controller=self,
+                html_embeddings_file=html_embeddings_file,
+                word_embeddings_file=word_embeddings_file,
+            )
+        else:
+            raise NotImplementedError(
+                "No vectorizer found: %s" % (vectorizer)
+            )
+
         self.clickable = []
         # simply a list of form tags, each forms input contents is
         # contained in the self.inputs multi-dimensional array, below
@@ -179,79 +207,3 @@ class Controller(object):
     def back(self):
         self.scraper.back()
         self.load_indices()
-
-    def page_vector(self, type="embeddings"):
-        """
-        Get feature vector from currently loaded page. This should
-        be used to determine what type of page we're on and what action
-        we ought to take (continue crawl, enter input, scrape structured
-        data, etc).
-        """
-        if type == "embeddings":
-            html = self.scraper.page_html
-            text = self.scraper.element_text(None, block=True)
-            # this means use the root of the page
-            element = None
-            return self.vectorizer.vectorize(html, text, element)
-
-    def form_vectors(self, type="text"):
-        """
-        Get a feature vector representing the forms on a page. This ought
-        to be used in cases where the model indicates the page may be a
-        search page, but where there are multiple forms. Or where you
-        just want to determine if a form is interactive data search.
-        Another alternative strategy would be to try the search and then
-        look at the next page.
-        """
-        logger.debug("[.] Loading form vectors")
-        form_data = []
-        if type == "text":
-            for tag in self.forms:
-                form = self.scraper.element_by_tag(tag)
-                txt = self.scraper.element_text(form, block=True)
-                if txt:
-                    form_data.append(txt)
-
-        return form_data
-
-    def button_vectors(self, type="text"):
-        logger.debug("[.] Building button vectors")
-        buttons_data = []
-        if type == "text":
-            for tag in self.buttons:
-                elem = self.scraper.element_by_tag(tag)
-                value = ""
-                if elem is not None:
-                    value = self.scraper.element_value(elem)
-                text = []
-                if value:
-                    text.append(value)
-                if elem is not None and self.scraper.element_text(elem):
-                    text.append(self.scraper.element_text(elem))
-                logger.debug(" - button value: %s, text: %s" % (value, text))
-                buttons_data.append(" ".join(text))
-        return buttons_data
-
-    def link_vectors(self, type="text"):
-        """
-        Get a matrix of link vectors. These describe the text of the link
-        in a way that a ML algorithm could decide how to prioritize the
-        search pattern.
-        """
-        logger.debug("[.] Building link vectors")
-        buttons_data = []
-        if type == "text":
-            for i in range(len(self.clickable)):
-                t = self.clickable[i]
-                elem = self.scraper.element_by_tag(t)
-                tag_name = self.scraper.element_tag_name(elem)
-                text = ""
-                if elem is None:
-                    logger.warn("[!] Link element couldn't be found: %s" % t)
-                elif tag_name != "input":
-                    text = self.scraper.element_text(elem).replace("\n", " ")
-                elif tag_name == "input":
-                    value = self.scraper.element_attr(elem, "value")
-                    text = value.replace("\n", " ")
-                buttons_data.append(text)
-        return buttons_data

@@ -19,7 +19,7 @@ setuptools.setup(
     url='https://github.com/brandonrobertz/autoscrape-py',
     license='AGPLv3',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'Intended Audience :: End Users/Desktop',
@@ -49,6 +49,7 @@ setuptools.setup(
         'autoscrape.backends.warc',
         'autoscrape.scrapers',
         'autoscrape.search',
+        'autoscrape.vectorization',
     ],
     entry_points={
         'console_scripts': [
@@ -56,15 +57,26 @@ setuptools.setup(
         ]
     },
     install_requires=[
-        'selenium>=3.141.0',
         'lxml>=4.3.0',
         'html5lib>=1.0.1',
-        'webencodings>=0.5.1',
         'docopt>=0.6.2',
-        'networkx>=2.2',
-        'numpy>=1.15.0',
         'cssselect>=1.1.0',
         'requests>=2.22.0',
-        'lxml>=4.3.0',
     ],
+    extras_require={
+        'selenium-backend': [
+            'selenium>=3.141.0'
+        ],
+        'warc-backend': [
+            'warc3-wet>=0.2.3',
+            'plyvel==1.2.0',
+        ],
+        'embeddings-vectorizer': [
+            'numpy>=1.15.0'
+        ],
+
+        'graph': [
+            'networkx>=2.2'
+        ]
+    }
 )

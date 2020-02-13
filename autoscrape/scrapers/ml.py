@@ -3,8 +3,13 @@ import logging
 import string
 from itertools import product
 
-from . import BaseScraper
-from ..control import Controller
+from autoscrape.scrapers import BaseScraper
+from autoscrape.control import Controller
+
+try:
+    from autoscrape.vectorization.embedding import EmbeddingsVectorizer
+except ModuleNotFoundError as e:
+    pass
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -16,10 +21,11 @@ class MLAutoScraper(BaseScraper):
     several trained machine learning classifiers.
     """
 
-    def __init__(self, baseurl, maxdepth=10, loglevel=None, formdepth=0,
-                 html_embeddings=None, word_embeddings=None, **kwargs):
+    def __init__(self, baseurl, maxdepth=10, loglevel=None, stdout=None,
+                 formdepth=0, html_embeddings=None, word_embeddings=None,
+                 **kwargs):
         # setup logging, etc
-        super(MLAutoScraper, self).setup_logging(loglevel=loglevel)
+        super().setup_logging(loglevel=loglevel, stdout=stdout)
         # set up web scraper controller
         self.control = Controller(
             html_embeddings_file=html_embeddings,

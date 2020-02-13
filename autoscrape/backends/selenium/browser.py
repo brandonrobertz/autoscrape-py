@@ -2,17 +2,22 @@
 import time
 import logging
 import re
+import sys
 
-from selenium import webdriver
-from selenium.common.exceptions import (
-    TimeoutException, StaleElementReferenceException,
-    NoSuchElementException, ElementNotInteractableException,
-    InvalidElementStateException,
-)
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-from selenium.webdriver.support.ui import WebDriverWait, Select
-from selenium.webdriver.support import expected_conditions as EC
+try:
+    from selenium import webdriver
+    from selenium.common.exceptions import (
+        TimeoutException, StaleElementReferenceException,
+        NoSuchElementException, ElementNotInteractableException,
+        InvalidElementStateException,
+    )
+    from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+    from selenium.webdriver.support.ui import WebDriverWait, Select
+    from selenium.webdriver.support import expected_conditions as EC
+except ModuleNotFoundError:
+    # we haven't installed selenium backend deps
+    pass
 
 from autoscrape.backends.base.browser import BrowserBase
 from autoscrape.backends.selenium.tags import Tagger
@@ -29,6 +34,15 @@ class SeleniumBrowser(BrowserBase, Tagger):
                  form_submit_wait=5, output=None, show_browser=False,
                  browser_binary=None,
                  remote_hub="http://localhost:4444/wd/hub", **kwargs):
+        try:
+            selenium
+        except NameError:
+            logger.error(
+                "Tried to use selenium backend but Selenium isn't"
+                " installed. (Hint: pip install autoscrape[selenium-backend])"
+                " Exiting."
+            )
+            sys.exit(1)
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018

@@ -8,7 +8,7 @@ import numpy as np
 logger = logging.getLogger('AUTOSCRAPE')
 
 
-class Embedding(object):
+class Embedding:
     def __init__(self, embeddings=None, t2id=None, id2t=None):
         self.embeddings = embeddings
         self.t2id = t2id
@@ -16,13 +16,16 @@ class Embedding(object):
         self.N, self.dim = embeddings.shape
 
 
-class Vectorizer(object):
+class EmbeddingsVectorizer:
     def __init__(self, html_embeddings_file=None, word_embeddings_file=None,
-                 loglevel=None):
+                 scraper=None, controller=None, loglevel=None):
         """
         Initialize our vectorizer with paths to the relevant word
         embedding files for our vectorization routines.
         """
+        self.scraper = scraper
+        self.controller = controller
+
         self.html = None
         if html_embeddings_file:
             logger.debug("[.] Loading HTML embeddings")
@@ -32,21 +35,6 @@ class Vectorizer(object):
         if word_embeddings_file:
             logger.debug("[.] Loading word embeddings")
             self.word = self.load_embedding(word_embeddings_file)
-
-    def setup_logging(self, loglevel=None):
-        level = logging.INFO
-        if loglevel == "DEBUG":
-            level = logging.DEBUG
-        elif loglevel == "INFO":
-            level = logging.INFO
-        elif loglevel == "WARN":
-            level = logging.WARN
-        elif loglevel == "ERROR":
-            level = logging.ERROR
-
-        logger.setLevel(level)
-        console_handler = logging.StreamHandler()
-        logger.addHandler(console_handler)
 
     def embeddings_length(self, path):
         N = 0
@@ -140,3 +128,23 @@ class Vectorizer(object):
             concat_array.append(x_pos)
         x = np.concatenate(concat_array)
         return x
+
+    def page_vector(self):
+        raise NotImplementedError(
+            "EmbeddingsVectorizer.page_vector not implemented"
+        )
+
+    def form_vectors(self):
+        raise NotImplementedError(
+            "EmbeddingsVectorizer.form_vectors not implemented"
+        )
+
+    def button_vectors(self):
+        raise NotImplementedError(
+            "EmbeddingsVectorizer.button_vectors not implemented"
+        )
+
+    def link_vectors(self):
+        raise NotImplementedError(
+            "EmbeddingsVectorizer.link_vectors not implemented"
+        )
