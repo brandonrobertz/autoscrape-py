@@ -76,7 +76,14 @@ setuptools.setup(
         ],
 
         'graph': [
-            'networkx>=2.2'
-        ]
+            'networkx>=2.2',
+        ],
+        'all': [
+            'selenium>=3.141.0'
+            'networkx>=2.2',
+            'numpy>=1.15.0',
+            'warc3-wet>=0.2.3',
+            'plyvel==1.2.0',
+        ],
     }
 )

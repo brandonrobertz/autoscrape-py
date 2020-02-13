@@ -38,8 +38,10 @@ Two ways, easiest first.
 
 ::
 
-    pip install autoscrape
+    pip install autoscrape[all]
     autoscrape -h
+
+This will install all dependencies for all backends and various options.
 
 Or:
 
@@ -47,7 +49,7 @@ Or:
 
     git clone https://github.com/brandonrobertz/autoscrape-py
     cd autoscrape-py/
-    python setup.py install
+    pip install .[all]
     autoscrape -h
 
 Either way, you can now use ``autoscrape`` from the command line.
@@ -62,11 +64,11 @@ dependencies installed.
 Crawler Backends
 ~~~~~~~~~~~~~~~~
 
-There are two backends available for driving AutoScrape: ``selenium``
-and ``requests``. The ``requests`` is based on the Python requests
-library and is only capable of crawling sites. For any interaction with
-forms or JavaScript powered buttons, you'll need to use the ``selenium``
-backend.
+There are two backends available for driving AutoScrape: ``requests``,
+``selenium`` and ``warc``. The ``requests`` backend (the default) is based on the
+Python requests library and is only capable of crawling sites and submitting
+simple HTTP forms. For any interaction with forms or JavaScript powered
+buttons, you'll need to use the ``selenium`` backend.
 
 You can control the backened with the ``--backend`` option:
 
@@ -76,6 +78,21 @@ You can control the backened with the ``--backend`` option:
       --backend requests \
       --output requests_crawled_site \
       'https://some.page/to-crawl'
+
+In order to use backends other than requests, you need to install
+the proper dependencies. `pip install autoscrape[all]` will
+install everything required for all backends/functionality, but
+you can also install dependencies in isolation:
+
+::
+    Selenium backend:
+    pip install autoscrape[selenium-backend]
+
+    Crawl graph builder (for use in --save-graph)
+    pip install autoscrape[graph]
+
+    WARC backend:
+    pip install autoscrape[warc-backend]
 
 Crawl
 ~~~~~
