@@ -94,6 +94,10 @@ you can also install dependencies in isolation:
     WARC backend:
     pip install autoscrape[warc-backend]
 
+Note that for the Selenium backend, you need to install geckodriver or
+chromedriver, depending if you're using Firefox or Chrome, respectively.
+More information is below in the External Dependencies section.
+
 Crawl
 ~~~~~
 
