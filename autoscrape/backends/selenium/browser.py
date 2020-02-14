@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import time
 import logging
+import os
 import re
 import sys
 
@@ -51,6 +52,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
             firefox_options = webdriver.firefox.options.Options()
             if not show_browser:
                 logger.debug(" - Headless mode enabled")
+                # override beause sometimes FF/Selenium/Geckodriver
+                # will ignore the headless options
+                os.environ["MOZ_HEADLESS"] = "1"
                 firefox_options.add_argument("--headless")
                 firefox_options.add_argument("-headless")
                 firefox_options.headless = True
