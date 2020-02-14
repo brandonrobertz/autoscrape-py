@@ -35,7 +35,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                  browser_binary=None,
                  remote_hub="http://localhost:4444/wd/hub", **kwargs):
         try:
-            selenium
+            webdriver
         except NameError:
             logger.error(
                 "Tried to use selenium backend but Selenium isn't"
