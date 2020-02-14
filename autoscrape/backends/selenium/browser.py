@@ -524,7 +524,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 form.find_element_by_xpath,
                 "//input[@type='submit']"
             )
-            logger.debug("Form submit input button: %s" % (sub))
+            logger.debug(" - Form submit input button: %s" % (sub))
         except NoSuchElementException as e:
             pass
 
@@ -542,7 +542,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 els = [el for el in possible_subs if "submit" in el.text.lower()]
                 if els:
                     sub = els[0]
-                    logger.debug("Form submit link: %s" % (sub))
+                    logger.debug(" - Form submit link: %s" % (sub))
             except NoSuchElementException as e:
                 pass
 

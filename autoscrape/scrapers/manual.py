@@ -149,8 +149,8 @@ class ManualControlScraper(BaseScraper):
             found_next = False
             button_data = self.control.vectorizer.button_vectors()
             n_buttons = len(button_data)
-            logger.debug("Current 'Next' Iteration Depth %s" % depth)
-            logger.debug("Button vectors (%s): %s" % (
+            logger.info("[.] Current 'Next' Iteration Depth %s" % depth)
+            logger.debug(" - Button vectors (%s): %s" % (
                 n_buttons, button_data
             ))
 
@@ -163,9 +163,9 @@ class ManualControlScraper(BaseScraper):
 
             for ix in range(n_buttons):
                 button = button_data[ix]
-                logger.debug("Checking button: %s" % button)
+                logger.debug(" - Checking button: %s" % button)
                 if self.next_match.lower() in button.lower():
-                    logger.debug("Next button found! Clicking: %s" % ix)
+                    logger.debug("[.] Next button found! Clicking: %s" % ix)
                     depth += 1
                     self.control.select_button(ix, iterating_form=True)
                     # subsequent page loads get saved here
@@ -177,11 +177,11 @@ class ManualControlScraper(BaseScraper):
                     break
 
             if not found_next:
-                logger.debug("Next button not found!")
+                logger.debug(" - Next button not found!")
                 break
 
         for _ in range(depth):
-            logger.debug("Going back from 'next'...")
+            logger.debug("[.] Going back from 'next'...")
             self.control.back()
 
     def scrape(self, depth=0):
@@ -218,35 +218,35 @@ class ManualControlScraper(BaseScraper):
 
             # inputs are keyed by form index, purely here for debug purposes
             inputs = self.control.inputs[ix]
-            logger.debug("Form: %s Text: %s" % (ix, form_data))
-            logger.debug("Inputs: %s" % inputs)
+            logger.debug(" - Form: %s Text: %s" % (ix, form_data))
+            logger.debug(" - Inputs: %s" % inputs)
 
             if self.form_match.lower() not in form_data.lower():
                 continue
 
-            logger.debug("*** Found an input form!")
+            logger.debug("[*] Found an input form!")
             self.save_training_page(classname="search_pages")
             self.save_screenshot(classname="search_pages")
 
             for input_phase in self.input_gen:
-                logger.debug("Input plan: %s" % input_phase)
+                logger.debug(" - Input plan: %s" % input_phase)
                 for single_input in input_phase:
                     input_index = single_input["index"]
                     if single_input["type"] == "input":
                         input_string = single_input["string"]
-                        logger.debug("Inputting %s to input %s" % (
+                        logger.info("[.] Inputting %s to input %s" % (
                             input_string, ix))
                         self.control.input(ix, input_index, input_string)
                     elif single_input["type"] == "select":
                         input_string = single_input["string"]
-                        logger.debug("Selecting option %s in input %s" % (
+                        logger.info("[.] Selecting option %s in input %s" % (
                             input_string, input_index))
                         self.control.input_select_option(
                             ix, input_index, input_string
                         )
                     elif single_input["type"] == "checkbox":
                         to_check = single_input["action"]
-                        logger.debug("%s checkbox input %s" % (
+                        logger.debug("[.] %s checkbox input %s" % (
                             "Checking" if to_check else "Unchecking",
                             input_index
                         ))
@@ -255,14 +255,14 @@ class ManualControlScraper(BaseScraper):
                         )
                     elif single_input["type"] == "date":
                         input_string = single_input["string"]
-                        logger.debug("Setting date to %s in date input %s" % (
+                        logger.debug("[.] Setting date to %s in date input %s" % (
                             input_string, ix))
                         self.control.input_date(ix, input_index, input_string)
 
                 self.save_screenshot(classname="interaction_pages")
                 self.control.submit(ix)
                 self.total_pages += 1
-                logger.debug("Beginning iteration of data pages")
+                logger.debug("[*] Beginning iteration of data pages")
                 self.save_screenshot(classname="interaction_pages")
                 self.keep_clicking_next_btns()
                 scraped = True
