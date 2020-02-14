@@ -44,6 +44,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 " Exiting."
             )
             sys.exit(1)
+
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
         # Version 0.20.1 is recommended as of 14/07/2018
@@ -118,6 +119,10 @@ class SeleniumBrowser(BrowserBase, Tagger):
                         "extensions": [],
                     }
                 })
+        else:
+            raise NotImplementedError("No driver found: %s, exiting." % (
+                driver
+            ))
 
         # set of clicked elements
         self.visited = set()
