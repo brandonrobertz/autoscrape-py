@@ -39,7 +39,7 @@ Two ways, easiest first.
 ::
 
     pip install autoscrape[all]
-    autoscrape -h
+    autoscrape --backend requests --output outdir --maxdepth 2 https://bxroberts.org
 
 This will install all dependencies for all backends and various options.
 
@@ -50,7 +50,7 @@ Or:
     git clone https://github.com/brandonrobertz/autoscrape-py
     cd autoscrape-py/
     pip install .[all]
-    autoscrape -h
+    autoscrape --backend requests --output outdir --maxdepth 2 https://bxroberts.org
 
 Either way, you can now use ``autoscrape`` from the command line.
 
