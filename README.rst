@@ -159,8 +159,16 @@ you need to have geckodriver installed. You can do that here:
 
     https://github.com/mozilla/geckodriver/releases
 
+Or through your package manager:
+
+::
+    apt install firefox-geckodriver
+
 Your ``geckodriver`` needs to be compatible with your current version of
-Firefox or you will get errors.
+Firefox or you will get errors. If you install FF and the driver
+through your package manager, you *should* be okay, but it's
+not guaranteed. We have specific versions of both pinned in the
+``Dockerfile``.
 
 If you prefer to use Chrome, you will need the ChromeDriver (we've
 tested using v2.41). It can be found in your distribution's package
