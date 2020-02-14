@@ -18,7 +18,6 @@ class Graph(object):
             logger.debug(
                 "NetworkX not installed. Not building crawl graph."
                 " (Hint: pip install autoscrape[graph])"
-                " Exiting."
             )
             self.graph = None
         # store scrape graph
