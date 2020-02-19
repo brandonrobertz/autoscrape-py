@@ -10,7 +10,7 @@ from .scrapers.manual import ManualControlScraper
 
 app = Celery(
     'tasks',
-    broker=os.environ.get("CJW_RABBITMQ_HOST"),
+    broker=os.environ.get("AUTOSCRAPE_RABBITMQ_HOST"),
     backend='rpc://'
 )
 

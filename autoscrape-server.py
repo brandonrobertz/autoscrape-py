@@ -12,9 +12,9 @@ import autoscrape.tasks as tasks
 
 
 connect_str = 'postgresql://%s:%s@%s/autoscrape' % (
-    os.environ["CJW_DB_USER"],
-    os.environ["CJW_DB_PASSWORD"],
-    os.environ["CJW_DB_HOST"]
+    os.environ["AUTOSCRAPE_DB_USER"],
+    os.environ["AUTOSCRAPE_DB_PASSWORD"],
+    os.environ["AUTOSCRAPE_DB_HOST"]
 )
 
 engine = create_engine(connect_str)
@@ -82,6 +82,13 @@ def get_path(path):
     return send_from_directory("www", path)
 
 
+@app.after_request
+def disable_cors(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    return response
+
+
 @app.route("/start", methods=["POST"])
 def post_start():
     """
@@ -91,7 +98,7 @@ def post_start():
     to query status or stop the scrape.
 
     Curl Example:
-        curl http://localhost:5000/start -H 'content-type: application/json' --data '{"baseurl": "https://bxroberts.org", "backend": "selenium", "form_submit_wait": "5", "input": null, "save_graph": false, "load_images": false, "maxdepth": "0", "next_match": "next page", "leave_host": false, "show_browser": false, "driver": "Firefox", "form_submit_natural_click": false, "formdepth": "0", "link_priority": null, "keep_filename": false, "ignore_links": null, "form_match": null, "save_screenshots": true, "remote_hub": "http://localhost:4444/wd/hub", "loglevel": "DEBUG", "output": "http://flask:5001/receive/<JOB-ID-HERE>", "disable_style_saving": false}'
+        curl http://localhost:5000/start -H 'content-type: application/json' --data '{"baseurl": "https://bxroberts.org", "backend": "selenium", "form_submit_wait": "5", "input": null, "save_graph": false, "load_images": false, "maxdepth": "0", "next_match": "next page", "leave_host": false, "show_browser": false, "driver": "Firefox", "form_submit_natural_click": false, "formdepth": "0", "link_priority": null, "keep_filename": false, "ignore_links": null, "form_match": null, "save_screenshots": true, "remote_hub": "http://localhost:4444/wd/hub", "loglevel": "DEBUG", "output": "http://flask:5000/receive/<JOB-ID-HERE>", "disable_style_saving": false}'
 
     Success Returns:
         HTTP 200 OK
@@ -101,6 +108,7 @@ def post_start():
     args = request.get_json()
     app.logger.debug("Arguments: %s" % args)
     baseurl = args.pop("baseurl")
+    # disables double logging in celery worker
     args["stdout"] = False
     app.logger.debug("Baseurl: %s" % baseurl)
     result = tasks.start.apply_async((baseurl, args))
@@ -257,4 +265,4 @@ def get_file_data(task_id, file_id):
 
 if __name__ == "__main__":
     db.create_all()
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5000)

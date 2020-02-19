@@ -11,9 +11,9 @@ services:
   database:
     image: postgres:10.4
     environment:
-      POSTGRES_USER: cjworkbench
-      POSTGRES_PASSWORD: cjworkbench
-      POSTGRES_DB: cjworkbench
+      POSTGRES_USER: autoscrape
+      POSTGRES_PASSWORD: autoscrape
+      POSTGRES_DB: autoscrape
       PGDATA: /var/lib/postgresql/data/10.4
     networks: [ 'dev' ]
     volumes:
@@ -36,16 +36,16 @@ services:
       - virtualenvs:/root/.local/share/virtualenvs/:rw
     command: [ 'python3', 'autoscrape-server.py' ]
     ports:
-      - '5000:5001'
+      - '5000:5000'
     links:
       - rabbitmq
     depends_on: [ 'rabbitmq', 'database' ]
     networks: [ 'dev' ]
     environment:
-      CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
-      CJW_DB_HOST: database
-      CJW_DB_USER: cjworkbench
-      CJW_DB_PASSWORD: cjworkbench
+      AUTOSCRAPE_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
+      AUTOSCRAPE_DB_HOST: database
+      AUTOSCRAPE_DB_USER: autoscrape
+      AUTOSCRAPE_DB_PASSWORD: autoscrape
 
   celery:
     build:
@@ -61,7 +61,7 @@ services:
     depends_on: [ 'rabbitmq', 'flask' ]
     networks: [ 'dev' ]
     environment:
-      CJW_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
+      AUTOSCRAPE_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
 
 networks:
   dev:

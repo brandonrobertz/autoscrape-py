@@ -22,4 +22,5 @@ clean: stop
 	fi
 	docker volume rm -f $$(docker volume ls | awk '{ print $$2 }')
 
-
+run_rabbitmq:
+	docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
