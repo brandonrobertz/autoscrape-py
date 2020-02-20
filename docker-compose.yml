@@ -9,12 +9,12 @@ version: '3.4'
 
 services:
   database:
-    image: postgres:10.4
+    image: postgres:10.10
     environment:
       POSTGRES_USER: autoscrape
       POSTGRES_PASSWORD: autoscrape
       POSTGRES_DB: autoscrape
-      PGDATA: /var/lib/postgresql/data/10.4
+      PGDATA: /var/lib/postgresql/data/10.10
     networks: [ 'dev' ]
     volumes:
       - dbdata:/var/lib/postgresql/data
@@ -58,10 +58,13 @@ services:
     #user: nobody
     links:
       - rabbitmq
-    depends_on: [ 'rabbitmq', 'flask' ]
+    depends_on: [ 'rabbitmq', 'flask', 'database' ]
     networks: [ 'dev' ]
     environment:
       AUTOSCRAPE_RABBITMQ_HOST: amqp://guest:guest@rabbitmq/
+      AUTOSCRAPE_DB_HOST: database
+      AUTOSCRAPE_DB_USER: autoscrape
+      AUTOSCRAPE_DB_PASSWORD: autoscrape
 
 networks:
   dev:

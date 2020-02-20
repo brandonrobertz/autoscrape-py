@@ -10,8 +10,10 @@ RUN apt-get update \
     && bash -c 'apt-get install -y --no-install-recommends $(apt-cache depends firefox-esr | awk "/Depends:/{print\$2}")' \
     && apt-get install --no-install-recommends -y \
         curl \
+        wget \
         xauth \
         xvfb \
+        xz-utils \
         bzip2 \
         postgresql-client \
     && rm -rf /var/lib/apt/lists/*
@@ -46,10 +48,24 @@ COPY autoscrape/ /app/autoscrape/
 
 # Flask API server
 COPY autoscrape-server.py /app/
+
+# Build AutoScrape WWW
+# Install Node.js
+
+RUN \
+  cd /tmp && \
+  curl https://nodejs.org/dist/v12.16.1/node-v12.16.1-linux-x64.tar.xz -o node-js.tar.xz && \
+  tar xvf node-js.tar.xz && \
+  rm -f node-js.tar.xz && \
+  cp -rfv node-v*/* / && \
+  rm -rf /tmp/node-* && \
+  npm install -g npm && \
+  printf '\n# Node.js\nexport PATH="node_modules/.bin:$PATH"' >> /root/.bashrc
+
 # Remember: this is a git submodule!
 COPY www/ /app/www/
-
-WORKDIR /app
+RUN echo REACT_APP_API_HOST="http://localhost:5000" >> .env
+RUN cd /app/www && npm install && npm run download-hextractor && npm run build
 
 FROM autoscrape-worker-deps AS autoscrape-worker
 CMD [ "celery", "-A", "autoscrape.tasks", "worker", "--loglevel=info" ]
