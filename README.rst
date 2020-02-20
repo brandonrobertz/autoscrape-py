@@ -25,7 +25,7 @@ paper, `Robust Web Scraping in the Public Interest with AutoScrape <https://bxro
 Currently there are two methods of running AutoScrape:
 
 - as a local CLI python script
-- as a containerized system via the API and Web UI
+- a full Web interface for scraping (see bottom of page)
 
 Installation and running instructions are provided for both below.
 
@@ -391,10 +391,10 @@ Autoscrape manual-mode full options:
             with a scraped page. To save storage, you can disable this
             functionality by using this option.
 
-Setup Containerized API Version
--------------------------------
+AutoScrape Web UI (Docker)
+--------------------------
 
-AutoScrape can also be ran as a containerized cluster environment, where
+AutoScrape can be ran as a containerized cluster environment, where
 scrapes can be triggered and stopped via API calls and data can be
 streamed to this server.
 
@@ -407,7 +407,7 @@ This requires the `autoscrape-www <https://github.com/brandonrobertz/autoscrape-
 
 This will pull the browser-based UI into the `www/` folder.
 
-You also need
+You need
 `docker-ce <https://docs.docker.com/install/#server>`__ and
 `docker-compose <https://docs.docker.com/compose/install/>`__. Once you
 have these dependencies installed, simply run:
@@ -415,7 +415,7 @@ have these dependencies installed, simply run:
 ::
 
     docker-compose build --pull
-    docker-compose up -t0 --abort-on-container-exit
+    docker-compose up
 
 This will build the containers and launch a API server running on local
 port 5000. More information about the API calls can be found in
