@@ -82,7 +82,7 @@ Interactive Form Search Options:
         A single-input type can be one of three types:
         checkbox ("c"), input box ("i"), option select
         ("s"), and date inputs ("d", with inputs in the
-        "YYYY-MM-DD" format). The type is separated by a
+        "MM-DD-YYYY" format). The type is separated by a
         colon, and the input index position is next. (Each
         input type has its own list, so a form with one
         input, one checkbox, and one option select, will all
