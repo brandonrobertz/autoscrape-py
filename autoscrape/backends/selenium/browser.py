@@ -253,6 +253,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
             except StaleElementReferenceException:
                 logger.debug("[.] Stale element found! Loading complete.")
                 break
+            except NoSuchElementException:
+                logger.debug("[.] Stale element found! Loading complete.")
+                break
             stale_check_times += 1
             time.sleep(wait_for_stale_time / stale_check_max_times)
 
