@@ -81,8 +81,8 @@ class InputParser:
                     # make sure our date field is correctly
                     # formatted. non-matching date fields
                     # will not make it to the input in webdriver
-                    datefmt = re.match("[0-9]{4}\-[0-9]{2}\-[0-9]{2}", action)
-                    assert datefmt, "Bad Date! Dates need to be: YYYY-MM-DD"
+                    # datefmt = re.match("[0-9]{4}\-[0-9]{2}\-[0-9]{2}", action)
+                    # assert datefmt, "Bad Date! Dates need to be: YYYY-MM-DD"
                     indiv_search.append({
                         "index": ix,
                         "type": "date",
