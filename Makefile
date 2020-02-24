@@ -24,3 +24,6 @@ clean: stop
 
 run_rabbitmq:
 	docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+
+update_www:
+	git submodule init && git submodule update && cd www && git fetch && git reset origin/master --hard
