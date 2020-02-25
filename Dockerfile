@@ -19,12 +19,12 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Firefox. It's a separate step so it's easier to resume docker build.
-RUN curl -L https://download-installer.cdn.mozilla.net/pub/firefox/releases/71.0/linux-x86_64/en-US/firefox-71.0.tar.bz2 \
+RUN curl -L https://download-installer.cdn.mozilla.net/pub/firefox/releases/64.0.2/linux-x86_64/en-US/firefox-64.0.2.tar.bz2 \
         | tar jx -C /opt \
         && ln -s /opt/firefox/firefox /usr/bin/firefox
 
 # Install geckodriver. It's a separate step so it's easier to resume docker build.
-RUN curl -L https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz \
+RUN curl -L https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-linux64.tar.gz \
         | tar zx -C /usr/bin/ \
         && chmod +x /usr/bin/geckodriver
 
