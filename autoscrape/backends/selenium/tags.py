@@ -70,8 +70,12 @@ class Tagger(TaggerBase, Dom):
         return self.driver.execute_script(script, element)
 
     def clickable_sanity_check(self, element):
-        if not element.is_displayed() and not element.is_enabled():
-            logger.debug(" - Skipping non-displayed: %s" % (element))
+        try:
+            if not element.is_displayed() and not element.is_enabled():
+                logger.debug(" - Skipping non-displayed: %s" % (element))
+                return False
+        except Exception as e:
+            logger.debug("[!] Skipping sanity check due to failure: %s" % (e))
             return False
         return super().clickable_sanity_check(element)
 
