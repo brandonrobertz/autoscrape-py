@@ -5,7 +5,7 @@
 # Docker containers and makes them available when running commands via
 # `docker exec`.
 
-version: '2.4'
+version: '2.2'
 
 services:
   database:
