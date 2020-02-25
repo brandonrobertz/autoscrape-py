@@ -51,10 +51,11 @@ services:
     build:
       context: .
       target: base
+    shm_size: 6GB
     volumes:
       - ./:/app:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
-    command: [ 'celery', '-c', '2', '-A', 'autoscrape.tasks', 'worker', '--loglevel=info' ]
+    command: [ 'celery', '-c', '1', '-A', 'autoscrape.tasks', 'worker', '--loglevel=info' ]
     #user: nobody
     links:
       - rabbitmq
