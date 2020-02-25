@@ -73,7 +73,7 @@ class Dom(DomBase):
                     el, e))
 
         full_text = " ".join(text).replace("\n", "")
-        logger.debug(" - Found text: %s" % full_text
+        logger.debug(" - Found text: %s" % full_text)
         return full_text
 
     def element_tag_name(self, element):
