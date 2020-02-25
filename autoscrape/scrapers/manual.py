@@ -108,7 +108,7 @@ class ManualControlScraper(BaseScraper):
             self.input_gen = InputParser(input).generate()
         # if not specified, do nothing with forms
         else:
-            self.input_gen = []
+            self.input_gen = [[]]
 
     def click_until_no_links(self, links):
         if self.max_pages is not None and self.total_pages >= self.max_pages:

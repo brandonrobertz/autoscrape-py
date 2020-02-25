@@ -5,7 +5,7 @@
 # Docker containers and makes them available when running commands via
 # `docker exec`.
 
-version: '3.4'
+version: '2.4'
 
 services:
   database:
@@ -28,9 +28,8 @@ services:
       RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: '+S 1:1 +stbt ts +A 12'
 
   flask:
-    build:
-      context: .
-      target: base
+    build: .
+    image: base
     volumes:
       - ./:/app:rw
       - virtualenvs:/root/.local/share/virtualenvs/:rw
@@ -48,9 +47,9 @@ services:
       AUTOSCRAPE_DB_PASSWORD: autoscrape
 
   celery:
-    build:
-      context: .
-      target: base
+    mem_limit: 7GB
+    build: .
+    image: base
     shm_size: 6GB
     volumes:
       - ./:/app:rw
