@@ -165,7 +165,9 @@ class ManualControlScraper(BaseScraper):
                 button = button_data[ix]
                 logger.debug(" - Checking button: %s" % button)
                 if self.next_match.lower() in button.lower():
-                    logger.debug("[.] Next button found! Clicking: %s" % ix)
+                    logger.info("[.] Next button found! Clicking: %s" % (
+                        button
+                    ))
                     depth += 1
                     self.control.select_button(ix, iterating_form=True)
                     # subsequent page loads get saved here
