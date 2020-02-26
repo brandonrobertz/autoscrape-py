@@ -111,6 +111,7 @@ class ManualControlScraper(BaseScraper):
             self.input_gen = [[]]
 
     def click_until_no_links(self, links):
+        logger.debug("[.] Clicking result page links...")
         if self.max_pages is not None and self.total_pages >= self.max_pages:
             logger.info(" - Maximum pages %s reached, returning..." % self.max_pages)
             return
@@ -121,15 +122,13 @@ class ManualControlScraper(BaseScraper):
             lambda x: re.findall(self.result_page_links, x[1]),
             link_zip
         )
+        logger.debug(" - Candidate links: %s" % (link_zip))
         # Click until we get no more matches
         for ix, text in link_zip:
-            logger.debug("Trying to click ix: %s, text: %s" % (ix, text))
+            logger.info("[.] Trying to click result page link: %s" % (text))
             logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
             if self.control.select_link(ix):
                 self.total_pages += 1
-                if self.max_pages is not None and self.total_pages >= self.max_pages:
-                    logger.info(" - Maximum pages %s reached, returning..." % self.max_pages)
-                    return
                 self.click_until_no_links(links)
                 self.save_training_page(classname="data_pages")
                 self.save_screenshot(classname="data_pages")
