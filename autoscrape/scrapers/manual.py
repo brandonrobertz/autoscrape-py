@@ -127,11 +127,13 @@ class ManualControlScraper(BaseScraper):
             logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
             if self.control.select_link(ix):
                 self.total_pages += 1
+                if self.max_pages is not None and self.total_pages >= self.max_pages:
+                    logger.info(" - Maximum pages %s reached, returning..." % self.max_pages)
+                    return
                 self.click_until_no_links(links)
                 self.save_training_page(classname="data_pages")
                 self.save_screenshot(classname="data_pages")
-                # # TODO: we need to know if the page URL changed
-                # self.control.back()
+                self.control.back()
 
     def keep_clicking_next_btns(self):
         """
