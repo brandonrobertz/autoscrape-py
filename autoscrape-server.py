@@ -105,6 +105,7 @@ def post_start():
     baseurl = args.pop("baseurl")
     # disables double logging in celery worker
     args["stdout"] = False
+    args["loglevel"] = "DEBUG"
     args["output"] = os.environ.get(
         "AUTOSCRAPE_API_URL",
         "http://flask:5000/receive"
