@@ -336,11 +336,11 @@ class ManualControlScraper(BaseScraper):
                 self.control.scraper.driver.quit()
             if self.output and self.save_graph:
                 self.save_scraper_graph()
-            # raise e
-        else:
-            logger.info("[+] AutoScrape run complete.")
-            if self.output and self.save_graph:
-                self.save_scraper_graph()
+            raise e
+        # else:
+        #     logger.info("[+] AutoScrape run complete.")
+        #     if self.output and self.save_graph:
+        #         self.save_scraper_graph()
         try:
             self.control.scraper.driver.quit()
         except Exception:
