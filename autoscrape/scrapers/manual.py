@@ -327,20 +327,20 @@ class ManualControlScraper(BaseScraper):
     def run(self, *args, **kwargs):
         # we have to catch this so, in the case of failure, we
         # don't have random browser windows hanging around
-        # try:
-        self.scrape(*args, **kwargs)
-        # except Exception as e:
-        #     msg = "[!] Fatal error scraping: %s. Cleaning up, quitting."
-        #     logger.error(msg % (e))
-        #     if hasattr(self.control.scraper, "driver"):
-        #         self.control.scraper.driver.quit()
-        #     if self.output and self.save_graph:
-        #         self.save_scraper_graph()
-        #     raise e
-        # else:
-        #     logger.info("[+] AutoScrape run complete.")
-        #     if self.output and self.save_graph:
-        #         self.save_scraper_graph()
+        try:
+            self.scrape(*args, **kwargs)
+        except Exception as e:
+            msg = "[!] Fatal error scraping: %s. Cleaning up, quitting."
+            logger.error(msg % (e))
+            if hasattr(self.control.scraper, "driver"):
+                self.control.scraper.driver.quit()
+            if self.output and self.save_graph:
+                self.save_scraper_graph()
+            # raise e
+        else:
+            logger.info("[+] AutoScrape run complete.")
+            if self.output and self.save_graph:
+                self.save_scraper_graph()
         try:
             self.control.scraper.driver.quit()
         except Exception:
