@@ -87,7 +87,7 @@ class Dom(DomBase):
         else:
             results = []
             for css_url in stylesheet_urls:
-                results.append(download_stylesheet(stylesheet_urls))
+                results.append(download_stylesheet(css_url))
 
         css = "\n".join(results)
         for style in self.dom.xpath("style"):
