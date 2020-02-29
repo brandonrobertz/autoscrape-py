@@ -157,7 +157,7 @@ class Controller:
         self.load_indices()
 
     def select_link(self, index):
-        if len(self.clickable) > index:
+        if index >= len(self.clickable):
             logger.error(
                 "[!] Critical error: link index exceeds clickable length."
             )
