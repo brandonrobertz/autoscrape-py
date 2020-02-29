@@ -73,9 +73,21 @@ class Dom(DomBase):
             css_url = self._normalize_url(l_href)
             stylesheet_urls.append(css_url)
 
-        pool = ThreadPool(8)
-        results = pool.map(download_stylesheet, stylesheet_urls)
-        pool.close()
+        pool = None
+        try:
+            pool = ThreadPool(8)
+        except OSError:
+            # operating system/container doesn't support threading
+            pass
+
+        if pool is not None:
+            results = pool.map(download_stylesheet, stylesheet_urls)
+            pool.close()
+        # fallback to single threaded in case of threading not permitted
+        else:
+            results = []
+            for css_url in stylesheet_urls:
+                results.append(download_stylesheet(stylesheet_urls))
 
         css = "\n".join(results)
         for style in self.dom.xpath("style"):
