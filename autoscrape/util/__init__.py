@@ -74,6 +74,7 @@ def write_file(filepath, data, fileclass=None, writetype="w", output=None,
         payload = {
             "name": filepath,
             "data": encoded,
+            "fileclass": fileclass,
             "url": url,
         }
         if fileclass:
