@@ -188,6 +188,7 @@ class BaseScraper(object):
             crawl_data = {
                 "url": url,
                 "html": data,
+                "fileclass": classname,
                 "date": now.isoformat(timespec="seconds") + "Z",
             }
 
