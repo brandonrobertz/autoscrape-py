@@ -85,7 +85,7 @@ class BaseScraper(object):
         png = None
         if hasattr(self.control.scraper, "driver"):
             logger.debug("[.] Saving screenshot to file: %s." % filepath)
-            png = self.control.scraper.driver.get_screenshot_as_png()
+            png = self.control.scraper.get_screenshot()
 
         # if self.control.scraper.driver_name == "Firefox":
         #     try:

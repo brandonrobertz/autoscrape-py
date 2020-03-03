@@ -10,7 +10,7 @@ try:
     from selenium.common.exceptions import (
         TimeoutException, StaleElementReferenceException,
         NoSuchElementException, ElementNotInteractableException,
-        InvalidElementStateException,
+        InvalidElementStateException, WebDriverException,
     )
     from selenium.webdriver.common.keys import Keys
     from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
@@ -625,3 +625,15 @@ class SeleniumBrowser(BrowserBase, Tagger):
             leave_host=self.leave_host,
         )
         return tagger.get_buttons()
+
+    def get_screenshot(self):
+        """
+        Return a PNG screenshot or None if failure.
+        """
+        try:
+            return self.driver.get_screenshot_as_png()
+        # handle strange exceptions thrown from inside selenium injected
+        # JS which appears to be used when taking screenshots
+        except WebDriverException as e:
+            logger.error("[!] Error getting screenshot: %s" % (e))
+            return None

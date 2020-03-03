@@ -296,3 +296,6 @@ class RequestsBrowser(BrowserBase, Tagger):
             }
             self.graph.add_node(node, **node_meta)
             self.graph.move_to_node(node)
+
+    def get_screenshot(self):
+        return None
