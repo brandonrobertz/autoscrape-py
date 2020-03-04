@@ -228,18 +228,19 @@ Autoscrape manual-mode full options:
         autoscrape [options] BASEURL
 
     General Options:
-    --backend BACKEND
-        The backend to use. Currently one of "selenium" or "requests".
-        The requests browser is only capable of crawling, but is
-        approximately 2-3.5x faster.
-        [default: selenium]
+        --backend BACKEND
+            The backend to use. Currently one of "selenium", "requests" or
+            "warc".  The requests browser is only capable of crawling, but
+            is approximately 2-3.5x faster. WARC is for emulating browsing
+            through Common Crawl archival data.
+            [default: selenium]
 
-    --loglevel LEVEL
-        Loglevel, note that DEBUG is extremely verbose.
-        [default: INFO]
+        --loglevel LEVEL
+            Loglevel, note that DEBUG is extremely verbose.
+            [default: INFO]
 
-    --quiet
-        This will silence all logging to console.
+        --quiet
+            This will silence all logging to console.
 
     Crawl-Specific Options:
         --maxdepth DEPTH
@@ -250,20 +251,36 @@ Autoscrape manual-mode full options:
             Setting to -1 means unlimited maximum crawl depth.
             [default: 10]
 
+        --max-pages NUM
+            Maximum number of unique pages, in total, to fetch.
+            AutoScrape will stop crawling once this is hit.
+
         --leave-host
             By default, autoscrape will not leave the host given
             in the BASEURL. This option lets the scraper leave
             the host.
 
-        --link-priority SORT_STRING
-            A string to sort the links by. In this case, any link
-            containing "SORT_STRING" will be clicked before any other
-            links.
+        --only-links MATCH_STREING
+            A whitelist of links to follow. All others will
+            be ignored. Can be a string or a regex with
+            multiple strings to match separated by a pipe
+            (|) character.
 
         --ignore-links MATCH_STRING
             This option can be used to remove any links matching
             MATCH_STRING (can be a regex or just a string match)
-            from consideration for clicking.
+            from consideration for clicking. Accepts the same
+            argument format as --only-links.
+
+        --link-priority SORT_STRING
+            A string to sort the links by. In this case, any link
+            containing "SORT_STRING" will be clicked before any other
+            links. In most cases you probably want to use the
+            whitelist, --only-links, option.
+
+        --ignore-extensions IGNORE_EXTENSIONS
+            Don't click on or download URLs pointing to files with
+            these extensions.
 
         --result-page-links MATCH_STRINGS_LIST
             If specified, AutoScrape will click on any links matching
@@ -343,10 +360,27 @@ Autoscrape manual-mode full options:
             Which browser to use. Current support for "Firefox",
             "Chrome", and "remote". [default: Firefox]
 
+        --browser-binary PATH_TO_BROWSER
+            Path to a specific browser binary. If left blank
+            selenium will pull the browser found on your path.
+
         --remote-hub URI
             If using "remote" driver, specify the hub URI to
             connect to. Needs the proto, address, port, and path.
             [default: http://localhost:4444/wd/hub]
+
+    WARC Options:
+        --warc-directory PATH_TO_WARCS
+            Path to the folder containing GZipped WARC files. These can be
+            downloaded from Common Crawl. Required when using the "warc"
+            backend.
+
+        --warc-index-file PATH_TO_LEVELDB
+            Path to the level DB database holding the URL-to-file
+            index: URL => (filename, record_number)
+            This will be generated from the WARCS in the --warc-directory
+            speficied if it's not already. Required when using the "warc"
+            backend.
 
     Data Saving Options:
         --output DIRECTORY_OR_URL
