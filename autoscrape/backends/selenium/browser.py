@@ -81,7 +81,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 firefox_profile=firefox_profile,
                 firefox_binary=binary,
             )
-            self.driver.set_page_load_timeout(30)
+            self.driver.set_page_load_timeout(90)
 
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
@@ -232,7 +232,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
 
         # wait for the page to become ready, up to 30s, checks every 0.5s
         logger.debug(" - Performing native WebDriverWait...")
-        wait = WebDriverWait(self.driver, 30)
+        wait = WebDriverWait(self.driver, 90)
         wait.until(self._wait_check)
 
         stale_check_max_times = 30.0
