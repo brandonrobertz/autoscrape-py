@@ -27,3 +27,6 @@ run_rabbitmq:
 
 update_www:
 	git submodule init && git submodule update && cd www && git fetch && git reset origin/master --hard
+
+commit_www:
+	git add www && git commit -m "Update www"
