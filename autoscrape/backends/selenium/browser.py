@@ -557,25 +557,18 @@ class SeleniumBrowser(BrowserBase, Tagger):
         y_off = 0
         ac.move_to_element(elem).move_by_offset(x_off, y_off).click().perform()
 
-    def submit(self, tag):
-        """
-        Submit a form from a given tag. Assumes all inputs are filled.
-        """
-        logger.info("[.] Submitting form.")
-        logger.debug(" - form button tag: %s" % tag)
-        form = self.element_by_tag(tag)
-        self._driver_exec(self.scrolltoview, form)
-
-        # try to find a Submit input button
+    def find_submit_button(self, form):
         sub = None
-        try:
-            sub = self._driver_exec(
-                form.find_element_by_xpath,
-                "//input[@type='submit']"
-            )
-            logger.debug(" - Form submit input button: %s" % (sub))
-        except NoSuchElementException as e:
-            pass
+        submit_btns = self._driver_exec(
+            form.find_elements_by_xpath,
+            "//input[@type='submit']"
+        )
+        for el in submit_btns:
+            txt = el.get_attribute("value").lower()
+            if "submit" in txt or "search" in txt or txt == "go":
+                sub = el
+                logger.debug(" - Form submit input button: %s" % (txt))
+                break
 
         # try to find a Submit link
         # NOTE: instead of using xpath we're going to do a manual search.
@@ -594,6 +587,20 @@ class SeleniumBrowser(BrowserBase, Tagger):
                     logger.debug(" - Form submit link: %s" % (sub))
             except NoSuchElementException as e:
                 pass
+
+        return sub
+
+    def submit(self, tag):
+        """
+        Submit a form from a given tag. Assumes all inputs are filled.
+        """
+        logger.info("[.] Submitting form.")
+        logger.debug(" - form button tag: %s" % tag)
+        form = self.element_by_tag(tag)
+        self._driver_exec(self.scrolltoview, form)
+
+        # try to find a Submit input button
+        sub = self.find_submit_button(form)
 
         # attempt to click on the button, if this fails, we will
         # try to perform a form submit
@@ -629,7 +636,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         # TODO: better way to wait for this, post-alert clicked
         if self.form_submit_wait:
             logger.debug(
-                "Forcing post-submit wait period of %ss" %
+                " - Forcing post-submit wait period of %ss" %
                 self.form_submit_wait
             )
             time.sleep(self.form_submit_wait)

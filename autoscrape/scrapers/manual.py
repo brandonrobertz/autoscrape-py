@@ -170,7 +170,7 @@ class ManualControlScraper(BaseScraper):
                 logger.debug(" - Checking button: %s" % button)
                 if not self.next_match:
                     continue
-                if self.next_match.lower() in button.lower():
+                if re.findall(self.next_match.lower(), button.lower()):
                     logger.info("[.] Next button found! Clicking: %s" % (
                         button
                     ))

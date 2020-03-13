@@ -55,7 +55,7 @@ class TextVectorizer:
             text = []
             if value:
                 text.append(value)
-            if elem is not None and self.scraper.element_text(elem):
+            if elem is not None:
                 text.append(self.scraper.element_text(elem))
             logger.debug(" - button value: %s, text: %s" % (value, text))
             buttons_data.append(" ".join(text))

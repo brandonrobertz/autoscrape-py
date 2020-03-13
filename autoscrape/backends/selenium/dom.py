@@ -39,13 +39,37 @@ class Dom(DomBase):
           }, '');"""
         return self.driver.execute_script(script)
 
+    def _text_via_many_means(self, el):
+        text = []
+        try:
+            txt = el.text
+            if txt:
+                text.append(txt.strip())
+        except Exception as e:
+            logger.error("Error getting text element: %s, Err: %s" % (
+                el, e))
+
+        title = el.get_attribute("title")
+        if title:
+            text.append(title.strip())
+
+        try:
+            placeholder = el.get_attribute("placeholder")
+            if placeholder:
+                text.append(placeholder.strip())
+        except Exception as e:
+            logger.error("Error getting placeholder: %s, Error: %s" % (
+                el, e))
+
+        return " ".join(text).replace("\n", "").strip()
+
     def element_text(self, element, block=False):
         """
         Get the text for all elements either under a given element
         or for a whole page (if element == None)
         """
         if not block and element is not None:
-            return element.text
+            return self._text_via_many_means(element)
 
         if element is None:
             element = self.driver
@@ -54,25 +78,11 @@ class Dom(DomBase):
         # (non-duplicately via descendants) in a more
         # performant way
         elems = element.find_elements_by_xpath(".//*")
-        text = []
+        texts = []
         for el in elems:
-            try:
-                txt = el.text
-                if txt:
-                    text.append(txt.strip())
-            except Exception as e:
-                logger.error("Error getting text element: %s, Err: %s" % (
-                    el, e))
+             texts.append(self._text_via_many_means(el))
 
-            try:
-                placeholder = el.get_attribute("placeholder")
-                if placeholder:
-                    text.append(placeholder.strip())
-            except Exception as e:
-                logger.error("Error getting placeholder: %s, Error: %s" % (
-                    el, e))
-
-        full_text = " ".join(text).replace("\n", "")
+        full_text = " ".join(texts).replace("\n", "").strip()
         logger.debug(" - Found text: %s" % full_text)
         return full_text
 
