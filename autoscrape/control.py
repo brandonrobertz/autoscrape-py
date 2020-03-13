@@ -156,14 +156,14 @@ class Controller:
         self.scraper.fetch(url, initial=True)
         self.load_indices()
 
-    def select_link(self, index):
+    def select_link(self, index, iterating_form=False):
         if index >= len(self.clickable):
             logger.error(
                 "[!] Critical error: link index exceeds clickable length."
             )
             return False
         tag = self.clickable[index]
-        clicked = self.scraper.click(tag)
+        clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:
             self.load_indices()
         return clicked

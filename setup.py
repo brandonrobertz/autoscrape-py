@@ -11,7 +11,7 @@ def get_long_description():
 
 setuptools.setup(
     name='autoscrape',
-    version='1.2.7',
+    version='1.3.0',
     description='An automated, programming-free web scraper for interactive sites',
     long_description=get_long_description(),
     author='Brandon Roberts',

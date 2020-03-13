@@ -178,6 +178,7 @@ class BaseScraper(object):
 
         crawl_data = None
         if self.output:
+            logger.info(" - Saving page: %s" % (filepath))
             write_file(
                 filepath, data, fileclass=classname,
                 writetype=writetype, output=self.output,
@@ -194,7 +195,7 @@ class BaseScraper(object):
 
         # only save stylesheets for web content types
         if link_to_text and not self.disable_style_saving:
-            logger.debug("[.] Saving stylesheet")
+            logger.debug(" -  Saving stylesheet")
             style_filepath = "%s.css" % filepath
             # this will save stylesheet as filepath.html.css
             stylesheet = self.control.scraper.get_stylesheet()

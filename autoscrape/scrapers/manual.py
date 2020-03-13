@@ -125,9 +125,9 @@ class ManualControlScraper(BaseScraper):
         logger.debug(" - Candidate links: %s" % (link_zip))
         # Click until we get no more matches
         for ix, text in link_zip:
-            logger.info("[.] Trying to click result page link: %s" % (text))
+            logger.info("[.] Clicking result page link: %s" % (text))
             logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
-            if self.control.select_link(ix):
+            if self.control.select_link(ix, iterating_form=True):
                 self.total_pages += 1
                 self.click_until_no_links(links)
                 self.save_training_page(classname="data_pages")

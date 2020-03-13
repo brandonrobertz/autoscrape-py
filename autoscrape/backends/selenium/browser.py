@@ -29,6 +29,7 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 
 class SeleniumBrowser(BrowserBase, Tagger):
+    TIMEOUT = 90
 
     def __init__(self, driver="Firefox", leave_host=False,
                  load_images=False, form_submit_natural_click=False,
@@ -81,7 +82,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 firefox_profile=firefox_profile,
                 firefox_binary=binary,
             )
-            self.driver.set_page_load_timeout(90)
+            self.driver.set_page_load_timeout(self.TIMEOUT)
 
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
@@ -130,7 +131,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
         # this is in the form of (command, *args, **kwargs)
         self.path = []
         # store the values of the history stack length (via JS) for use in determining
-        # whether or not we actually navigated somewhere
+        # whether or not we actually navigated somewhere. stored in window, hist
+        # pairs: [[win_1, 1], ..., [win_N, N]]
         self.history_stack = []
         # tree building
         self.graph = Graph()
@@ -189,6 +191,16 @@ class SeleniumBrowser(BrowserBase, Tagger):
         script = "return window.history.length;"
         return self._driver_exec(self.driver.execute_script, script)
 
+    def _get_open_windows(self):
+        """
+        Get the handles of each open browser window and add any new
+        ones to the open window stack.
+        """
+        return self.driver.window_handles
+
+    def _switch_to_window(self, window_id):
+        self.driver.switch_to_window(window_id)
+
     def _wait_check(self, driver):
         """
         This is the check that gets ran to determine whether
@@ -232,10 +244,10 @@ class SeleniumBrowser(BrowserBase, Tagger):
 
         # wait for the page to become ready, up to 30s, checks every 0.5s
         logger.debug(" - Performing native WebDriverWait...")
-        wait = WebDriverWait(self.driver, 90)
+        wait = WebDriverWait(self.driver, self.TIMEOUT)
         wait.until(self._wait_check)
 
-        stale_check_max_times = 30.0
+        stale_check_max_times = self.TIMEOUT
         stale_check_times = 0
         while stale_check_times < stale_check_max_times:
             logger.debug(" - Doing ID check (no. %s)..." % (stale_check_times))
@@ -244,7 +256,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             stale_check_times += 1
             time.sleep(wait_for_stale_time / stale_check_max_times)
 
-        stale_check_max_times = 30.0
+        stale_check_max_times = self.TIMEOUT
         stale_check_times = 0
         while stale_check_times < stale_check_max_times:
             logger.debug(" - Doing stale check (no. %s)..." % (stale_check_times))
@@ -281,7 +293,11 @@ class SeleniumBrowser(BrowserBase, Tagger):
         logger.info("[.] Fetching %s" % url)
         self._loadwait(self.driver.get, url)
         self.path.append(("fetch", (url,), {}))
-        self.history_stack.append(self._get_history_depth())
+
+        depth = self._get_history_depth()
+        window = self._get_open_windows()[-1]
+        self.history_stack.append([window, depth])
+
         node = "Fetch\n url: %s" % url
         self.graph.add_root_node(node, url=url, action="fetch")
 
@@ -290,15 +306,25 @@ class SeleniumBrowser(BrowserBase, Tagger):
         logger.debug(" - current path-length=%s path=%s" % (
             len(self.path), self._no_tags(self.path),
         ))
-        logger.debug("History stack: %s" % (self.history_stack))
+
         # only go 'back' if the history depth changed from
         # now to the previous (back) value. if they're the
         # same, we just clicked something inside the page
         if len(self.history_stack) > 1:
-            current_hist = self.history_stack.pop()
-            if current_hist != self.history_stack[-1]:
-                logger.debug("History depth changed since last action.")
+            window, depth = self.history_stack.pop()
+            prev_win, prev_depth = self.history_stack[-1]
+            # same window, we just incremented the history stack once
+            if window == prev_win and depth != prev_depth:
+                logger.debug(" - History depth changed since last action.")
                 self._loadwait(self.driver.back)
+            # time to close an open window, focus old
+            elif window != prev_win:
+                logger.debug(" - Going back to previous window")
+                # close current window (make sure we've focused proper one)
+                self._switch_to_window(window)
+                self.driver.close()
+                # focus previous one
+                self._switch_to_window(prev_win)
         self.path.pop()
         self.graph.move_to_parent()
 
@@ -395,7 +421,17 @@ class SeleniumBrowser(BrowserBase, Tagger):
             logger.error("[!] Current URL: %s" % (self.page_url))
             return False
 
-        self.history_stack.append(self._get_history_depth())
+        depth = self._get_history_depth()
+        window = self._get_open_windows()[-1]
+
+        if len(self.history_stack) > 1:
+            prev_window = self.history_stack[-1][0]
+            if window != prev_window:
+                logger.debug(" - Focusing new window: %s" % (window))
+                self._switch_to_window(window)
+
+        self.history_stack.append([window, depth])
+
         self.path.append((
             "click", (tag,), {"iterating_form": iterating_form}
         ))
@@ -516,7 +552,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
         """
         Submit a form from a given tag. Assumes all inputs are filled.
         """
-        logger.info("Submitting form by tag: %s" % tag)
+        logger.info("[.] Submitting form.")
+        logger.debug(" - form button tag: %s" % tag)
         form = self.element_by_tag(tag)
         self._driver_exec(self.scrolltoview, form)
 
@@ -567,7 +604,11 @@ class SeleniumBrowser(BrowserBase, Tagger):
             logger.debug("Using form.submit selenium shim")
             self._loadwait(form.submit, check_alerts=True)
 
-        self.history_stack.append(self._get_history_depth())
+        depth = self._get_history_depth()
+        window = self._get_open_windows()[-1]
+        # assuming we can't pop a new window here, for now
+        self.history_stack.append([window, depth])
+
         self.path.append(("submit", (tag,), {}))
         node = "Submit\n tag: %s" % (tag)
         node_meta = {
