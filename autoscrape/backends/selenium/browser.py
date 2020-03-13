@@ -29,12 +29,14 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 
 class SeleniumBrowser(BrowserBase, Tagger):
-    TIMEOUT = 90
+    # override a None passed to page_timeout because we need
+    # to set an integer value
+    DEFAULT_TIMEOUT = 30
 
     def __init__(self, driver="Firefox", leave_host=False,
                  load_images=False, form_submit_natural_click=False,
                  form_submit_wait=5, output=None, show_browser=False,
-                 browser_binary=None,
+                 browser_binary=None, page_timeout=None,
                  remote_hub="http://localhost:4444/wd/hub", **kwargs):
         try:
             webdriver
@@ -45,6 +47,11 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 " Exiting."
             )
             sys.exit(1)
+
+        # toggle the various timeouts in selenium
+        self.timeout = page_timeout
+        if self.timeout is None:
+            self.timeout = self.DEFAULT_TIMEOUT
 
         # Needs geckodriver:
         # https://github.com/mozilla/geckodriver/releases
@@ -82,7 +89,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 firefox_profile=firefox_profile,
                 firefox_binary=binary,
             )
-            self.driver.set_page_load_timeout(self.TIMEOUT)
+            self.driver.set_page_load_timeout(self.timeout)
 
         # this requires chromedriver to be on the PATH
         # if using chromium and ubuntu, apt install chromium-chromedriver
@@ -244,10 +251,10 @@ class SeleniumBrowser(BrowserBase, Tagger):
 
         # wait for the page to become ready, up to 30s, checks every 0.5s
         logger.debug(" - Performing native WebDriverWait...")
-        wait = WebDriverWait(self.driver, self.TIMEOUT)
+        wait = WebDriverWait(self.driver, self.timeout)
         wait.until(self._wait_check)
 
-        stale_check_max_times = self.TIMEOUT
+        stale_check_max_times = self.timeout
         stale_check_times = 0
         while stale_check_times < stale_check_max_times:
             logger.debug(" - Doing ID check (no. %s)..." % (stale_check_times))
@@ -256,7 +263,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             stale_check_times += 1
             time.sleep(wait_for_stale_time / stale_check_max_times)
 
-        stale_check_max_times = self.TIMEOUT
+        stale_check_max_times = self.timeout
         stale_check_times = 0
         while stale_check_times < stale_check_max_times:
             logger.debug(" - Doing stale check (no. %s)..." % (stale_check_times))
@@ -390,7 +397,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
         href = self._driver_exec(elem.get_attribute, "href")
         hash = "%s|%s|%s" % (href, onclick, name)
         text = self._driver_exec(elem.text)
-        if hash in self.visited and not iterating_form:
+        # only enable this for URL links
+        if href and hash in self.visited and not iterating_form:
+            logger.debug("Link already clicked! Hash: %s" % (hash))
             return False
 
         self.visited.add(hash)

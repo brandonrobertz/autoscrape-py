@@ -43,12 +43,14 @@ class ManualControlScraper(BaseScraper):
                  ignore_extensions=None, result_page_links=None,
                  form_submit_natural_click=False, form_submit_wait=5,
                  load_images=False, show_browser=False, warc_index_file=None,
-                 warc_directory=None, return_data=False,
+                 warc_directory=None, return_data=False, page_timeout=None,
                  backend="selenium"):
         # setup logging, etc
         super().setup_logging(
             loglevel=loglevel, stdout=stdout
         )
+        if page_timeout is not None:
+            page_timeout = int(page_timeout)
         # set up web scraper controller
         self.control = Controller(
             leave_host=leave_host, driver=driver, remote_hub=remote_hub,
@@ -57,6 +59,7 @@ class ManualControlScraper(BaseScraper):
             load_images=load_images, show_browser=show_browser,
             warc_index_file=warc_index_file, warc_directory=warc_directory,
             output=output, backend=backend, browser_binary=browser_binary,
+            page_timeout=page_timeout,
         )
         self.control.initialize(baseurl)
         # depth of DFS in search of form
@@ -111,7 +114,7 @@ class ManualControlScraper(BaseScraper):
             self.input_gen = [[]]
 
     def click_until_no_links(self, links):
-        logger.debug("[.] Clicking result page links...")
+        logger.info("[.] Clicking result page links...")
         if self.max_pages is not None and self.total_pages >= self.max_pages:
             logger.info(" - Maximum pages %s reached, returning..." % self.max_pages)
             return
@@ -314,7 +317,7 @@ class ManualControlScraper(BaseScraper):
             logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
             logger.debug(" - Attempting to click link text: %s" % text)
             if self.control.select_link(ix):
-                logger.debug("[.] Link clicked. Going a level deeper...")
+                logger.info("[.] Link clicked: %s" % (text))
                 logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
                 self.total_pages += 1
                 self.scrape(depth=depth + 1)

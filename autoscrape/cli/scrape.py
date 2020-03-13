@@ -126,6 +126,14 @@ Interactive Form Search Options:
         pages, etc). [default: 5]
 
 Webdriver-Specific and General Options:
+    --page-timeout SECONDS
+        Selenium has a lot of timeout settings used for
+        determining when a page has loaded. In cases where
+        pages take a very long time, this may need to be
+        increased. If you have a fast-loading page, but
+        AutoScrape is waiting for load, you can set this
+        lower to speed things up. [default: 30]
+
     --load-images
         By default, images on a page will not be fetched.
         This speeds up scrapes on sites and lowers bandwidth

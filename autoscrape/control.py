@@ -38,7 +38,7 @@ class Controller:
                  remote_hub="http://localhost:4444/wd/hub", output=None,
                  form_submit_natural_click=False, form_submit_wait=5,
                  warc_index_file=None, warc_directory=None,
-                 load_images=False, show_browser=False,
+                 load_images=False, show_browser=False, page_timeout=None,
                  html_embeddings_file=None, word_embeddings_file=None,
                  backend="selenium", vectorizer="text"):
         """
@@ -63,7 +63,7 @@ class Controller:
             form_submit_wait=form_submit_wait,
             warc_index_file=warc_index_file, warc_directory=warc_directory,
             load_images=load_images, show_browser=show_browser,
-            output=output,
+            output=output, page_timeout=page_timeout,
         )
 
         Vectorizer = None
@@ -165,6 +165,7 @@ class Controller:
         tag = self.clickable[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:
+            time.sleep(1)
             self.load_indices()
         return clicked
 
@@ -172,6 +173,7 @@ class Controller:
         tag = self.buttons[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:
+            time.sleep(1)
             self.load_indices()
         return clicked
 
@@ -207,8 +209,10 @@ class Controller:
     def submit(self, index):
         tag = self.forms[index]
         self.scraper.submit(tag)
+        time.sleep(1)
         self.load_indices()
 
     def back(self):
         self.scraper.back()
+        time.sleep(1)
         self.load_indices()
