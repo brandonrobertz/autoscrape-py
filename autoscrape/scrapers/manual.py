@@ -153,7 +153,7 @@ class ManualControlScraper(BaseScraper):
             found_next = False
             button_data = self.control.vectorizer.button_vectors()
             n_buttons = len(button_data)
-            logger.info("[.] Current 'Next' Iteration Depth %s" % depth)
+            logger.info("[.] On result page %s" % (depth + 1))
             logger.debug(" - Button vectors (%s): %s" % (
                 n_buttons, button_data
             ))

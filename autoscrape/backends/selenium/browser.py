@@ -206,7 +206,10 @@ class SeleniumBrowser(BrowserBase, Tagger):
         return self.driver.window_handles
 
     def _switch_to_window(self, window_id):
-        self.driver.switch_to_window(window_id)
+        self.driver.switch_to.window(window_id)
+
+    def _switch_to_iframe(self, frame_id):
+        self.driver.switch_to.frame(frame_id)
 
     def _wait_check(self, driver):
         """
