@@ -1,23 +1,111 @@
 # -*- coding: UTF-8 -*-
 import logging
 
+try:
+    from selenium.common.exceptions import NoSuchElementException
+except ModuleNotFoundError:
+    # we haven't installed selenium backend deps
+    pass
+
 from autoscrape.backends.base.dom import DomBase
 
 
 logger = logging.getLogger('AUTOSCRAPE')
 
 
+class FrameTransparentList(list):
+    def __init__(self, *args, **kwargs):
+        self.driver = kwargs.pop("driver")
+        super().__init__(*args, **kwargs)
+
+    def __getitem__(self, index):
+        raw_item = super().__getitem__(index)
+        if not isinstance(raw_item, list):
+            self.driver.switch_to.default_content()
+            return raw_item
+        iframe_ix, element = raw_item
+        self.driver.switch_to.frame(iframe_ix)
+        return element
+
+    def __iter__(self):
+        for raw_item in list.__iter__(self):
+            if not isinstance(raw_item, list):
+                self.driver.switch_to.default_content()
+                yield raw_item
+                continue
+            iframe_ix, element = raw_item
+            self.driver.switch_to.frame(iframe_ix)
+            yield element
+            self.driver.switch_to.default_content()
+
+
 class Dom(DomBase):
     def element_attr(self, element, name, default=None):
         return element.get_attribute(name)
 
+    def iframe_capable_lookup(self, tag):
+        try:
+            self.driver.switch_to.default_content()
+            return self.driver.find_element_by_css_selector(tag)
+        except NoSuchElementException:
+            pass
+        self.driver.switch_to.default_content()
+        iframes = self.driver.find_elements_by_tag_name("iframe")
+        for iframe_ix in range(len(iframes)):
+            self.driver.switch_to.frame(iframe_ix)
+            try:
+                return self.driver.find_element_by_css_selector(tag)
+            except NoSuchElementException:
+                continue
+        raise NoSuchElementException("No element found for tag: %s" % (tag))
+
     def element_by_tag(self, tag):
-        return self.dom.cssselect(tag)[0]
+        """
+        Take a tag and return the corresponding live element in the DOM.
+        """
+        inside_id = False
+        # escaping logic
+        newtag = ""
+        for c in tag:
+            if c == "#":
+                inside_id = True
+                newtag += c
+                continue
+
+            # end of ID
+            elif inside_id and re.search("\s", c):
+                inside_id = False
+
+            elif inside_id and c in self.css_escapables:
+                for escapable in self.css_escapables:
+                    c = "\%s" % escapable
+
+            newtag += c
+
+        if newtag != tag:
+            logger.debug("Original tag: %s, newtag: %s" % (tag, newtag))
+            tag = newtag
+
+        # try:
+        return self.iframe_capable_lookup(tag)
+        # except Exception as e:
+        #     msg = "Error finding element for tag %s. Error: (%s) %s"
+        #     logger.error(msg % (tag, type(e), e))
 
     def elements_by_path(self, xpath, from_element=None):
-        if not from_element:
-            return self.driver.find_elements_by_xpath(xpath)
-        return from_element.find_elements_by_xpath(xpath)
+        if from_element is None:
+            from_element = self.driver
+        iframes = from_element.find_elements_by_tag_name("iframe")
+        if not len(iframes):
+            return from_element.find_elements_by_xpath(xpath)
+        # gather all elements from iframe
+        elements = from_element.find_elements_by_xpath(xpath)
+        for iframe_ix in range(len(iframes)):
+            self.driver.switch_to.frame(iframe_ix)
+            for el in self.driver.find_elements_by_xpath(xpath):
+                elements.append([iframe_ix, el])
+        self.driver.switch_to.default_content()
+        return FrameTransparentList(elements, driver=self.driver)
 
     def get_stylesheet(self):
         script = """
@@ -60,6 +148,10 @@ class Dom(DomBase):
         except Exception as e:
             logger.error("Error getting placeholder: %s, Error: %s" % (
                 el, e))
+
+        img_els = el.find_elements_by_tag_name("img")
+        for img in img_els:
+            text.append(img.get_attribute("alt"))
 
         return " ".join(text).replace("\n", "").strip()
 

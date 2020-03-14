@@ -257,7 +257,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         wait = WebDriverWait(self.driver, self.timeout)
         wait.until(self._wait_check)
 
-        stale_check_max_times = self.timeout
+        stale_check_max_times = 10
         stale_check_times = 0
         while stale_check_times < stale_check_max_times:
             logger.debug(" - Doing ID check (no. %s)..." % (stale_check_times))
@@ -266,7 +266,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             stale_check_times += 1
             time.sleep(wait_for_stale_time / stale_check_max_times)
 
-        stale_check_max_times = self.timeout
+        stale_check_max_times = 10
         stale_check_times = 0
         while stale_check_times < stale_check_max_times:
             logger.debug(" - Doing stale check (no. %s)..." % (stale_check_times))
@@ -349,41 +349,6 @@ class SeleniumBrowser(BrowserBase, Tagger):
 
         script = "arguments[0].target='_self';"
         self._driver_exec(self.driver.execute_script, script, elem)
-
-    def element_by_tag(self, tag):
-        """
-        Take a tag and return the corresponding live element in the DOM.
-        """
-        inside_id = False
-        # escaping logic
-        newtag = ""
-        for c in tag:
-            if c == "#":
-                inside_id = True
-                newtag += c
-                continue
-
-            # end of ID
-            elif inside_id and re.search("\s", c):
-                inside_id = False
-
-            elif inside_id and c in self.css_escapables:
-                for escapable in self.css_escapables:
-                    c = "\%s" % escapable
-
-            newtag += c
-
-        if newtag != tag:
-            logger.debug("Original tag: %s, newtag: %s" % (tag, newtag))
-            tag = newtag
-
-        try:
-            return self._driver_exec(
-                self.driver.find_element_by_css_selector, tag
-            )
-        except Exception as e:
-            msg = "Error finding element for tag %s. Error: %s"
-            logger.error(msg % (tag, e))
 
     def click(self, tag, iterating_form=False):
         """
