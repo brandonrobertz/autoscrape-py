@@ -143,7 +143,7 @@ class ManualControlScraper(BaseScraper):
         links, and clicks them until one is not found. This saves the
         pages as it goes.
         """
-        logger.debug("[*] Entering 'next' iteration routine")
+        logger.info("[*] Entering result page iteration routine")
         depth = 0
         while True:
             if self.formdepth and depth > self.formdepth:
@@ -189,7 +189,7 @@ class ManualControlScraper(BaseScraper):
                 break
 
         for _ in range(depth):
-            logger.debug("[.] Going back from 'next'...")
+            logger.debug("[.] Going back from result page...")
             self.control.back()
 
     def scrape(self, depth=0):
@@ -232,7 +232,7 @@ class ManualControlScraper(BaseScraper):
             if self.form_match.lower() not in form_data.lower():
                 continue
 
-            logger.debug("[*] Found an input form!")
+            logger.info("[*] Found an input form!")
             self.save_training_page(classname="search_pages")
             self.save_screenshot(classname="search_pages")
 
@@ -254,7 +254,7 @@ class ManualControlScraper(BaseScraper):
                         )
                     elif single_input["type"] == "checkbox":
                         to_check = single_input["action"]
-                        logger.debug("[.] %s checkbox input %s" % (
+                        logger.info("[.] %s checkbox input %s" % (
                             "Checking" if to_check else "Unchecking",
                             input_index
                         ))
@@ -263,14 +263,13 @@ class ManualControlScraper(BaseScraper):
                         )
                     elif single_input["type"] == "date":
                         input_string = single_input["string"]
-                        logger.debug("[.] Setting date to %s in date input %s" % (
+                        logger.info("[.] Setting date to %s in date input %s" % (
                             input_string, ix))
                         self.control.input_date(ix, input_index, input_string)
 
                 self.save_screenshot(classname="interaction_pages")
                 self.control.submit(ix)
                 self.total_pages += 1
-                logger.debug("[*] Beginning iteration of data pages")
                 self.save_screenshot(classname="interaction_pages")
                 self.keep_clicking_next_btns()
                 scraped = True
