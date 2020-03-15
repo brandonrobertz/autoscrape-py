@@ -86,13 +86,15 @@ class Dom(DomBase):
             logger.debug("Original tag: %s, newtag: %s" % (tag, newtag))
             tag = newtag
 
-        # try:
         return self.iframe_capable_lookup(tag)
-        # except Exception as e:
-        #     msg = "Error finding element for tag %s. Error: (%s) %s"
-        #     logger.error(msg % (tag, type(e), e))
 
     def elements_by_path(self, xpath, from_element=None):
+        """
+        Get all elements, across all iframes. We output a
+        FrameTransparentList which is a normal list of elements, but it will
+        switch to the correct frame upon accessing/iterating to
+        each element.
+        """
         if from_element is None:
             from_element = self.driver
         iframes = from_element.find_elements_by_tag_name("iframe")
