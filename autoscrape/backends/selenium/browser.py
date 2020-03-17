@@ -326,6 +326,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             # same window, we just incremented the history stack once
             if window == prev_win and depth != prev_depth:
                 logger.debug(" - History depth changed since last action.")
+                self.driver.switch_to.default_content()
                 self._loadwait(self.driver.back)
             # time to close an open window, focus old
             elif window != prev_win:
