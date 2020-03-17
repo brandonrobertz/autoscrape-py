@@ -99,14 +99,32 @@ class TaggerBase(DomBase):
             elem = form
             x_path = ".%s" % x_path
 
-        elems = self.elements_by_path(x_path, from_element=elem)
-        for input in elems:
-            input_tag = self.tag_from_element(input)
-            if not input_tag:
-                logger.warn("No tag for input %s" % input)
-                continue
+        # radio checkboxes are grouped by name
+        if itype == "radio":
+            # store the radio group position by name here
+            radio_names = []
+            elems = self.elements_by_path(x_path, from_element=elem)
+            for radio in elems:
+                name = self.element_attr(radio, "name")
+                if name not in radio_names:
+                    radio_names.append(name)
+                    tags.append([])
+                radio_group_ix = radio_names.index(name)
+                radio_tag = self.tag_from_element(radio)
+                if not radio_tag:
+                    logger.warn("No tag for radio %s" % radio)
+                    continue
+                tags[radio_group_ix].append(radio_tag)
+        # all the rest are flat
+        else:
+            elems = self.elements_by_path(x_path, from_element=elem)
+            for input in elems:
+                input_tag = self.tag_from_element(input)
+                if not input_tag:
+                    logger.warn("No tag for input %s" % input)
+                    continue
 
-            tags.append(input_tag)
+                tags.append(input_tag)
 
         return tags
 
@@ -137,6 +155,7 @@ class TaggerBase(DomBase):
                 self.get_inputs(form=elem, itype="select"),
                 self.get_inputs(form=elem, itype="checkbox"),
                 self.get_inputs(form=elem, itype="date"),
+                self.get_inputs(form=elem, itype="radio"),
             ]
 
         return tags

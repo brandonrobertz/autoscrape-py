@@ -88,6 +88,12 @@ class InputParser:
                         "type": "date",
                         "string": action,
                     })
+                elif itype == "r":
+                    indiv_search.append({
+                        "index": ix,
+                        "type": "radio",
+                        "string": int(action),
+                    })
                 else:
                     raise Exception("Invalid input type found: %s" % itype)
 

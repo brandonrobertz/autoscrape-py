@@ -206,6 +206,15 @@ class Controller:
         tag = self.inputs[form_ix][3][index]
         self.scraper.input(tag, chars)
 
+    def input_radio_option(self, form_ix, index, radio_index):
+        """
+        Select a radio checkbox from a given form, checkbox group
+        index and desired value by text.
+        """
+        grp_tags = self.inputs[form_ix][4][index]
+        tag = grp_tags[radio_index]
+        self.scraper.input_checkbox(tag, True, radio=True)
+
     def submit(self, index):
         tag = self.forms[index]
         self.scraper.submit(tag)

@@ -326,6 +326,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
             # same window, we just incremented the history stack once
             if window == prev_win and depth != prev_depth:
                 logger.debug(" - History depth changed since last action.")
+                # going backward should be the only time we have a
+                # frame focused, where we want to be on the main page
                 self.driver.switch_to.default_content()
                 self._loadwait(self.driver.back)
             # time to close an open window, focus old
@@ -450,7 +452,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             "(\[:left:\]|\[:right:\]|\[:down:\]|\[:up:\]|\[:enter:\])",
             input
         )
-        logger.debug("Split replacements input string: %s" % split_replacements)
+        logger.debug(" - Split replacements input string: %s" % split_replacements)
         for chunk in split_replacements:
             if not chunk:
                 continue
@@ -463,7 +465,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         """
         Enter some input into an element by a given tag.
         """
-        logger.info("Injecting text \"%s\" to input" % (input))
+        logger.info(" - Injecting text \"%s\" to input" % (input))
         elem = self.element_by_tag(tag)
         self._driver_exec(self.scrolltoview, elem)
         try:
@@ -487,7 +489,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         """
         Select an input select option based on its visible string value.
         """
-        logger.info("Selecting option %s" % (option_str))
+        logger.info(" - Selecting option %s" % (option_str))
         elem = self.element_by_tag(tag)
         self._driver_exec(self.scrolltoview, elem)
         # TODO: wrap in _driver_exec after testing
@@ -502,18 +504,19 @@ class SeleniumBrowser(BrowserBase, Tagger):
         }
         self.graph.add_action_to_current(action)
 
-    def input_checkbox(self, tag, to_check):
+    def input_checkbox(self, tag, to_check, radio=False):
         """
         Check, uncheck, or don't touch an input checkbox, based
         on its current checked value.
         """
-        logger.info("Checking to checkbox selected=%s" % (to_check))
+        logger.info(" - Checking to checkbox selected=%s" % (to_check))
         elem = self.element_by_tag(tag)
         self._driver_exec(self.scrolltoview, elem)
         # TODO: wrap in _driver_exec after testing
         if elem.is_selected() != to_check:
             elem.click()
-            self._driver_exec(elem.clear)
+            if not radio:
+                self._driver_exec(elem.clear)
         self.path.append(("input_checkbox", (tag, to_check,), {}))
         action = {
             "action": "input_checkbox",
@@ -527,7 +530,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         Perform a "natural" click of an element, so that if there are
         any parent listeners, they will also be triggered.
         """
-        logger.info("Performing a 'natural' click")
+        logger.info(" - Performing a 'natural' click")
         from selenium.webdriver.common.action_chains import ActionChains
         ac = ActionChains(self.driver)
         x_off = 0

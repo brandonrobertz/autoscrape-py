@@ -243,12 +243,14 @@ class ManualControlScraper(BaseScraper):
                     if single_input["type"] == "input":
                         input_string = single_input["string"]
                         logger.info("[.] Inputting %s to input %s" % (
-                            input_string, ix))
+                            input_string, ix
+                        ))
                         self.control.input(ix, input_index, input_string)
                     elif single_input["type"] == "select":
                         input_string = single_input["string"]
                         logger.info("[.] Selecting option %s in input %s" % (
-                            input_string, input_index))
+                            input_string, input_index
+                        ))
                         self.control.input_select_option(
                             ix, input_index, input_string
                         )
@@ -266,6 +268,14 @@ class ManualControlScraper(BaseScraper):
                         logger.info("[.] Setting date to %s in date input %s" % (
                             input_string, ix))
                         self.control.input_date(ix, input_index, input_string)
+                    elif single_input["type"] == "radio":
+                        radio_index = single_input["string"]
+                        logger.info("[.] Selecting radio checkbox %s in group %s" % (
+                            radio_index, input_index
+                        ))
+                        self.control.input_radio_option(
+                            ix, input_index, radio_index
+                        )
 
                 self.save_screenshot(classname="interaction_pages")
                 self.control.submit(ix)
