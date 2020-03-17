@@ -398,6 +398,14 @@ class SeleniumBrowser(BrowserBase, Tagger):
             logger.error("[!] Current URL: %s" % (self.page_url))
             return False
 
+        # apply form submit waits to 'next' button clicks
+        if iterating_form and self.form_submit_wait:
+            logger.debug(
+                " - Forcing post-submit wait period of %ss" %
+                self.form_submit_wait
+            )
+            time.sleep(self.form_submit_wait)
+
         depth = self._get_history_depth()
         window = self._get_open_windows()[-1]
 
