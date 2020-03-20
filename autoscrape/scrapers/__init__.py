@@ -129,12 +129,6 @@ class BaseScraper(object):
         if classname not in self.training_classes:
             raise ValueError("Base class speficied: %s" % classname)
 
-        # always keep filename for downloads, for now
-        if not self.output or re.match("^https?://", self.output):
-            classdir = classname
-        else:
-            classdir = os.path.join(self.output, classname)
-
         data = None
         if url is None:
             # TODO: migrate over
@@ -147,7 +141,15 @@ class BaseScraper(object):
         link_to_text = ext in TEXT_EXTENSIONS
         if not link_to_text:
             data = self.control.scraper.download_file(url, return_data=True)
+            print("DOWNLOADS")
             classname = "downloads"
+
+        # always keep filename for downloads, for now
+        if not self.output or re.match("^https?://", self.output):
+            classdir = classname
+        else:
+            classdir = os.path.join(self.output, classname)
+
 
         # we had some kind of error downloading
         if data is None:

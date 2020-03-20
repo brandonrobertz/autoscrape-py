@@ -218,8 +218,19 @@ class SeleniumBrowser(BrowserBase, Tagger):
         the page is loaded or not.
         """
         logger.debug(" - Waiting for page to load (document.readyState)...")
-        script = "return document.readyState;"
-        result = self._driver_exec(self.driver.execute_script, script)
+        script = """
+          var callback = arguments[arguments.length - 1];
+          setTimeout(callback(document.readyState), 3000);
+          document.addEventListener('readystatechange', event => {
+            console.log(event.target.readyState);
+            if (event.target.readyState === 'interactive') {
+            }
+            else if (event.target.readyState === 'complete') {
+              callback(document.readyState);
+            }
+          });
+        """
+        result = self._driver_exec(self.driver.execute_async_script, script)
         return result == "complete"
 
     def _loadwait(self, fn, *args, **kwargs):
@@ -227,7 +238,6 @@ class SeleniumBrowser(BrowserBase, Tagger):
         Run a driver interaction function, wait for the page to
         become ready, and handle any broken pipe errors
         """
-        wait_for_stale_time = 10  # seconds
         start = time.time()
         check_alerts = False
         if "check_alerts" in kwargs:
@@ -257,30 +267,6 @@ class SeleniumBrowser(BrowserBase, Tagger):
         logger.debug(" - Performing native WebDriverWait...")
         wait = WebDriverWait(self.driver, self.timeout)
         wait.until(self._wait_check)
-
-        stale_check_max_times = 10
-        stale_check_times = 0
-        while stale_check_times < stale_check_max_times:
-            logger.debug(" - Doing ID check (no. %s)..." % (stale_check_times))
-            if elem.id != self.driver.find_element_by_xpath("html").id:
-                break
-            stale_check_times += 1
-            time.sleep(wait_for_stale_time / stale_check_max_times)
-
-        stale_check_max_times = 10
-        stale_check_times = 0
-        while stale_check_times < stale_check_max_times:
-            logger.debug(" - Doing stale check (no. %s)..." % (stale_check_times))
-            try:
-                elem.text
-            except StaleElementReferenceException:
-                logger.debug("[.] Stale element found! Loading complete.")
-                break
-            except NoSuchElementException:
-                logger.debug("[.] Stale element found! Loading complete.")
-                break
-            stale_check_times += 1
-            time.sleep(wait_for_stale_time / stale_check_max_times)
 
         t = time.time() - start
         logger.debug(" - Wait for load succeeded in %s" % t)
