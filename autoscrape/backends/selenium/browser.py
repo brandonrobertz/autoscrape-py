@@ -12,6 +12,7 @@ try:
         NoSuchElementException, ElementNotInteractableException,
         InvalidElementStateException, WebDriverException,
     )
+    from selenium.webdriver.common.by import By
     from selenium.webdriver.common.keys import Keys
     from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
     from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -377,6 +378,10 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.disable_target(elem)
         self.scrolltoview(elem)
 
+        if iterating_form:
+            wait = WebDriverWait(self.driver, self.timeout)
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, tag)))
+
         try:
             self._loadwait(elem.click)
         except TimeoutException as e:
@@ -395,9 +400,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 logger.error("[!] Current URL: %s" % (self.page_url))
                 return False
         except Exception as e:
-            logger.error("[!] Error clicking %s: %s" % (href, e))
-            logger.error("[!] Stacktrace: %s" % (e.stacktrace))
-            logger.error("[!] Screen: %s" % (e.screen))
+            logger.error("[!] Error clicking: %s" % (e))
             logger.error("[!] Current URL: %s" % (self.page_url))
             return False
 
