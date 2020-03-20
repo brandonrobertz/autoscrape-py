@@ -57,6 +57,7 @@ class Dom(DomBase):
                 return self.driver.find_element_by_css_selector(tag)
             except NoSuchElementException:
                 continue
+            self.driver.switch_to.default_content()
         raise NoSuchElementException("No element found for tag: %s" % (tag))
 
     def element_by_tag(self, tag):
@@ -106,6 +107,7 @@ class Dom(DomBase):
             self.driver.switch_to.frame(iframe_ix)
             for el in self.driver.find_elements_by_xpath(xpath):
                 elements.append([iframe_ix, el])
+            self.driver.switch_to.default_content()
         self.driver.switch_to.default_content()
         return FrameTransparentList(elements, driver=self.driver)
 
