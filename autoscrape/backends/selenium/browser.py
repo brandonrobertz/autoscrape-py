@@ -350,6 +350,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
             logger.warn("Element by tag not found. Tag: %s" % tag)
             return False
 
+        wait = WebDriverWait(self.driver, self.timeout)
+        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, tag)))
+
         name = self._driver_exec(elem.tag_name)
         onclick = self._driver_exec(elem.get_attribute, "onclick")
         href = self._driver_exec(elem.get_attribute, "href")
@@ -363,10 +366,6 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.visited.add(hash)
         self.disable_target(elem)
         self.scrolltoview(elem)
-
-        if iterating_form:
-            wait = WebDriverWait(self.driver, self.timeout)
-            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, tag)))
 
         try:
             self._loadwait(elem.click)
