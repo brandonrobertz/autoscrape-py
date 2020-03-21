@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+import hashlib
 import time
 import logging
 import os
@@ -142,6 +143,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
         # whether or not we actually navigated somewhere. stored in window, hist
         # pairs: [[win_1, 1], ..., [win_N, N]]
         self.history_stack = []
+        # used for detecting infinite loop inside a form (if the 'next' button
+        # never does disabled once at the end of results)
+        self.page_hashes = []
         # tree building
         self.graph = Graph()
         # sometimes the firefox driver loses its pipe to the browser. in
@@ -350,8 +354,11 @@ class SeleniumBrowser(BrowserBase, Tagger):
             logger.warn("Element by tag not found. Tag: %s" % tag)
             return False
 
-        wait = WebDriverWait(self.driver, self.timeout)
-        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, tag)))
+        try:
+            wait = WebDriverWait(self.driver, self.timeout)
+            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, tag)))
+        except TimeoutException as e:
+            pass
 
         name = self._driver_exec(elem.tag_name)
         onclick = self._driver_exec(elem.get_attribute, "onclick")
@@ -622,6 +629,40 @@ class SeleniumBrowser(BrowserBase, Tagger):
     @property
     def page_url(self):
         return self._driver_exec(self.driver.current_url)
+
+    @property
+    def infinite_loop_detected(self):
+        """
+        Store the recent page hashes and check to see if
+        the most recent pages have all been identical. This
+        determines an infinite loop. Note that this is only
+        intended to be used inside a results pages loop.
+        """
+        infinite_loop_threshold = 5
+
+        html_b = self.page_html
+        if type(html_b) != bytes:
+            html_b = self.page_html.encode("utf-8")
+
+        hash = hashlib.md5(html_b).hexdigest()
+        logger.debug(" - Page hash: %s" % (hash))
+
+        # don't even look for infinite loop until we have the
+        # required number of hashes to search
+        if len(self.page_hashes) < infinite_loop_threshold:
+            self.page_hashes.append(hash)
+            return False
+
+        self.page_hashes = self.page_hashes[1:] + [hash]
+        recent = self.page_hashes[:infinite_loop_threshold]
+        identical = recent.count(hash)
+        logger.debug(" - %s pages of the past %s have been identical" % (
+            identical, infinite_loop_threshold
+        ))
+        if identical == infinite_loop_threshold:
+            return True
+
+        return False
 
     def get_clickable(self, type=None):
         """

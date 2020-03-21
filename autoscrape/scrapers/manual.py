@@ -188,6 +188,11 @@ class ManualControlScraper(BaseScraper):
                 logger.debug(" - Next button not found!")
                 break
 
+            logger.debug(" - Checking for infinite loop...")
+            if self.control.scraper.infinite_loop_detected:
+                logger.debug(" - Infinte loop detected. Breaking.")
+                break
+
         for _ in range(depth):
             logger.debug("[.] Going back from result page...")
             self.control.back()

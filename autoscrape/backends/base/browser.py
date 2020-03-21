@@ -56,3 +56,7 @@ class BrowserBase(TaggerBase):
         }
         self.graph.add_node(node, **node_meta)
         self.graph.move_to_node(node)
+
+    @property
+    def infinite_loop_detected(self):
+        return False
