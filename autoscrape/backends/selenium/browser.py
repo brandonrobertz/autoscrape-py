@@ -222,19 +222,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
         the page is loaded or not.
         """
         logger.debug(" - Waiting for page to load (document.readyState)...")
-        script = """
-          var callback = arguments[arguments.length - 1];
-          setTimeout(callback(document.readyState), 3000);
-          document.addEventListener('readystatechange', event => {
-            console.log(event.target.readyState);
-            if (event.target.readyState === 'interactive') {
-            }
-            else if (event.target.readyState === 'complete') {
-              callback(document.readyState);
-            }
-          });
-        """
-        result = self._driver_exec(self.driver.execute_async_script, script)
+        script = "return document.readyState"
+        result = self._driver_exec(self.driver.execute_script, script)
         return result == "complete"
 
     def _loadwait(self, fn, *args, **kwargs):
