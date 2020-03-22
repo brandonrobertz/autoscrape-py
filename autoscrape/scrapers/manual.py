@@ -112,6 +112,8 @@ class ManualControlScraper(BaseScraper):
         # if not specified, do nothing with forms
         else:
             self.input_gen = [[]]
+        # whether or not we've successfully scraped what we want
+        self.scraped = False
 
     def click_until_no_links(self, links):
         logger.info("[.] Clicking result page links...")
@@ -146,7 +148,7 @@ class ManualControlScraper(BaseScraper):
         logger.info("[*] Entering result page iteration routine")
         depth = 0
         while True:
-            if self.formdepth and depth > self.formdepth:
+            if self.formdepth and depth >= self.formdepth:
                 logger.debug("[!] Max 'next' formdepth reached %s" % depth)
                 break
 
@@ -216,7 +218,6 @@ class ManualControlScraper(BaseScraper):
 
         self.save_training_page(classname="crawl_pages")
         self.save_screenshot(classname="crawl_pages")
-        scraped = False
         form_vectors = self.control.vectorizer.form_vectors()
 
         # NOTE: we never get into this loop if self.input_gen is empty
@@ -287,15 +288,14 @@ class ManualControlScraper(BaseScraper):
                 self.total_pages += 1
                 self.save_screenshot(classname="interaction_pages")
                 self.keep_clicking_next_btns()
-                scraped = True
+                self.scraped = True
                 self.control.back()
 
             logger.debug("[*] Completed iteration!")
             # Only scrape a single form, due to explicit, single
             # match configuration option
-
-            if scraped:
-                logger.debug("[*] Scrape complete! Exiting.")
+            if self.scraped:
+                logger.info("[*] Scrape complete! Exiting.")
                 return
 
         link_vectors = self.control.vectorizer.link_vectors()
@@ -327,6 +327,9 @@ class ManualControlScraper(BaseScraper):
             if self.max_pages is not None and self.total_pages >= self.max_pages:
                 logger.info(" - Maximum pages reached, skipping links.")
                 break
+            if self.scraped:
+                logger.debug(" - Scrape complete, not clicking anything else.")
+                return
 
             logger.debug(" - Current URL: %s" % (self.control.scraper.page_url))
             logger.debug(" - Attempting to click link text: %s" % text)
