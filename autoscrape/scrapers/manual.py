@@ -208,6 +208,9 @@ class ManualControlScraper(BaseScraper):
         if self.max_pages is not None and self.total_pages >= self.max_pages:
             logger.info(" - Maximum pages %s reached, returning..." % self.max_pages)
             return
+        if self.scraped:
+            logger.debug(" - Scrape complete, not clicking anything else.")
+            return
 
         if self.ignore_extensions and re.findall(self.ignore_extensions,
                                                  self.control.scraper.page_url):
