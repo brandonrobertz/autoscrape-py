@@ -8,10 +8,19 @@ from celery.task.control import revoke
 from .scrapers.manual import ManualControlScraper
 
 
+backend = "rpc://"
+if os.environ.get("AUTOSCRAPE_DB_HOST"):
+    backend = 'db+postgresql://%s:%s@%s/autoscrape' % (
+        os.environ["AUTOSCRAPE_DB_USER"],
+        os.environ["AUTOSCRAPE_DB_PASSWORD"],
+        os.environ["AUTOSCRAPE_DB_HOST"]
+    )
+
+
 app = Celery(
     'tasks',
     broker=os.environ.get("AUTOSCRAPE_RABBITMQ_HOST"),
-    backend='rpc://'
+    backend=backend,
 )
 
 app.conf.update(

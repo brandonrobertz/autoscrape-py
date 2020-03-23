@@ -68,7 +68,9 @@ class Data(db.Model):
 
 
 @app.route("/", methods=["GET"])
-def get_root():
+@app.route("/scrape", methods=["GET"])
+@app.route("/scrape/<id>", methods=["GET"])
+def get_root(id=None):
     return send_from_directory("www/build", "index.html")
 
 
