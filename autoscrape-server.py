@@ -70,6 +70,8 @@ class Data(db.Model):
 @app.route("/", methods=["GET"])
 @app.route("/scrape", methods=["GET"])
 @app.route("/scrape/<id>", methods=["GET"])
+@app.route("/build-extractor", methods=["GET"])
+@app.route("/download-data", methods=["GET"])
 def get_root(id=None):
     return send_from_directory("www/build", "index.html")
 
