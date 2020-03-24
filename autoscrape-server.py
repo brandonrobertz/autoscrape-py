@@ -227,15 +227,19 @@ def list_files(id):
     if fileclass:
         filter_params["fileclass"] = fileclass
 
-    data = Data.query.filter_by(
+    page = int(request.args.get("page", 1))
+    pagination = Data.query.filter_by(
         **filter_params
     ).order_by(
         Data.timestamp.desc()
-    ).all()
+    ).paginate(page=page, error_out=False)
 
     return jsonify({
         "status": "OK",
-        "data": [d.serialize for d in data]
+        "has_next": pagination.has_next,
+        "has_prev": pagination.has_prev,
+        "page": pagination.page,
+        "data": [d.serialize for d in pagination.items]
     })
 
 
@@ -259,10 +263,12 @@ def get_file_data(task_id, file_id):
     return jsonify({
         "status": "OK",
         "data": {
-            "task_id": task_id,
+            "scrape_id": task_id,
             "id": file_id,
             "name": data.name,
+            "timestamp": data.timestamp,
             "data": data.data,
+            "fileclass": data.fileclass,
             "url": data.url,
         }
     })
