@@ -66,7 +66,6 @@ class Data(db.Model):
             "url": self.url,
         }
 
-
 @app.route("/", methods=["GET"])
 @app.route("/scrape", methods=["GET"])
 @app.route("/scrape/<id>", methods=["GET"])
@@ -79,7 +78,11 @@ def get_root(id=None):
 
 @app.route("/<path:path>", methods=["GET"])
 def get_path(path):
-    return send_from_directory("www/build", path)
+    mimetypes = {
+        '.wasm': 'application/wasm',
+    }
+    mimetype = mimetypes.get(path[-4:], None)
+    return send_from_directory("www/build", path, mimetype=mimetype)
 
 
 @app.after_request
