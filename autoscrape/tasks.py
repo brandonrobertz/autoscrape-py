@@ -3,7 +3,6 @@ import os
 import re
 
 from celery import Celery
-from celery.task.control import revoke
 
 from .scrapers.manual import ManualControlScraper
 
@@ -47,9 +46,3 @@ def start(self, baseurl, args):
         args["output"] = output
     scraper = ManualControlScraper(baseurl, **args)
     scraper.run()
-
-
-@app.task(bind=True)
-def stop(self, id):
-    print("Stopping AutoScrape job: %s" % id)
-    revoke(id, terminate=True)  # , signal='SIGKILL')

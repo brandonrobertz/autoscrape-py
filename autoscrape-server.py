@@ -168,7 +168,8 @@ def get_stop(id):
         {"status": "OK"}
     """
     app.logger.debug("Stopping scraper task: %s" % id)
-    tasks.stop.delay(id)
+    result = tasks.app.AsyncResult(id)
+    result.revoke(terminate=True, signal='SIGKILL')
     return jsonify({"status": "OK"})
 
 
