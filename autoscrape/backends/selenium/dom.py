@@ -2,7 +2,10 @@
 import logging
 
 try:
-    from selenium.common.exceptions import NoSuchElementException
+    from selenium.common.exceptions import (
+        NoSuchElementException, StaleElementReferenceException,
+        NoSuchFrameException
+    )
 except ModuleNotFoundError:
     # we haven't installed selenium backend deps
     pass
@@ -52,13 +55,17 @@ class Dom(DomBase):
         self.driver.switch_to.default_content()
         iframes = self.driver.find_elements_by_tag_name("iframe")
         for iframe_ix in range(len(iframes)):
-            self.driver.switch_to.frame(iframe_ix)
+            try:
+                self.driver.switch_to.frame(iframe_ix)
+            except NoSuchFrameException:
+                continue
             try:
                 return self.driver.find_element_by_css_selector(tag)
             except NoSuchElementException:
                 continue
             self.driver.switch_to.default_content()
-        raise NoSuchElementException("No element found for tag: %s" % (tag))
+        logger.debug("[!] No element found for tag: %s" % (tag))
+        return None
 
     def element_by_tag(self, tag):
         """
@@ -155,7 +162,12 @@ class Dom(DomBase):
 
         img_els = el.find_elements_by_tag_name("img")
         for img in img_els:
-            text.append(img.get_attribute("alt"))
+            try:
+                text.append(img.get_attribute("alt"))
+            except StaleElementReferenceException as e:
+                logger.error("Error getting image text: %s, Error: %s" % (
+                    img, e
+                ))
 
         return " ".join(text).replace("\n", "").strip()
 
@@ -179,7 +191,7 @@ class Dom(DomBase):
              texts.append(self._text_via_many_means(el))
 
         full_text = " ".join(texts).replace("\n", "").strip()
-        logger.debug(" - Found text: %s" % full_text)
+        # logger.debug(" - Found text: %s" % full_text)
         return full_text
 
     def element_tag_name(self, element):
@@ -189,3 +201,16 @@ class Dom(DomBase):
 
     def element_value(self, element):
         return element.get_attribute("value")
+
+    def element_displayed(self, element):
+        fn_names = ["is_displayed", "is_enabled"]
+        for fn_name in fn_names:
+            fn = hasattr(element, fn_name, None)
+            if not fn:
+                continue
+            try:
+                if not getattr(element, fn)():
+                    return False
+            except StaleElementReferenceException as e:
+                pass
+        return True

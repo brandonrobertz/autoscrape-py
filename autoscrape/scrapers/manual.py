@@ -149,7 +149,7 @@ class ManualControlScraper(BaseScraper):
         depth = 0
         while True:
             if self.formdepth and depth >= self.formdepth:
-                logger.debug("[!] Max 'next' formdepth reached %s" % depth)
+                logger.debug("[*] Max 'next' formdepth reached %s" % depth)
                 break
 
             found_next = False

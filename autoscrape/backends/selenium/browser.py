@@ -349,13 +349,18 @@ class SeleniumBrowser(BrowserBase, Tagger):
         except TimeoutException as e:
             pass
 
-        name = self._driver_exec(elem.tag_name)
-        onclick = self._driver_exec(elem.get_attribute, "onclick")
+        hash_parts = []
+        hash_parts.append(self._driver_exec(elem.tag_name))
         href = self._driver_exec(elem.get_attribute, "href")
-        hash = "%s|%s|%s" % (href, onclick, name)
+        hash_parts.append(href)
+        hash_parts.append(self._driver_exec(elem.get_attribute, "onclick"))
         text = self._driver_exec(elem.text)
+        hash = "|".join([h for h in hash_parts if h])
+        logger.debug(" - Link hash : %s" % (hash))
+
         # only enable this for URL links
-        if href and hash in self.visited and not iterating_form:
+        # if href and hash in self.visited and not iterating_form:
+        if hash in self.visited and not iterating_form:
             logger.debug("Link already clicked! Hash: %s" % (hash))
             return False
 
@@ -381,8 +386,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 logger.error("[!] Current URL: %s" % (self.page_url))
                 return False
         except Exception as e:
-            logger.error("[!] Error clicking: %s" % (e))
-            logger.error("[!] Current URL: %s" % (self.page_url))
+            logger.debug("[!] Error clicking: %s" % (e))
+            logger.debug("[!] Current URL: %s" % (self.page_url))
             return False
 
         # apply form submit waits to 'next' button clicks

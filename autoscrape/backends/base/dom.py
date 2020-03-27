@@ -78,6 +78,14 @@ class DomBase:
             raise NotImplementedError("DomBase.element_name not implemented")
         return element.name
 
+    def element_displayed(self, element):
+        """
+        Figure out if an element is displayed. If its not, we can't really
+        interact with it (get its text or attribs, etc). This only effects
+        the selenium backend right now.
+        """
+        return True
+
     def download_file(self, url, return_data=False):
         """
         Fetch the given url, returning a byte stream of the page data. This
