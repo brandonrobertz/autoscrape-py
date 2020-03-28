@@ -96,6 +96,7 @@ class Controller:
         #   other forms ...,
         # ]
         self.inputs = []
+        self.force_wait = 5
 
     def load_indices(self):
         logger.debug("[.] Loading page vectors...")
@@ -154,6 +155,7 @@ class Controller:
         gets the links for the current page and sets its tag array.
         """
         self.scraper.fetch(url, initial=True)
+        time.sleep(self.force_wait)
         self.load_indices()
 
     def select_link(self, index, iterating_form=False):
@@ -165,7 +167,7 @@ class Controller:
         tag = self.clickable[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:
-            time.sleep(1)
+            time.sleep(self.force_wait)
             self.load_indices()
         return clicked
 
@@ -173,7 +175,7 @@ class Controller:
         tag = self.buttons[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:
-            time.sleep(1)
+            time.sleep(self.force_wait)
             self.load_indices()
         return clicked
 
@@ -218,10 +220,10 @@ class Controller:
     def submit(self, index):
         tag = self.forms[index]
         self.scraper.submit(tag)
-        time.sleep(1)
+        time.sleep(self.force_wait)
         self.load_indices()
 
     def back(self):
         self.scraper.back()
-        time.sleep(1)
+        time.sleep(self.force_wait)
         self.load_indices()
