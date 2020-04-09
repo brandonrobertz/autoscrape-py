@@ -22,6 +22,13 @@ class EmbeddingsVectorizer:
         """
         Initialize our vectorizer with paths to the relevant word
         embedding files for our vectorization routines.
+
+        Representations:
+            - Element text vector (fasttext)
+            - Element path vector ( body -> form -> div ... -> button )
+
+        Given state, q-function gets action-state pairs. We take
+        the action giving the highest q-value.
         """
         self.scraper = scraper
         self.controller = controller

@@ -73,17 +73,21 @@ class RequestsBrowser(BrowserBase, Tagger):
         text = self.element_text(element)
         url = None
         tag_name = self.element_tag_name(element)
+        logger.debug(" - tag name: %s Text: %s" % (tag_name, text))
         if tag_name == "a":
             raw_href = self.element_attr(element, "href")
             if not raw_href:
+                logger.debug("[!] No HREF, skipping link...")
                 return False
 
             url = self._normalize_url(raw_href)
             if self._check_and_set_visited(url):
+                logger.debug("[!] Already visited URL %s" % (url))
                 return False
 
             logger.info("[+] Clicking link: %s" % url)
             if not self.fetch(url):
+                logger.debug("[!] Fetch failed on %s" % (url))
                 return False
         elif tag_name == "input":
             element_type = element.type

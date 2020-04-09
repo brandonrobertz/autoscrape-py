@@ -8,6 +8,7 @@ import sys
 from autoscrape.backends.requests.browser import RequestsBrowser
 from autoscrape.backends.requests.tags import Tagger
 from autoscrape.search.graph import Graph
+from autoscrape.util.warc import build_warc_index
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -22,7 +23,7 @@ except ModuleNotFoundError:
 
 class WARCBrowser(RequestsBrowser):
     def __init__(self, warc_index_file=None, warc_directory=None,
-                 leave_host=False, **kwargs):
+                 filter_domain=None, leave_host=False, **kwargs):
         try:
             warc
         except NameError:
@@ -43,9 +44,15 @@ class WARCBrowser(RequestsBrowser):
         self.warc_index_file = warc_index_file
         # directory containing Common Crawl WARCs
         self.warc_directory = warc_directory
+        # only build index for a specific domain
+        self.filter_domain = filter_domain
 
         # WARC index: URL => (filename, record_number)
-        self.warc_index = self._build_warc_index()
+        self.warc_index = plyvel.DB(self.warc_index_file, create_if_missing=True)
+        build_warc_index(
+            db=self.warc_index, warc_directory=self.warc_directory,
+            filter_domain=self.filter_domain
+        )
         # WARC cache: filename => [record1, ..., recordN]
         self.warc_cache = {}
         self.warc_directory = warc_directory
@@ -53,7 +60,7 @@ class WARCBrowser(RequestsBrowser):
         # how many WARC files to keep in memory at a given time
         # since the crawls are sequential, most files for a site
         # will exist in a segment of a few WARC files.
-        self.warc_cache_size = 20
+        self.warc_cache_size = 50
         # we're going to store the order the files have have been
         # accessed most recently here:
         #     [most_recently_used_filename, ..., least_recently_used_filename]
@@ -97,36 +104,48 @@ class WARCBrowser(RequestsBrowser):
             return False
         return True
 
+    def _warc_records(self, filename):
+        try:
+            return warc.open(filename)
+        except Exception as e:
+            logger.error("[!] Error opening WARC file %s" % (filename))
+            logger.error(e)
+        return []
+
     def _build_warc_index(self):
         """
         Read through all WARC files in self.warc_directory and build
         an index: URL => filename, record_number
         """
-        db = plyvel.DB(self.warc_index_file, create_if_missing=True)
         blank = True
         for rec in db.iterator():
             blank = False
             break
         if not blank:
             logger.debug("[.] Loaded WARC index: %s" % (self.warc_index_file))
-            return db
+            return
         logger.info("[.] Building WARC index. This might take a while...")
         _, _, filenames = list(os.walk(self.warc_directory))[0]
         for basename in filenames:
+            found = 0
             filename = os.path.join(self.warc_directory, basename)
             if not filename.endswith(".warc.gz"):
                 continue
             logger.debug(" - Parsing %s" % (filename))
             record_number = -1
-            for record in warc.open(filename):
+            for record in self._warc_records(filename):
                 if not self._warc_record_sane(record):
                     continue
                 record_number += 1
                 uri = record["WARC-Target-URI"]
+                if self.filter_domain and self.filter_domain not in uri:
+                    continue
+                found += 1
                 uri_bytes = bytes(uri, "utf-8")
                 value = pickle.dumps((filename, record_number))
-                db.put(uri_bytes, value)
-        return db
+                self.warc_index.put(uri_bytes, value)
+            if found:
+                logger.debug(" - Found %s records" % (found))
 
     def _load_warc_file(self, filename):
         """
@@ -137,10 +156,11 @@ class WARCBrowser(RequestsBrowser):
         logger.debug("[-] Loading WARC file: %s" % (filename))
         if len(self.warc_cache_stack) > self.warc_cache_size:
             least_used = self.warc_cache_stack.pop()
+            logger.debug(" - Removing WARC from memory: %s" % (filename))
             del self.warc_cache[least_used]
 
         self.warc_cache[filename] = []
-        for record in warc.open(filename):
+        for record in self._warc_records(filename):
             if not self._warc_record_sane(record):
                 continue
             payload = self._warc_payload(record)
@@ -163,7 +183,7 @@ class WARCBrowser(RequestsBrowser):
         data = self.warc_index.get(url_b)
         if not data:
             logger.debug("[!] Couldn't find URL in WARC index: %s" % (url))
-            self.current_html = "<html></html>"
+            return False
         else:
             filename, record_number = pickle.loads(data)
             logger.debug(" -  Loading filename: %s record number: %s" % (
@@ -190,3 +210,4 @@ class WARCBrowser(RequestsBrowser):
             node = "Fetch\n url: %s" % url
             self.graph.add_root_node(node, url=url, action="fetch")
 
+        return True

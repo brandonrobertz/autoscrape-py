@@ -45,6 +45,7 @@ class Controller:
         Set up our WebDriver and misc utilities.
         """
         Browser = None
+        self.backend = backend
         if backend == "selenium":
             Browser = SeleniumBrowser
         elif backend == "requests":
@@ -155,7 +156,8 @@ class Controller:
         gets the links for the current page and sets its tag array.
         """
         self.scraper.fetch(url, initial=True)
-        time.sleep(self.force_wait)
+        if self.backend == "selenium":
+            time.sleep(self.force_wait)
         self.load_indices()
 
     def select_link(self, index, iterating_form=False):
@@ -167,7 +169,8 @@ class Controller:
         tag = self.clickable[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:
-            time.sleep(self.force_wait)
+            if self.backend == "selenium":
+                time.sleep(self.force_wait)
             self.load_indices()
         return clicked
 
@@ -175,7 +178,8 @@ class Controller:
         tag = self.buttons[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:
-            time.sleep(self.force_wait)
+            if self.backend == "selenium":
+                time.sleep(self.force_wait)
             self.load_indices()
         return clicked
 
@@ -220,10 +224,12 @@ class Controller:
     def submit(self, index):
         tag = self.forms[index]
         self.scraper.submit(tag)
-        time.sleep(self.force_wait)
+        if self.backend == "selenium":
+            time.sleep(self.force_wait)
         self.load_indices()
 
     def back(self):
         self.scraper.back()
-        time.sleep(self.force_wait)
+        if self.backend == "selenium":
+            time.sleep(self.force_wait)
         self.load_indices()
