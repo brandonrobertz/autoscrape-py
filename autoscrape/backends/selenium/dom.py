@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 import logging
+import re
 
 try:
     from selenium.common.exceptions import (

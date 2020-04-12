@@ -223,7 +223,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         """
         logger.debug(" - Waiting for page to load (document.readyState)...")
         script = "return document.readyState"
-        result = self._driver_exec(self.driver.execute_script, script)
+        result = driver.execute_script(script)
         return result == "complete"
 
     def _loadwait(self, fn, *args, **kwargs):
