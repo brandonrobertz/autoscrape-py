@@ -11,7 +11,7 @@ def get_long_description():
 
 setuptools.setup(
     name='autoscrape',
-    version='1.6.4',
+    version='1.6.5',
     description='An automated, programming-free web scraper for interactive sites',
     long_description=get_long_description(),
     author='Brandon Roberts',
@@ -65,7 +65,7 @@ setuptools.setup(
     ],
     extras_require={
         'selenium-backend': [
-            'selenium>=3.141.0'
+            'selenium>=4.0.0a3'
         ],
         'warc-backend': [
             'warc3-wet>=0.2.3',
@@ -79,7 +79,7 @@ setuptools.setup(
             'networkx>=2.2',
         ],
         'all': [
-            'selenium>=3.141.0'
+            'selenium>=4.0.0a3'
             'networkx>=2.2',
             'numpy>=1.15.0',
             'warc3-wet>=0.2.3',

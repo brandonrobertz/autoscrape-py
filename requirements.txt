@@ -1,4 +1,4 @@
-selenium>=3.141.0
+selenium>=4.0.0a3
 lxml>=4.3.0
 html5lib>=1.0.1
 webencodings>=0.5.1
