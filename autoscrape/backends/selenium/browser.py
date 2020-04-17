@@ -87,7 +87,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 logger.debug(" - Using binary: %s" % (browser_binary))
                 binary = FirefoxBinary(browser_binary)
             self.driver = webdriver.Firefox(
-                firefox_options=firefox_options,
+                options=firefox_options,
                 firefox_profile=firefox_profile,
                 firefox_binary=binary,
             )
