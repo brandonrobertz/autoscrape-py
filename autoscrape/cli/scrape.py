@@ -137,6 +137,12 @@ Webdriver-Specific and General Options:
         AutoScrape is waiting for load, you can set this
         lower to speed things up. [default: 30]
 
+    --force-page-wait SECONDS
+       This forces AutoScrape to wait for the specified number
+       of seconds after performing a navigation action.
+       This is sometimes required for slow sites or oddly
+       loading single page apps.
+
     --load-images
         By default, images on a page will not be fetched.
         This speeds up scrapes on sites and lowers bandwidth

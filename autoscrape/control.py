@@ -38,6 +38,7 @@ class Controller:
                  remote_hub="http://localhost:4444/wd/hub", output=None,
                  form_submit_natural_click=False, form_submit_wait=5,
                  warc_index_file=None, warc_directory=None,
+                 force_page_wait=None,
                  load_images=False, show_browser=False, page_timeout=None,
                  html_embeddings_file=None, word_embeddings_file=None,
                  backend="selenium", vectorizer="text"):
@@ -97,10 +98,20 @@ class Controller:
         #   other forms ...,
         # ]
         self.inputs = []
-        self.force_wait = 5
+        # TODO: the point of this wait is to ensure the DOM has stopped
+        # mutating (loading results, etc). a proper fix for this is to
+        # look at the count of DOM objects being queried for each index
+        # type and detect when it stops changing.
+        self.force_page_wait = force_page_wait
 
     def load_indices(self):
         logger.debug("[.] Loading page vectors...")
+        if self.backend == "selenium" and self.force_page_wait:
+            logger.debug(" - Force waiting for %s seconds" % (
+                self.force_page_wait
+            ))
+            time.sleep(self.force_page_wait)
+
         self.clickable = self.scraper.get_clickable()
         forms_dict = self.scraper.get_forms()
         self.forms = list(forms_dict.keys())
@@ -156,8 +167,6 @@ class Controller:
         gets the links for the current page and sets its tag array.
         """
         self.scraper.fetch(url, initial=True)
-        if self.backend == "selenium":
-            time.sleep(self.force_wait)
         self.load_indices()
 
     def select_link(self, index, iterating_form=False):
@@ -169,8 +178,6 @@ class Controller:
         tag = self.clickable[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:
-            if self.backend == "selenium":
-                time.sleep(self.force_wait)
             self.load_indices()
         return clicked
 
@@ -178,8 +185,6 @@ class Controller:
         tag = self.buttons[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:
-            if self.backend == "selenium":
-                time.sleep(self.force_wait)
             self.load_indices()
         return clicked
 
@@ -224,12 +229,8 @@ class Controller:
     def submit(self, index):
         tag = self.forms[index]
         self.scraper.submit(tag)
-        if self.backend == "selenium":
-            time.sleep(self.force_wait)
         self.load_indices()
 
     def back(self):
         self.scraper.back()
-        if self.backend == "selenium":
-            time.sleep(self.force_wait)
         self.load_indices()
