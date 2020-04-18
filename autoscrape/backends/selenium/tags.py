@@ -33,6 +33,10 @@ class Tagger(TaggerBase, Dom):
                     return;
                 var path = [];
                 while (el.nodeType === Node.ELEMENT_NODE) {
+                    // if (el.id) {
+                    //   path.unshift(`#${el.id}`);
+                    //   break;
+                    // }
                     var selector = el.nodeName.toLowerCase();
                     // // NOTE: we removed this because web pages often use
                     // // strange characters in ID names which cause the CSS
