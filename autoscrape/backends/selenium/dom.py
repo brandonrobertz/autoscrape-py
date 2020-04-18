@@ -182,18 +182,8 @@ class Dom(DomBase):
 
         if element is None:
             element = self.driver
-        # TODO: this is a major bottleneck. find a way
-        # to ensure all text of children is extracted
-        # (non-duplicately via descendants) in a more
-        # performant way
-        elems = element.find_elements_by_xpath(".//*")
-        texts = []
-        for el in elems:
-             texts.append(self._text_via_many_means(el))
 
-        full_text = " ".join(texts).replace("\n", "").strip()
-        # logger.debug(" - Found text: %s" % full_text)
-        return full_text
+        return element.text
 
     def element_tag_name(self, element):
         if element is None:
