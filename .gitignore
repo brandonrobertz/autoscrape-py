@@ -6,6 +6,7 @@ __pycache__
 *.log
 graph*.dot
 .idea
+.#*
 
 # default output directory
 autoscrape-data*/

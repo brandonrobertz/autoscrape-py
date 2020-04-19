@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 import logging
 import re
 
@@ -106,6 +106,7 @@ class Dom(DomBase):
         """
         if from_element is None:
             from_element = self.driver
+        return from_element.find_elements_by_xpath(xpath)
         iframes = from_element.find_elements_by_tag_name("iframe")
         if not len(iframes):
             return from_element.find_elements_by_xpath(xpath)
@@ -196,11 +197,10 @@ class Dom(DomBase):
     def element_displayed(self, element):
         fn_names = ["is_displayed", "is_enabled"]
         for fn_name in fn_names:
-            fn = hasattr(element, fn_name, None)
-            if not fn:
+            if not hasattr(element, fn_name):
                 continue
             try:
-                if not getattr(element, fn)():
+                if not getattr(element, fn_name)():
                     return False
             except StaleElementReferenceException as e:
                 pass

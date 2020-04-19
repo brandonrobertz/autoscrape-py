@@ -40,8 +40,7 @@ class TextVectorizer:
         for tag in self.controller.forms:
             form = self.scraper.element_by_tag(tag)
             txt = self.scraper.element_text(form, block=True)
-            if txt:
-                form_data.append(txt)
+            form_data.append(txt)
         return form_data
 
     def button_vectors(self):

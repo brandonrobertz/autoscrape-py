@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 import logging
 
 from urllib.parse import urlparse
@@ -115,11 +115,18 @@ class TaggerBase(DomBase):
                     logger.warn("No tag for radio %s" % radio)
                     continue
                 tags[radio_group_ix].append(radio_tag)
+
         # all the rest are flat
         else:
             elems = self.elements_by_path(x_path, from_element=elem)
-            for input in elems:
-                input_tag = self.tag_from_element(input)
+            for inp in elems:
+                # this should weed out hidden/non-displayed inputs ...
+                if not self.element_displayed(inp):
+                    continue
+                # .. and just in case it didn't
+                if self.element_attr(inp, "type") == "hidden":
+                    continue
+                input_tag = self.tag_from_element(inp)
                 if not input_tag:
                     logger.warn("No tag for input %s" % input)
                     continue
@@ -139,12 +146,8 @@ class TaggerBase(DomBase):
 
         tags = {}
         for elem in forms:
-            # TODO: migrate these to DOM? requests can't really do this...
-            if hasattr(elem, "is_displayed") and not elem.is_displayed():
+            if not self.element_displayed(elem):
                 continue
-            if hasattr(elem, "is_enabled") and not elem.is_enabled():
-                continue
-
             tag = self.tag_from_element(elem)
             if not tag:
                 logger.warn("No tag for element %s" % elem)
@@ -174,9 +177,7 @@ class TaggerBase(DomBase):
 
         tags = []
         for elem in btns:
-            if hasattr(elem, "is_displayed") and not elem.is_displayed():
-                continue
-            if hasattr(elem, "is_enabled") and not elem.is_enabled():
+            if not self.element_displayed(elem):
                 continue
             tag = self.tag_from_element(elem)
             if not tag:

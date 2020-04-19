@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 import hashlib
 import time
 import logging
@@ -501,11 +501,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
         logger.info(" - Checking to checkbox selected=%s" % (to_check))
         elem = self.element_by_tag(tag)
         self._driver_exec(self.scrolltoview, elem)
-        # TODO: wrap in _driver_exec after testing
         if elem.is_selected() != to_check:
             elem.click()
-            if not radio:
-                self._driver_exec(elem.clear)
         self.path.append(("input_checkbox", (tag, to_check,), {}))
         action = {
             "action": "input_checkbox",
@@ -526,7 +523,13 @@ class SeleniumBrowser(BrowserBase, Tagger):
         y_off = 0
         ac.move_to_element(elem).move_by_offset(x_off, y_off).click().perform()
 
-    def find_submit_button(self, form):
+    def _text_matches_search_button(self, text):
+        for test_text in ["submit", "search", "go"]:
+            if test_text == text.lower():
+                return True
+        return False
+
+    def _find_submit_button(self, form):
         sub = None
         submit_btns = self._driver_exec(
             form.find_elements_by_xpath,
@@ -534,7 +537,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         )
         for el in submit_btns:
             txt = el.get_attribute("value").lower()
-            if "submit" in txt or "search" in txt or txt == "go":
+            if self._text_matches_search_button(txt):
                 sub = el
                 logger.debug(" - Form submit input button: %s" % (txt))
                 break
@@ -550,10 +553,14 @@ class SeleniumBrowser(BrowserBase, Tagger):
                     form.find_elements_by_xpath,
                     "//a"
                 )
-                els = [el for el in possible_subs if "submit" in el.text.lower()]
-                if els:
-                    sub = els[0]
+
+                for el in possible_subs:
+                    el_text = self.element_text(el)
+                    if not self._text_matches_search_button(el_text):
+                        continue
+                    sub = el
                     logger.debug(" - Form submit link: %s" % (sub))
+                    break
             except NoSuchElementException as e:
                 pass
 
@@ -569,7 +576,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self._driver_exec(self.scrolltoview, form)
 
         # try to find a Submit input button
-        sub = self.find_submit_button(form)
+        sub = self._find_submit_button(form)
 
         # attempt to click on the button, if this fails, we will
         # try to perform a form submit

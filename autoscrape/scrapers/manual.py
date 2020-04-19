@@ -243,7 +243,7 @@ class ManualControlScraper(BaseScraper):
             if self.form_match.lower() not in form_data.lower():
                 continue
 
-            logger.info("[*] Found an input form!")
+            logger.info("[*] Found an input form (No. %s on page)" % (ix))
             self.save_training_page(classname="search_pages")
             self.save_screenshot(classname="search_pages")
 
