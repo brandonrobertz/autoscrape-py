@@ -538,7 +538,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         Find a submit button by a variety of strategies:
             1. use self.form_submit_button_selector
             2. find a input with type 'submit'
-            3. find a button with "search" or "go" in text
+            3. find a link with "search" or "go" in text
         """
         sub = None
         if self.form_submit_button_selector:
@@ -554,10 +554,17 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 "//input[@type='submit']"
             )
             for el in submit_btns:
+                if not self.element_displayed(el):
+                    continue
                 txt = el.get_attribute("value").lower()
+                cls = el.get_attribute("class").lower()
                 if self._text_matches_search_button(txt):
                     sub = el
                     logger.debug(" - Form submit input button: %s" % (txt))
+                    break
+                if self._text_matches_search_button(cls):
+                    sub = el
+                    logger.debug(" - Form submit input button (class): %s" % (cls))
                     break
 
         # try to find a Submit link
@@ -573,6 +580,8 @@ class SeleniumBrowser(BrowserBase, Tagger):
                 )
 
                 for el in possible_subs:
+                    if not self.element_displayed(el):
+                        continue
                     el_text = self.element_text(el)
                     if not self._text_matches_search_button(el_text):
                         continue
