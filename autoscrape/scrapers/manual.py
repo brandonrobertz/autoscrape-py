@@ -42,7 +42,7 @@ class ManualControlScraper(BaseScraper):
                  link_priority=None, ignore_links=None, only_links=None,
                  ignore_extensions=None, result_page_links=None,
                  form_submit_natural_click=False, form_submit_wait=5,
-                 force_page_wait=None,
+                 force_page_wait=None, form_submit_button_selector=None,
                  load_images=False, show_browser=False, warc_index_file=None,
                  warc_directory=None, return_data=False, page_timeout=None,
                  backend="selenium"):
@@ -57,6 +57,7 @@ class ManualControlScraper(BaseScraper):
             leave_host=leave_host, driver=driver, remote_hub=remote_hub,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=int(form_submit_wait or 0),
+            form_submit_button_selector=form_submit_button_selector,
             force_page_wait=int(force_page_wait or 0),
             load_images=load_images, show_browser=show_browser,
             warc_index_file=warc_index_file, warc_directory=warc_directory,

@@ -114,6 +114,11 @@ Interactive Form Search Options:
         "next" buttons. Zero means infinite depth.
         [default: 0]
 
+    --form-submit-button-selector XPATH_SELECTOR
+        A XPath selector indicating a submit button/element
+        to click. Use this when the submit button to a form
+        doesn't have any text or is a strange element type.
+
     --form-submit-natural-click
         Some webpages make clicking a link element difficult
         due to JavaScript onClick events. In cases where a

@@ -38,6 +38,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
     def __init__(self, driver="Firefox", leave_host=False,
                  load_images=False, form_submit_natural_click=False,
                  form_submit_wait=5, output=None, show_browser=False,
+                 form_submit_button_selector=None,
                  browser_binary=None, page_timeout=None,
                  remote_hub="http://localhost:4444/wd/hub", **kwargs):
         try:
@@ -157,6 +158,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
         self.css_escapables = ".:"
         self.form_submit_natural_click = form_submit_natural_click
         self.form_submit_wait = form_submit_wait
+        # selector to locate submit button, overrides all other
+        # selection strategies
+        self.form_submit_button_selector = form_submit_button_selector
 
     def _driver_exec(self, fn, *args, **kwargs):
         """
@@ -530,17 +534,31 @@ class SeleniumBrowser(BrowserBase, Tagger):
         return False
 
     def _find_submit_button(self, form):
+        """
+        Find a submit button by a variety of strategies:
+            1. use self.form_submit_button_selector
+            2. find a input with type 'submit'
+            3. find a button with "search" or "go" in text
+        """
         sub = None
-        submit_btns = self._driver_exec(
-            form.find_elements_by_xpath,
-            "//input[@type='submit']"
-        )
-        for el in submit_btns:
-            txt = el.get_attribute("value").lower()
-            if self._text_matches_search_button(txt):
-                sub = el
-                logger.debug(" - Form submit input button: %s" % (txt))
-                break
+        if self.form_submit_button_selector:
+            sub = self._driver_exec(
+                form.find_element_by_xpath,
+                self.form_submit_button_selector
+            )
+
+        # try to find a input with type 'submit'
+        if not sub:
+            submit_btns = self._driver_exec(
+                form.find_elements_by_xpath,
+                "//input[@type='submit']"
+            )
+            for el in submit_btns:
+                txt = el.get_attribute("value").lower()
+                if self._text_matches_search_button(txt):
+                    sub = el
+                    logger.debug(" - Form submit input button: %s" % (txt))
+                    break
 
         # try to find a Submit link
         # NOTE: instead of using xpath we're going to do a manual search.

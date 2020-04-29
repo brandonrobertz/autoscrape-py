@@ -38,7 +38,7 @@ class Controller:
                  remote_hub="http://localhost:4444/wd/hub", output=None,
                  form_submit_natural_click=False, form_submit_wait=5,
                  warc_index_file=None, warc_directory=None,
-                 force_page_wait=None,
+                 force_page_wait=None, form_submit_button_selector=None,
                  load_images=False, show_browser=False, page_timeout=None,
                  html_embeddings_file=None, word_embeddings_file=None,
                  backend="selenium", vectorizer="text"):
@@ -63,6 +63,7 @@ class Controller:
             browser_binary=browser_binary, remote_hub=remote_hub,
             form_submit_natural_click=form_submit_natural_click,
             form_submit_wait=form_submit_wait,
+            form_submit_button_selector=form_submit_button_selector,
             warc_index_file=warc_index_file, warc_directory=warc_directory,
             load_images=load_images, show_browser=show_browser,
             output=output, page_timeout=page_timeout,
