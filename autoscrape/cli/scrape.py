@@ -145,8 +145,9 @@ Webdriver-Specific and General Options:
     --force-page-wait SECONDS
        This forces AutoScrape to wait for the specified number
        of seconds after performing a navigation action.
-       This is sometimes required for slow sites or oddly
-       loading single page apps.
+       Increase this for slow sites or oddly loading single page
+       apps, decrease this for fast sites or crawls.
+       [default: 5]
 
     --load-images
         By default, images on a page will not be fetched.

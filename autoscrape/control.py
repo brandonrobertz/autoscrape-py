@@ -104,6 +104,8 @@ class Controller:
         # look at the count of DOM objects being queried for each index
         # type and detect when it stops changing.
         self.force_page_wait = force_page_wait
+        if self.force_page_wait is not None:
+            self.force_page_wait = int(self.force_page_wait)
 
     def load_indices(self):
         logger.debug("[.] Loading page vectors...")
