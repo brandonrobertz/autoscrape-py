@@ -8,7 +8,7 @@ import sys
 from autoscrape.backends.requests.browser import RequestsBrowser
 from autoscrape.backends.requests.tags import Tagger
 from autoscrape.search.graph import Graph
-from autoscrape.util.warc import build_warc_index
+from autoscrape.util.warc import build_warc_index, _warc_records
 
 
 logger = logging.getLogger('AUTOSCRAPE')
@@ -16,7 +16,7 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 try:
     import plyvel
-    import warc
+    import warcio
 except ModuleNotFoundError:
     pass
 
@@ -25,7 +25,7 @@ class WARCBrowser(RequestsBrowser):
     def __init__(self, warc_index_file=None, warc_directory=None,
                  filter_domain=None, leave_host=False, **kwargs):
         try:
-            warc
+            warcio
         except NameError:
             logger.debug(
                 "WARC dependencies not installed."
@@ -60,7 +60,7 @@ class WARCBrowser(RequestsBrowser):
         # how many WARC files to keep in memory at a given time
         # since the crawls are sequential, most files for a site
         # will exist in a segment of a few WARC files.
-        self.warc_cache_size = 50
+        self.warc_cache_size = 2
         # we're going to store the order the files have have been
         # accessed most recently here:
         #     [most_recently_used_filename, ..., least_recently_used_filename]
@@ -83,70 +83,6 @@ class WARCBrowser(RequestsBrowser):
         self.current_url = None
         self.current_html = None
 
-    def _warc_payload(self, record):
-        """
-        Extract the body from a WARC response "payload".
-        """
-        # find the initial blank line, indicating body starts
-        line = True
-        while line:
-            line = record.payload.readline().strip()
-        payload = ""
-        for line in record.payload:
-            cleaned = line.decode("utf-8").strip()
-            payload += cleaned
-        return payload
-
-    def _warc_record_sane(self, record):
-        if record.type != "response":
-            return False
-        if "WARC-Target-URI" not in record:
-            return False
-        return True
-
-    def _warc_records(self, filename):
-        try:
-            return warc.open(filename)
-        except Exception as e:
-            logger.error("[!] Error opening WARC file %s" % (filename))
-            logger.error(e)
-        return []
-
-    def _build_warc_index(self):
-        """
-        Read through all WARC files in self.warc_directory and build
-        an index: URL => filename, record_number
-        """
-        blank = True
-        for rec in db.iterator():
-            blank = False
-            break
-        if not blank:
-            logger.debug("[.] Loaded WARC index: %s" % (self.warc_index_file))
-            return
-        logger.info("[.] Building WARC index. This might take a while...")
-        _, _, filenames = list(os.walk(self.warc_directory))[0]
-        for basename in filenames:
-            found = 0
-            filename = os.path.join(self.warc_directory, basename)
-            if not filename.endswith(".warc.gz"):
-                continue
-            logger.debug(" - Parsing %s" % (filename))
-            record_number = -1
-            for record in self._warc_records(filename):
-                if not self._warc_record_sane(record):
-                    continue
-                record_number += 1
-                uri = record["WARC-Target-URI"]
-                if self.filter_domain and self.filter_domain not in uri:
-                    continue
-                found += 1
-                uri_bytes = bytes(uri, "utf-8")
-                value = pickle.dumps((filename, record_number))
-                self.warc_index.put(uri_bytes, value)
-            if found:
-                logger.debug(" - Found %s records" % (found))
-
     def _load_warc_file(self, filename):
         """
         Take a specified WARC file, load it and keep it in memory in a quickly
@@ -160,14 +96,12 @@ class WARCBrowser(RequestsBrowser):
             del self.warc_cache[least_used]
 
         self.warc_cache[filename] = []
-        for record in self._warc_records(filename):
-            if not self._warc_record_sane(record):
-                continue
-            payload = self._warc_payload(record)
+        for record in _warc_records(filename):
+            payload = record["payload"]
             if not payload:
                 payload = "<html></html>"
             self.warc_cache[filename].append({
-                "header": {k: v for k,v in record.header.items()},
+                "header": record["headers"],
                 "payload": payload,
             })
 

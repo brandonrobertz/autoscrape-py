@@ -68,7 +68,7 @@ setuptools.setup(
             'selenium>=3.141.0,<4.0.0',
         ],
         'warc-backend': [
-            'warc3-wet>=0.2.3',
+            'warcio>=1.7.3,<2.0.0',
             'plyvel==1.2.0',
         ],
         'embeddings-vectorizer': [
@@ -82,7 +82,7 @@ setuptools.setup(
             'selenium>=3.141.0,<4.0.0',
             'networkx>=2.2',
             'numpy>=1.15.0',
-            'warc3-wet>=0.2.3',
+            'warcio>=1.7.3,<2.0.0',
             'plyvel==1.2.0',
         ],
     }

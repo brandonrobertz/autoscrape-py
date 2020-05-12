@@ -5,8 +5,7 @@ import pickle
 
 try:
     import plyvel
-    # TODO: replace with warcio
-    import warc
+    import warcio
 except ModuleNotFoundError:
     pass
 
@@ -15,9 +14,9 @@ logger = logging.getLogger('AUTOSCRAPE')
 
 
 def _warc_record_sane(record):
-    if record.type != "response":
+    if record.rec_type != "response":
         return False
-    if "WARC-Target-URI" not in record:
+    if not record.rec_headers.get_header('WARC-Target-URI'):
         return False
     return True
 
@@ -25,8 +24,16 @@ def _warc_record_sane(record):
 def _warc_records(filename):
     records = []
     try:
-        for record in warc.open(filename):
-            records.append(record)
+        with open(filename, "rb") as f:
+            for record in warcio.ArchiveIterator(f):
+                if not _warc_record_sane(record):
+                    continue
+                parsed_rec = {
+                    "uri": record.rec_headers.get_header('WARC-Target-URI'),
+                    "payload": record.content_stream().read().strip(),
+                    "headers": record.http_headers.headers,
+                }
+                yield parsed_rec
     except Exception as e:
         logger.error("[!] Error opening WARC file %s" % (filename))
         logger.error(e)
@@ -41,10 +48,8 @@ def _process_warcfile(filepath, filter_domain):
     record_number = -1
     results = []
     for record in _warc_records(filepath):
-        if not _warc_record_sane(record):
-            continue
         record_number += 1
-        uri = record["WARC-Target-URI"]
+        uri = record["uri"]
         if filter_domain and filter_domain not in uri:
             continue
         logger.debug("URI: %s" % (uri))
@@ -74,7 +79,7 @@ def build_warc_index(db=None, warc_directory=None, filter_domain=None):
     filepaths = [(os.path.join(warc_directory, n), filter_domain) for n in filenames]
     print(filepaths[0])
 
-    with Pool(8) as f:
+    with Pool(4) as f:
         results_groups = f.starmap(_process_warcfile, filepaths)
     for results in results_groups:
         for uri_bytes, value in results:
