@@ -155,7 +155,6 @@ class ManualControlScraper(BaseScraper):
                 logger.debug("[*] Max 'next' formdepth reached %s" % depth)
                 break
 
-            found_next = False
             button_data = self.control.vectorizer.button_vectors()
             n_buttons = len(button_data)
             logger.info("[.] On result page %s" % (depth + 1))
@@ -170,29 +169,46 @@ class ManualControlScraper(BaseScraper):
             if self.result_page_links:
                 self.click_until_no_links(self.result_page_links)
 
+            # element type, index, text
+            next_found = None
             for ix in range(n_buttons):
-                button = button_data[ix]
-                logger.debug(" - Checking button: %s" % button)
-                if not self.next_match:
-                    continue
-                if re.findall(self.next_match.lower(), button.lower()):
-                    logger.info("[.] Next button found! Clicking: %s" % (
-                        button
-                    ))
-                    depth += 1
-                    self.control.select_button(ix, iterating_form=True)
-                    # subsequent page loads get saved here
-                    self.save_training_page(classname="data_pages")
-                    self.save_screenshot(classname="data_pages")
-
-                    found_next = True
-                    # don't click any other next buttons
+                button_text = button_data[ix]
+                logger.debug(" - Checking button: %s" % button_text)
+                if re.findall(self.next_match.lower(), button_text.lower()):
+                    next_found = ("button", ix, button_text)
                     break
 
-            if not found_next:
+            if not next_found:
+                link_vectors = self.control.vectorizer.link_vectors()
+                n_clickable = len(link_vectors)
+                logger.debug(" - Button not found, searching %s links" % (
+                    n_clickable
+                ))
+                for ix in range(n_clickable):
+                    link_text = link_vectors[ix]
+                    logger.debug(" - Checking clickable: %s" % link_text)
+                    if re.findall(self.next_match.lower(), link_text.lower()):
+                        next_found = ("link", ix, link_text)
+                        break
+
+            # we didn't find a next match, break loop
+            if next_found is None:
                 logger.debug(" - Next button not found!")
                 break
+            else:
+                ntype, ix, text = next_found
+                logger.info("[.] Next button found! Clicking: %s" % (text))
+                depth += 1
+                if ntype == "button":
+                    self.control.select_button(ix, iterating_form=True)
+                elif ntype == "link":
+                    self.control.select_link(ix, iterating_form=True)
+                # subsequent page loads get saved here
+                self.save_training_page(classname="data_pages")
+                self.save_screenshot(classname="data_pages")
 
+            # check for infinite loop, this is based on the hash
+            # of the previous few pages
             logger.debug(" - Checking for infinite loop...")
             if self.control.scraper.infinite_loop_detected:
                 logger.debug(" - Infinte loop detected. Breaking.")
@@ -293,7 +309,8 @@ class ManualControlScraper(BaseScraper):
                 self.control.submit(ix)
                 self.total_pages += 1
                 self.save_screenshot(classname="interaction_pages")
-                self.keep_clicking_next_btns()
+                if self.next_match:
+                    self.keep_clicking_next_btns()
                 self.scraped = True
                 self.control.back()
 

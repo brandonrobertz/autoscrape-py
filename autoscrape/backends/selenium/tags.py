@@ -76,9 +76,6 @@ class Tagger(TaggerBase, Dom):
     def clickable_sanity_check(self, element):
         try:
             if not self.element_displayed(element):
-                logger.debug(" - Skipping non-displayed link: %s" % (
-                    element
-                ))
                 return False
         except Exception as e:
             logger.debug("[!] Skipping sanity check due to failure: %s" % (e))
