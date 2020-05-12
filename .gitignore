@@ -7,6 +7,7 @@ __pycache__
 graph*.dot
 .idea
 .#*
+.python-version
 
 # default output directory
 autoscrape-data*/

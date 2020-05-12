@@ -542,6 +542,9 @@ class SeleniumBrowser(BrowserBase, Tagger):
         """
         sub = None
         if self.form_submit_button_selector:
+            logger.debug(" - Using submit button selector: %s" % (
+                self.form_submit_button_selector
+            ))
             sub = self._driver_exec(
                 form.find_element_by_xpath,
                 self.form_submit_button_selector
@@ -551,12 +554,12 @@ class SeleniumBrowser(BrowserBase, Tagger):
         if not sub:
             submit_btns = self._driver_exec(
                 form.find_elements_by_xpath,
-                "//input[@type='submit']"
+                "//input[@type='submit']|//button[@type='submit']"
             )
             for el in submit_btns:
                 if not self.element_displayed(el):
                     continue
-                txt = el.get_attribute("value").lower()
+                txt = self.element_text(el)
                 cls = el.get_attribute("class").lower()
                 if self._text_matches_search_button(txt):
                     sub = el
