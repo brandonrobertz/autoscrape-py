@@ -242,7 +242,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             del kwargs["check_alerts"]
 
         # get any element as a reference for staleness check
-        elem = self.driver.find_element_by_xpath("html")
+        elem = self.driver.find_element_by_xpath("//*")
 
         self._driver_exec(fn, *args, **kwargs)
         time.sleep(1)
@@ -554,7 +554,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         if not sub:
             submit_btns = self._driver_exec(
                 form.find_elements_by_xpath,
-                "//input[@type='submit']|//button[@type='submit']"
+                "/input[@type='submit']|/button[@type='submit']"
             )
             for el in submit_btns:
                 if not self.element_displayed(el):
@@ -579,7 +579,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
             try:
                 possible_subs = self._driver_exec(
                     form.find_elements_by_xpath,
-                    "//a"
+                    "/a"
                 )
 
                 for el in possible_subs:
@@ -601,7 +601,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         Submit a form from a given tag. Assumes all inputs are filled.
         """
         logger.info("[.] Submitting form.")
-        logger.debug(" - form button tag: %s" % tag)
+        logger.debug(" - form tag: %s" % tag)
         form = self.element_by_tag(tag)
         self._driver_exec(self.scrolltoview, form)
 

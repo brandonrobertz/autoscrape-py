@@ -131,7 +131,7 @@ Interactive Form Search Options:
         How many seconds to force wait after a submit to a form.
         This should be used in cases where the builtin
         wait-for-page-load isn't working properly (JS-heavy
-        pages, etc). [default: 5]
+        pages, etc). [default: 1]
 
 Webdriver-Specific and General Options:
     --page-timeout SECONDS
@@ -147,7 +147,7 @@ Webdriver-Specific and General Options:
        of seconds after performing a navigation action.
        Increase this for slow sites or oddly loading single page
        apps, decrease this for fast sites or crawls.
-       [default: 5]
+       [default: 1]
 
     --load-images
         By default, images on a page will not be fetched.

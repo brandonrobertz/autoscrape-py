@@ -171,6 +171,9 @@ class Dom(DomBase):
                     img, e
                 ))
 
+        if self.element_tag_name(el) == "input":
+            text.append(el.get_attribute("value"))
+
         return " ".join(text).replace("\n", "").strip()
 
     def element_text(self, element, block=False):
