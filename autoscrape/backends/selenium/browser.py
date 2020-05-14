@@ -226,8 +226,21 @@ class SeleniumBrowser(BrowserBase, Tagger):
         the page is loaded or not.
         """
         logger.debug(" - Waiting for page to load (document.readyState)...")
-        script = "return document.readyState"
-        result = driver.execute_script(script)
+        s = time.time()
+        script = """
+          var callback = arguments[arguments.length - 1];
+          setTimeout(callback(document.readyState), %s);
+          document.addEventListener('readystatechange', event => {
+            console.log(event.target.readyState);
+            if (event.target.readyState === 'interactive') {
+            }
+            else if (event.target.readyState === 'complete') {
+              callback(document.readyState);
+            }
+          });
+        """ % (5000)
+        result = self._driver_exec(self.driver.execute_async_script, script)
+        logger.debug(" - Page loaded in %s seconds" % (time.time() - s))
         return result == "complete"
 
     def _loadwait(self, fn, *args, **kwargs):
@@ -528,7 +541,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         ac.move_to_element(elem).move_by_offset(x_off, y_off).click().perform()
 
     def _text_matches_search_button(self, text):
-        for test_text in ["submit", "search", "go"]:
+        for test_text in ["submit", "search"]:
             if test_text == text.lower():
                 return True
         return False
@@ -538,7 +551,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         Find a submit button by a variety of strategies:
             1. use self.form_submit_button_selector
             2. find a input with type 'submit'
-            3. find a link with "search" or "go" in text
+            3. find a link with "search" in text
         """
         sub = None
         if self.form_submit_button_selector:
@@ -554,7 +567,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         if not sub:
             submit_btns = self._driver_exec(
                 form.find_elements_by_xpath,
-                "/input[@type='submit']|/button[@type='submit']"
+                ".//input[@type='submit']|.//button[@type='submit']"
             )
             for el in submit_btns:
                 if not self.element_displayed(el):
@@ -578,8 +591,7 @@ class SeleniumBrowser(BrowserBase, Tagger):
         if not sub:
             try:
                 possible_subs = self._driver_exec(
-                    form.find_elements_by_xpath,
-                    "/a"
+                    form.find_elements_by_xpath, ".//a"
                 )
 
                 for el in possible_subs:

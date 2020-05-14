@@ -85,10 +85,16 @@ class Controller:
                 "No vectorizer found: %s" % (vectorizer)
             )
 
-        self.clickable = []
+        # this flag marks vectors as stale. when this is true and
+        # we try to access the link vectors, we'll re-load them
+        self.stale = True
+
+        self.clickable = None
+
         # simply a list of form tags, each forms input contents is
         # contained in the self.inputs multi-dimensional array, below
         self.forms = []
+
         # this expands into the following format:
         # [ form_tag:
         #   [
@@ -99,6 +105,7 @@ class Controller:
         #   other forms ...,
         # ]
         self.inputs = []
+
         # TODO: the point of this wait is to ensure the DOM has stopped
         # mutating (loading results, etc). a proper fix for this is to
         # look at the count of DOM objects being queried for each index
@@ -115,11 +122,14 @@ class Controller:
             ))
             time.sleep(self.force_page_wait)
 
-        self.clickable = self.scraper.get_clickable()
+        self.clickable = None
+        # self.clickable = self.scraper.get_clickable()
+        logger.debug(" - Getting forms")
         forms_dict = self.scraper.get_forms()
         self.forms = list(forms_dict.keys())
+        logger.debug(" - Getting inputs")
         self.inputs = [tags for tags in forms_dict.values()]
-        self.buttons = self.scraper.get_buttons()
+        self.buttons = None # self.scraper.get_buttons()
 
         # logger.debug("Clickable links: %s" % (len(self.clickable)))
         # for i in range(len(self.clickable)):
@@ -173,6 +183,9 @@ class Controller:
         self.load_indices()
 
     def select_link(self, index, iterating_form=False):
+        if self.clickable is None:
+            logger.debug(" - Getting links")
+            self.clickable = self.scraper.get_clickable()
         if index >= len(self.clickable):
             logger.error(
                 "[!] Critical error: link index exceeds clickable length."
@@ -185,6 +198,9 @@ class Controller:
         return clicked
 
     def select_button(self, index, iterating_form=False):
+        if self.buttons is None:
+            logger.debug(" - Getting buttons")
+            self.buttons = self.scraper.get_buttons()
         tag = self.buttons[index]
         clicked = self.scraper.click(tag, iterating_form=iterating_form)
         if clicked:

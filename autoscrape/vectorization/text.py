@@ -46,7 +46,7 @@ class TextVectorizer:
     def button_vectors(self):
         logger.debug("[.] Building button vectors")
         buttons_data = []
-        for tag in self.controller.buttons:
+        for tag in self.controller.scraper.get_buttons():
             elem = self.scraper.element_by_tag(tag)
             value = ""
             if elem is not None:
@@ -68,8 +68,7 @@ class TextVectorizer:
         """
         logger.debug("[.] Building link vectors")
         buttons_data = []
-        for i in range(len(self.controller.clickable)):
-            t = self.controller.clickable[i]
+        for t in self.controller.scraper.get_clickable():
             elem = self.scraper.element_by_tag(t)
             tag_name = self.scraper.element_tag_name(elem)
             text = ""

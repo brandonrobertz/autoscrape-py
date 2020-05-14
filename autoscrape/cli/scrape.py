@@ -107,7 +107,7 @@ Interactive Form Search Options:
         searching a form.  The scraper will continue to
         click "next" buttons after a search until no matches
         are found, unless limited by the --formdepth option
-        (see below). [default: next page]
+        (see below).
 
     --formdepth DEPTH
         How deep the scraper will iterate, by clicking
@@ -131,7 +131,7 @@ Interactive Form Search Options:
         How many seconds to force wait after a submit to a form.
         This should be used in cases where the builtin
         wait-for-page-load isn't working properly (JS-heavy
-        pages, etc). [default: 1]
+        pages, etc). [default: 5]
 
 Webdriver-Specific and General Options:
     --page-timeout SECONDS

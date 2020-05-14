@@ -23,6 +23,7 @@ class Dom(DomBase):
         self.dom = self._get_dom()
 
     def _get_dom(self):
+        dom = None
         try:
             dom = lxml.html.fromstring(self.current_html)
         # this handles trying to load XML, RSS feed, etc

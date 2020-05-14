@@ -162,10 +162,6 @@ class ManualControlScraper(BaseScraper):
                 n_buttons, button_data
             ))
 
-            # save the initial landing data page
-            self.save_training_page(classname="data_pages")
-            self.save_screenshot(classname="data_pages")
-
             if self.result_page_links:
                 self.click_until_no_links(self.result_page_links)
 
@@ -203,6 +199,7 @@ class ManualControlScraper(BaseScraper):
                     self.control.select_button(ix, iterating_form=True)
                 elif ntype == "link":
                     self.control.select_link(ix, iterating_form=True)
+
                 # subsequent page loads get saved here
                 self.save_training_page(classname="data_pages")
                 self.save_screenshot(classname="data_pages")
@@ -305,12 +302,21 @@ class ManualControlScraper(BaseScraper):
                             ix, input_index, radio_index
                         )
 
+                # capture post-input screenshot
                 self.save_screenshot(classname="interaction_pages")
+
+                # actually submit the page
                 self.control.submit(ix)
                 self.total_pages += 1
-                self.save_screenshot(classname="interaction_pages")
+
+                # save the initial landing result page
+                self.save_screenshot(classname="data_pages")
+                self.save_training_page(classname="data_pages")
+
+                # if we're looking for next buttons, click them
                 if self.next_match:
                     self.keep_clicking_next_btns()
+
                 self.scraped = True
                 self.control.back()
 

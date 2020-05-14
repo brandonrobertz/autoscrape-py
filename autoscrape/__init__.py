@@ -3,11 +3,10 @@
 __title__ = 'autoscrape-py'
 __author__ = 'Brandon Roberts (brandon@bxroberts.org)'
 __license__ = 'AGPLv3'
-__version__ = '1.6.11'
+__version__ = '1.6.12'
 
 
 from autoscrape.scrapers.test import TestScraper
-from autoscrape.scrapers.ml import MLAutoScraper
 from autoscrape.scrapers.null import NullScraper
 from autoscrape.scrapers.manual import ManualControlScraper
 

@@ -32,6 +32,12 @@ class RequestsBrowser(BrowserBase, Tagger):
     def __init__(self, leave_host=False, **kwargs):
         # requests Session
         self.s = requests.Session()
+        self.s.headers.update({
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:35.0)"
+                "Gecko/20100101 Firefox/35.0"
+            )
+        })
 
         # set of clicked elements
         self.visited = set()
@@ -147,12 +153,13 @@ class RequestsBrowser(BrowserBase, Tagger):
             try:
                 response = self.s.get(url)
                 break
-            except requests.exceptions.ConnectionError:
-                logger.error(" ! Connection error, retrying...")
+            except requests.exceptions.ConnectionError as e:
+                logger.error(" ! Connection error retrying...")
+                logger.error(e)
                 if not retries:
                     logger.error(" ! Connection error, skipping URL...")
                     return False
-                time.sleep(5)
+                time.sleep(30)
             retries -= 1
 
         if not response.text:
