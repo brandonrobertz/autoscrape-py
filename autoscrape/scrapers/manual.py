@@ -217,6 +217,9 @@ class ManualControlScraper(BaseScraper):
 
     def scrape(self, depth=0):
         logger.info("[.] Crawl depth %s" % depth)
+        logger.info(" - Total pages: %s of max: %s" % (
+            self.total_pages, self.max_pages
+        ))
         if self.maxdepth != -1 and depth > self.maxdepth:
             logger.info(" - Maximum depth %s reached, returning..." % depth)
             self.control.back()
