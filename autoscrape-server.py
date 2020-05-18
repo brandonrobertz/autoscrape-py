@@ -2,7 +2,7 @@
 import os
 
 from flask import (
-    Flask, request, jsonify, send_from_directory, redirect, url_for
+    Flask, request, jsonify, send_from_directory
 )
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
@@ -66,6 +66,7 @@ class Data(db.Model):
             "url": self.url,
         }
 
+
 @app.route("/", methods=["GET"])
 @app.route("/scrape", methods=["GET"])
 @app.route("/scrape/<id>", methods=["GET"])
@@ -101,7 +102,8 @@ def post_start():
     to query status or stop the scrape.
 
     Curl Example:
-        curl http://localhost:5000/start -H 'content-type: application/json' --data '{"baseurl": "https://bxroberts.org", "backend": "selenium", "form_submit_wait": "5", "input": null, "save_graph": false, "load_images": false, "maxdepth": "0", "next_match": "next page", "leave_host": false, "show_browser": false, "driver": "Firefox", "form_submit_natural_click": false, "formdepth": "0", "link_priority": null, "keep_filename": false, "ignore_links": null, "form_match": null, "save_screenshots": true, "remote_hub": "http://localhost:4444/wd/hub", "loglevel": "DEBUG", "output": "http://flask:5000/receive/<JOB-ID-HERE>", "disable_style_saving": false}'
+        curl http://localhost:5000/start -H 'content-type: application/json' \
+            --data '{"baseurl": "https://bxroberts.org",}'
 
     Success Returns:
         HTTP 200 OK
@@ -134,7 +136,7 @@ def get_status(id):
 
     Success Returns:
         HTTP 200 OK
-        {"status": "OK", "data": "STARTED"}
+        {"status": "OK", "message": "STARTED", "traceback": None}
     """
     result = tasks.app.AsyncResult(id)
     data = Data.query.filter_by(
@@ -148,6 +150,8 @@ def get_status(id):
         "status": "OK",
         "message": result.state,
     }
+    if result.traceback:
+        response["traceback"] = result.traceback
     if data:
         app.logger.debug("Data: %s" % data)
         response["data"] = data.data
