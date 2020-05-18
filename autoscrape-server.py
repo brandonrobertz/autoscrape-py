@@ -150,8 +150,8 @@ def get_status(id):
         "status": "OK",
         "message": result.state,
     }
-    if result.traceback:
-        response["traceback"] = result.traceback
+    # if result.traceback:
+    #     response["traceback"] = result.traceback
     if data:
         app.logger.debug("Data: %s" % data)
         response["data"] = data.data
