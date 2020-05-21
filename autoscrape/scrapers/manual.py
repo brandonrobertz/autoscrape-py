@@ -51,7 +51,7 @@ class ManualControlScraper(BaseScraper):
             loglevel=loglevel, stdout=stdout
         )
         if page_timeout is not None:
-            page_timeout = int(page_timeout)
+            page_timeout = int(page_timeout or 0)
         # set up web scraper controller
         self.control = Controller(
             leave_host=leave_host, driver=driver, remote_hub=remote_hub,
@@ -66,9 +66,9 @@ class ManualControlScraper(BaseScraper):
         )
         self.control.initialize(baseurl)
         # depth of DFS in search of form
-        self.maxdepth = int(maxdepth)
+        self.maxdepth = int(maxdepth or 0)
         # current depth of iterating through 'next' form buttons
-        self.formdepth = int(formdepth)
+        self.formdepth = int(formdepth or 0)
         # max total pages to fetch
         self.max_pages = int(max_pages) if max_pages else None
         # keep number of fetched pages here.
@@ -108,7 +108,7 @@ class ManualControlScraper(BaseScraper):
         # attempt a position-based "natural click" over the element
         self.form_submit_natural_click = form_submit_natural_click
         # a period of seconds to force a wait after a submit
-        self.form_submit_wait = int(form_submit_wait)
+        self.form_submit_wait = int(form_submit_wait or 0)
         # a generator, outputting individual form interaction plans
         if input:
             self.input_gen = InputParser(input).generate()
