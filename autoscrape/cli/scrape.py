@@ -40,7 +40,7 @@ Crawl-Specific Options:
         in the BASEURL. This option lets the scraper leave
         the host.
 
-    --only-links MATCH_STREING
+    --only-links MATCH_STRING
         A whitelist of links to follow. All others will
         be ignored. Can be a string or a regex with
         multiple strings to match separated by a pipe
@@ -258,4 +258,3 @@ def main():
 
     logger.debug("AutoScrape starting with arguments: %s" % (docopt_args))
     scraper.run()
-
