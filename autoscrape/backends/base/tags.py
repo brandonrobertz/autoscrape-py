@@ -90,6 +90,8 @@ class TaggerBase(DomBase):
         x_path = "//input"
         if itype == "select":
             x_path = "//select"
+        elif itype == "date":
+            x_path = "//input[@type='date']|//input[@structure='date']"
         elif itype:
             x_path = "//input[@type='%s']" % (itype)
 
