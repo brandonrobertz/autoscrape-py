@@ -20,12 +20,14 @@ programming necessary.
 
 This is an implementation of the web scraping framework described in the
 paper, `Robust Web Scraping in the Public Interest with AutoScrape <https://bxroberts.org/files/autoscrape.pdf>`__ and presented at
-`Computation + Journalism Symposium 2019 <http://cplusj.org/>`__.
+`Computation + Journalism Symposium 2019 <http://cplusj.org/>`__. This is
+an experimental work in progress!
 
-Currently there are two methods of running AutoScrape:
+Currently there are a few ways to use  AutoScrape:
 
+- via a full Web interface for scraping (see bottom of page, make sure to pull in the submodule!)
 - as a local CLI python script
-- a full Web interface for scraping (see bottom of page)
+- as a simplified web scraping framework
 
 Installation and running instructions are provided for both below.
 
